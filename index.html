@@ -668,8 +668,10 @@ async function _handleSession(session) {
   }
   sbUser = session.user;
   loginScreen.style.display = 'none';
-  await pullFromSupabase();
+  // Arrancar inmediatamente con datos locales — no bloquear por Supabase
   startApp();
+  // Sync Supabase en background (no await — no bloquea el arranque)
+  pullFromSupabase().catch(e => console.warn('Supabase sync background error:', e));
   return true;
 }
 
@@ -1417,15 +1419,20 @@ function loadUsers() {
     localStorage.setItem(LS_USERS, JSON.stringify(SEED_USERS));
     return SEED_USERS;
   }
-  // Sync visual fields (initials, color, name) + add new SEED users not yet in localStorage
+  // Sync all managed fields from SEED_USERS (visual + clientIds + role)
   let changed = false;
-  const VISUAL = ['initials','color','name','team'];
+  const MANAGED = ['initials','color','name','team','role','clientIds'];
   SEED_USERS.forEach(seed => {
     const existing = saved.find(u => u.id === seed.id);
     if (!existing) {
       saved.push(seed); changed = true;
     } else {
-      VISUAL.forEach(f => { if (existing[f] !== seed[f]) { existing[f] = seed[f]; changed = true; } });
+      MANAGED.forEach(f => {
+        const differs = f === 'clientIds'
+          ? JSON.stringify(existing[f]) !== JSON.stringify(seed[f])
+          : existing[f] !== seed[f];
+        if (differs) { existing[f] = seed[f]; changed = true; }
+      });
     }
   });
   if (changed) localStorage.setItem(LS_USERS, JSON.stringify(saved));
@@ -3165,13 +3172,18 @@ function startApp() {
   }, 500);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+// Inicializar una sola vez — evitar doble init si DOM ya está listo
+let _initDone = false;
+function _boot() {
+  if (_initDone) return;
+  _initDone = true;
   initSupabaseClient();
   initAuth(); // async — llama startApp() cuando la sesión esté lista
-});
-if (document.readyState !== 'loading') {
-  initSupabaseClient();
-  initAuth();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _boot);
+} else {
+  _boot();
 }
 ['prioridades','compromisos','riesgos','upsell'].forEach(k=>{const el=document.getElementById('note-'+k);if(el)el.addEventListener('blur',()=>saveNote(k));});
 
@@ -4353,12 +4365,4 @@ function renderPortfolioA() {
       ✨ Ingresar con link mágico
     </button>
     <p id="sb-login-msg" style="font-size:13px; color:var(--text2); line-height:1.6; min-height:20px;"></p>
-    <p style="color:var(--text3); font-size:11px; margin-top:28px;">Te enviamos un enlace al email — sin contraseña necesaria.<br>Solo @db1.com.br tiene acceso.</p>
-  </div>
-</div>
-
-<!-- PROFILE PICKER MODAL -->
-<div id="profile-picker" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
-  <div style="background:#1a1d2e; border:1px solid #2e3250; border-radius:16px; padding:40px; max-width:600px; width:90%; text-align:center;">
-    <div style="font-size:28px; margin-bottom:8px;">👋</div>
-    <h2 style="color:
+    <p style="color:var(--text3); font-size:11px; margin-top:28px;">Te enviamos un enlace al email — sin contraseña necesaria.<br>Solo 
