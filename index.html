@@ -647,44 +647,55 @@ let _appStarted = false;
 
 function initSupabaseClient() {
   try {
-    sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+    // flowType implicit = magic link llega con hash #access_token (más confiable para SPAs)
+    sbClient = window.supabase.createClient(SB_URL, SB_KEY, {
+      auth: { flowType: 'implicit', detectSessionInUrl: true }
+    });
   } catch(e) {
     console.warn('Supabase SDK no disponible — modo offline:', e);
   }
+}
+
+async function _handleSession(session) {
+  const loginScreen = document.getElementById('sb-login-screen');
+  if (!session || !session.user) return false;
+  if (!session.user.email.endsWith('@db1.com.br')) {
+    await sbClient.auth.signOut();
+    sbUser = null;
+    loginScreen.style.display = 'flex';
+    showSbMsg('❌ Solo usuarios @db1.com.br pueden acceder.', 'var(--red)');
+    return false;
+  }
+  sbUser = session.user;
+  loginScreen.style.display = 'none';
+  await pullFromSupabase();
+  startApp();
+  return true;
 }
 
 async function initAuth() {
   const loginScreen = document.getElementById('sb-login-screen');
   if (!sbClient) { startApp(); return; }
 
-  // Escuchar magic link callback
+  // Escuchar TODOS los eventos de autenticación relevantes
   sbClient.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session && !_appStarted) {
-      sbUser = session.user;
-      if (!sbUser.email.endsWith('@db1.com.br')) {
-        await sbClient.auth.signOut(); sbUser = null;
-        loginScreen.style.display = 'flex';
-        showSbMsg('❌ Solo usuarios @db1.com.br pueden acceder.', 'var(--red)');
-        return;
-      }
-      loginScreen.style.display = 'none';
-      await pullFromSupabase();
-      startApp();
+    if (_appStarted) return; // ya inició, ignorar
+    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+      await _handleSession(session);
+    } else if (event === 'SIGNED_OUT') {
+      sbUser = null; _appStarted = false;
+      loginScreen.style.display = 'flex';
     }
   });
 
+  // Dar tiempo al SDK para procesar el hash/code del magic link antes de getSession
+  await new Promise(r => setTimeout(r, 300));
+
   const { data: { session } } = await sbClient.auth.getSession();
   if (session && session.user) {
-    sbUser = session.user;
-    if (!sbUser.email.endsWith('@db1.com.br')) {
-      await sbClient.auth.signOut(); sbUser = null;
-      loginScreen.style.display = 'flex'; return;
-    }
-    loginScreen.style.display = 'none';
-    await pullFromSupabase();
-    startApp();
+    await _handleSession(session);
   } else {
-    // Sin sesión — si tiene datos locales, permite acceso local; si no, pide login
+    // Sin sesión activa — fallback a datos locales
     const localUser = localStorage.getItem('cs-v3-active-user');
     if (localUser) {
       loginScreen.style.display = 'none';
@@ -710,7 +721,7 @@ async function sendMagicLink() {
   btn.disabled = true; btn.textContent = 'Enviando...'; showSbMsg('', '');
   try {
     const { error } = await sbClient.auth.signInWithOtp({
-      email, options: { emailRedirectTo: window.location.href }
+      email, options: { emailRedirectTo: 'https://cs-dashboard-phi-three.vercel.app' }
     });
     if (error) throw error;
     showSbMsg('✉️ ¡Listo! Revisá tu bandeja de entrada y hacé clic en el link que te enviamos a ' + email + '.', 'var(--green)');
@@ -1285,6 +1296,7 @@ const SEED_USERS = [
       'emma-sleep','lacoste','belcorp-chile','beitgroup-pe','rip-curl',
       'updown-juegos','prosurf','belcorp-mex','belcorp-peru','emma-sleep-co',
       'forus-peru','kayser',
+      'whirlpool','tramontina-cl','tramontina-mx',
       // nuevos Sami
       'lenovo-cl-1','lenovo-cl-2','lenovo-cl-3','madesa-col','estratec',
       'maletaschile','saideep'
@@ -1298,7 +1310,7 @@ const SEED_USERS = [
     team: 'LATAM CS',
     role: 'csm',
     clientIds: [
-      'transbel','whirlpool','lacoste-gen','tramontina-cl','tramontina-mx',
+      'transbel','lacoste-gen',
       'lenovo-ar','natura-ar','adidas-cl','adidas-co','madesa-pe','madesa-mx','natura-mx'
     ]
   },
@@ -4349,14 +4361,4 @@ function renderPortfolioA() {
 <div id="profile-picker" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
   <div style="background:#1a1d2e; border:1px solid #2e3250; border-radius:16px; padding:40px; max-width:600px; width:90%; text-align:center;">
     <div style="font-size:28px; margin-bottom:8px;">👋</div>
-    <h2 style="color:#e8eaf6; font-size:20px; margin-bottom:4px;">CS Command Center</h2>
-    <p style="color:#8892b0; font-size:13px; margin-bottom:32px;">Selecciona tu perfil para continuar</p>
-    <div id="profile-cards" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;"></div>
-    <p style="color:#4a5578; font-size:11px; margin-top:24px;">¿No ves tu perfil? Pídele al administrador que te agregue.</p>
-  </div>
-</div>
-
-
-</body>
-</html>
-    
+    <h2 style="color:
