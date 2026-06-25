@@ -266,6 +266,10 @@ textarea.ficha-note:focus { border-color: var(--accent); }
 .import-result.ok  { background: var(--green-bg); color: var(--green); display: block; }
 .import-result.err { background: var(--red-bg);   color: var(--red);   display: block; }
 
+/* ── READ-ONLY MODE (Director / visitante) ── */
+.readonly-mode .hide-if-readonly { display: none !important; }
+.readonly-badge { position:fixed; bottom:16px; right:16px; background:rgba(155,89,182,.18); border:1px solid rgba(155,89,182,.4); color:#b39ddb; font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; z-index:500; pointer-events:none; letter-spacing:.5px; }
+
 /* ── MOOD INDICATOR ── */
 .mood-pill { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; padding: 2px 7px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all .15s; border: 1px solid transparent; user-select: none; }
 .mood-pill:hover { border-color: var(--accent); }
@@ -424,8 +428,8 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     </div>
     <div class="topbar-actions">
       <button class="btn btn-ghost" onclick="exportarJSON()">↓ Exportar JSON</button>
-      <button class="btn btn-ghost" onclick="openImport()">↑ Importar JSON</button>
-      <button class="btn btn-primary" onclick="nav('acciones',document.getElementById('nav-acciones'));openAddAction(null)">+ Nueva Acción</button>
+      <button class="btn btn-ghost hide-if-readonly" onclick="openImport()">↑ Importar JSON</button>
+      <button class="btn btn-primary hide-if-readonly" onclick="nav('acciones',document.getElementById('nav-acciones'));openAddAction(null)">+ Nueva Acción</button>
     </div>
   </div>
 
@@ -569,7 +573,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
         <div class="chip" id="filterBottleneck" onclick="toggleBottleneck(this)">🚧 Cuellos de botella</div>
         <div class="chip" id="filterThisWeek" onclick="toggleThisWeek(this)">📅 Esta semana</div>
         <div class="chip" id="filterOverdue" onclick="toggleOverdue(this)">🔴 Vencidas</div>
-        <button class="btn btn-primary" onclick="openAddAction(null)" style="margin-left:auto">+ Nueva Acción</button>
+        <button class="btn btn-primary hide-if-readonly" onclick="openAddAction(null)" style="margin-left:auto">+ Nueva Acción</button>
       </div>
       <!-- Toggle Kanban / Timeline -->
       <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">
@@ -737,13 +741,15 @@ async function initAuth() {
   if (session && session.user) {
     await _handleSession(session);
   } else {
-    // Sin sesión activa — fallback a datos locales
+    // Sin sesión activa — mostrar profile picker directamente
     const localUser = localStorage.getItem('cs-v3-active-user');
     if (localUser) {
       loginScreen.style.display = 'none';
       startApp();
     } else {
-      loginScreen.style.display = 'flex';
+      // Mostrar profile picker como landing (no login wall)
+      loginScreen.style.display = 'none';
+      startApp(); // carga datos primero
     }
   }
 }
@@ -1562,6 +1568,29 @@ function getVisibleClientIds() {
   return user.clientIds;
 }
 
+function isReadOnly() {
+  const u = getActiveUser();
+  return !u || u.role === 'director';
+}
+
+function applyReadOnlyMode() {
+  const ro = isReadOnly();
+  document.body.classList.toggle('readonly-mode', ro);
+  // Badge visible cuando es Director/visitante
+  let badge = document.getElementById('readonly-badge');
+  if (ro) {
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.id = 'readonly-badge';
+      badge.className = 'readonly-badge';
+      badge.textContent = '👑 Modo Vista · Solo lectura';
+      document.body.appendChild(badge);
+    }
+  } else {
+    if (badge) badge.remove();
+  }
+}
+
 function getActionsKey(userId) {
   return userId ? `cs-v3-actions-${userId}` : (typeof LS_ACTIONS !== 'undefined' ? LS_ACTIONS : 'cs-v3-actions');
 }
@@ -1903,7 +1932,7 @@ function renderCatalogo() {
           <button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="openCfgModal()">⚙️ Configurar API Zendesk</button>
           <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
             <p style="font-size:11px;color:var(--text2);margin-bottom:8px">GMV desde Power BI:</p>
-            <button class="btn btn-ghost" style="width:100%;margin-bottom:6px" onclick="openImport()">↑ Importar JSON semanal</button>
+            <button class="btn btn-ghost hide-if-readonly" style="width:100%;margin-bottom:6px" onclick="openImport()">↑ Importar JSON semanal</button>
             <button class="btn btn-ghost" style="width:100%" onclick="exportarJSON()">↓ Exportar JSON</button>
           </div>
         </div>
@@ -3093,6 +3122,7 @@ function selectProfile(userId) {
   renderKPIs();
   renderOverview();
   updateUserBadge();
+  applyReadOnlyMode();
 }
 
 function updateUserBadge() {
@@ -3411,6 +3441,7 @@ function startApp() {
     showProfilePicker();
   } else {
     updateUserBadge();
+    applyReadOnlyMode();
   }
   renderKPIs();
   renderOverview();
