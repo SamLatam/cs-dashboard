@@ -511,6 +511,16 @@ textarea.ficha-note:focus { border-color: var(--accent); }
 </head>
 <body>
 
+<!-- ── PROFILE PICKER (overlay, se muestra cuando no hay usuario activo) ── -->
+<div id="profile-picker" style="display:none; position:fixed; inset:0; background:rgba(10,11,30,0.97); z-index:9999; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:40px 20px;">
+  <div style="text-align:center; margin-bottom:8px;">
+    <div style="font-size:32px; font-weight:800; color:#e8eaf6; letter-spacing:-0.5px;">CS Command Center</div>
+    <div style="font-size:15px; color:#8892b0; margin-top:10px;">AnyMarket LATAM — Seleccioná tu perfil para continuar</div>
+  </div>
+  <div id="profile-cards" style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; max-width:860px;"></div>
+  <div style="font-size:11px; color:#4a5578; margin-top:8px;">© DB1 Global Software · Customer Success</div>
+</div>
+
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -1149,7 +1159,7 @@ const PORT = [
   {id:'ngarden-mx',               name:'NGARDEN MEXICO',                               country:'MX', centry:false},
   {id:'vh-textiles',              name:'VH TEXTILES SAS DE CV',                        country:'MX', centry:false},
 ];
-const SEED_VERSION = '2026-06-26b';
+const SEED_VERSION = '2026-06-26c';
 const ISOLATION_VERSION = '2026-06-25b'; // bump to force CSM store cleanup
 (function isolationCleanup() {
   const key = 'cs-isolation-v';
