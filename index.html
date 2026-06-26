@@ -154,19 +154,157 @@ td { padding: 11px 12px; vertical-align: middle; font-size: 13px; }
 svg.donut { transform: rotate(-90deg); }
 
 /* ── ALERTS ── */
-.alert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
-.alert-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; border-left: 4px solid; cursor: pointer; transition: opacity .15s; }
-.alert-card:hover { opacity: .85; }
-.alert-card.ac-red    { border-left-color: var(--red); }
-.alert-card.ac-orange { border-left-color: var(--orange); }
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(231,76,60,.0), 0 2px 12px rgba(0,0,0,.3); }
+  50%      { box-shadow: 0 0 0 4px rgba(231,76,60,.25), 0 2px 12px rgba(0,0,0,.3); }
+}
+@keyframes pulse-glow-orange {
+  0%,100% { box-shadow: 0 0 0 0 rgba(230,126,34,.0), 0 2px 8px rgba(0,0,0,.2); }
+  50%      { box-shadow: 0 0 0 3px rgba(230,126,34,.2), 0 2px 8px rgba(0,0,0,.2); }
+}
+.alert-section-header {
+  grid-column: 1/-1; display: flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  margin-top: 4px; margin-bottom: -4px; padding: 6px 10px; border-radius: 6px;
+}
+.ash-critica { background: rgba(231,76,60,.12); color: var(--red); border-left: 3px solid var(--red); }
+.ash-alta    { background: rgba(230,126,34,.12); color: var(--orange); border-left: 3px solid var(--orange); }
+.ash-media   { background: rgba(79,142,247,.1);  color: var(--accent); border-left: 3px solid var(--accent); }
+.alert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 12px; }
+.alert-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 18px 18px 14px; border-left: 5px solid; cursor: pointer;
+  transition: transform .15s, opacity .15s; position: relative; overflow: hidden;
+}
+.alert-card:hover { transform: translateY(-2px); opacity: .92; }
+.alert-card.ac-red    { border-left-color: var(--red);    animation: pulse-glow 2.5s ease-in-out infinite; }
+.alert-card.ac-orange { border-left-color: var(--orange); animation: pulse-glow-orange 3s ease-in-out infinite; }
 .alert-card.ac-blue   { border-left-color: var(--accent); }
-.alert-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-.alert-body  { color: var(--text2); font-size: 12px; line-height: 1.5; }
-.alert-meta  { margin-top: 8px; font-size: 11px; color: var(--text3); }
-.sev-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; white-space: nowrap; }
+.alert-card.ac-green  { border-left-color: var(--green);  }
+.alert-card.ac-red::before {
+  content:''; position:absolute; top:0; right:0; width:60px; height:60px;
+  background: radial-gradient(circle at top right, rgba(231,76,60,.15), transparent 70%);
+}
+.alert-card.ac-orange::before {
+  content:''; position:absolute; top:0; right:0; width:60px; height:60px;
+  background: radial-gradient(circle at top right, rgba(230,126,34,.12), transparent 70%);
+}
+.alert-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.alert-client-tag {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  background: var(--surface2); color: var(--text2); text-transform: uppercase; letter-spacing: .5px;
+}
+.alert-title { font-weight: 700; font-size: 13.5px; margin-bottom: 6px; line-height: 1.35; color: var(--text); }
+.alert-body  { color: var(--text2); font-size: 12px; line-height: 1.55; }
+.alert-causa { margin-top: 8px; padding: 8px 10px; background: var(--surface2); border-radius: 6px; font-size: 11.5px; color: var(--text2); border-left: 2px solid var(--border); }
+.alert-causa strong { color: var(--text); }
+.alert-footer { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+.alert-meta  { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+.alert-action-link { font-size: 11px; font-weight: 600; color: var(--accent); padding: 3px 9px; border-radius: 20px; background: rgba(79,142,247,.1); white-space: nowrap; }
+.alert-action-link:hover { background: rgba(79,142,247,.2); }
+.sev-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; white-space: nowrap; letter-spacing: .5px; }
 .sev-critica { background: var(--red-bg);    color: var(--red); }
 .sev-alta    { background: var(--orange-bg); color: var(--orange); }
 .sev-media   { background: var(--yellow-bg); color: var(--yellow); }
+.alert-bottleneck-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+  background: rgba(231,76,60,.15); color: var(--red); border: 1px solid rgba(231,76,60,.3);
+}
+.alert-actions-count {
+  font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px;
+  background: var(--surface2); color: var(--text2);
+}
+
+/* ── ALERT DETAIL PANEL ── */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes slideOutRight {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
+}
+@keyframes flashIn {
+  0%   { background: rgba(231,76,60,.35); }
+  100% { background: var(--surface); }
+}
+.alert-detail-overlay {
+  display: none; position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
+}
+.alert-detail-overlay.open { display: block; }
+.alert-detail-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(600px, 100vw);
+  background: var(--bg); border-left: 1px solid var(--border);
+  z-index: 8001; overflow-y: auto; display: flex; flex-direction: column;
+  box-shadow: -8px 0 40px rgba(0,0,0,.5);
+  animation: slideInRight .28s cubic-bezier(.22,1,.36,1) both;
+}
+.alert-detail-panel.closing { animation: slideOutRight .2s ease-in both; }
+.adp-header {
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--bg); z-index: 1;
+}
+.adp-severity-strip {
+  height: 4px; margin: -20px -24px 16px; border-radius: 0;
+}
+.adp-sev-red    { background: linear-gradient(90deg, var(--red), rgba(231,76,60,.3)); }
+.adp-sev-orange { background: linear-gradient(90deg, var(--orange), rgba(230,126,34,.3)); }
+.adp-sev-blue   { background: linear-gradient(90deg, var(--accent), rgba(79,142,247,.3)); }
+.adp-client-name { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.adp-alert-title { font-size: 14px; font-weight: 600; color: var(--text2); margin-bottom: 12px; }
+.adp-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.adp-body { padding: 20px 24px; flex: 1; }
+.adp-section { margin-bottom: 20px; }
+.adp-section-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text3); margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.adp-metric-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.adp-metric {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px; text-align: center;
+}
+.adp-metric .val { font-size: 20px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.adp-metric .lbl { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; }
+.adp-causa-box {
+  background: rgba(231,76,60,.07); border: 1px solid rgba(231,76,60,.25);
+  border-radius: 10px; padding: 14px; margin-bottom: 16px;
+  border-left: 3px solid var(--red);
+}
+.adp-causa-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing:.8px; color: var(--red); margin-bottom: 6px; }
+.adp-causa-box .text  { font-size: 13px; color: var(--text); line-height: 1.5; }
+.adp-action-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start;
+  animation: flashIn .4s ease-out both;
+}
+.adp-action-card.bloq { border-left: 3px solid var(--red); }
+.adp-action-card.crit { border-left: 3px solid var(--orange); }
+.adp-action-card .act-text { font-size: 12.5px; color: var(--text); flex: 1; }
+.adp-action-card .act-due  { font-size: 11px; color: var(--text3); white-space: nowrap; }
+.adp-quick-actions {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;
+}
+.adp-btn {
+  padding: 10px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600;
+  border: none; cursor: pointer; transition: opacity .15s; text-align: center;
+}
+.adp-btn:hover { opacity: .82; }
+.adp-btn-primary { background: var(--accent); color: #fff; }
+.adp-btn-red     { background: rgba(231,76,60,.15); color: var(--red); border: 1px solid rgba(231,76,60,.3); }
+.adp-btn-ghost   { background: var(--surface); color: var(--text2); border: 1px solid var(--border); }
+.adp-close-btn {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text2); cursor: pointer; font-size: 13px; padding: 4px 10px; font-weight: 700;
+}
+.adp-close-btn:hover { background: var(--border); color: var(--text); }
+/* Cards more dramatic on hover */
+.alert-card:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 8px 24px rgba(0,0,0,.4); opacity: 1 !important; }
+.alert-card.ac-red:hover    { box-shadow: 0 0 0 2px rgba(231,76,60,.5), 0 8px 24px rgba(0,0,0,.4); }
+.alert-card.ac-orange:hover { box-shadow: 0 0 0 2px rgba(230,126,34,.4), 0 8px 24px rgba(0,0,0,.4); }
 
 /* ── ACCIONES ── */
 .accion-kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
@@ -620,6 +758,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
 
     <!-- PAGE: ALERTAS -->
     <div class="page" id="page-alertas">
+      <div id="alertSummaryBar" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;"></div>
       <div class="alert-grid" id="alertGrid"></div>
     </div>
 
@@ -859,13 +998,14 @@ const PORT = [
   {id:'tramontina-cl',   name:'TRAMONTINA - CL',                          country:'CL', centry:false},
   {id:'tramontina-mx',   name:'TRAMONTINA - MX',                          country:'MX', centry:false},
   // ── SAMI nuevos ────────────────────────────────────────────────────────────
+  {id:'maletaschile',             name:'MALETASCHILE.COM',                             country:'CL', centry:false},
+  {id:'saideep',                  name:'SAIDEEP',                                      country:'CL', centry:false},
+  {id:'comercializadora-tc',      name:'COMERCIALIZADORA TODO CLICK',                  country:'CL', centry:false},
+  // ── MARÍA nuevos ────────────────────────────────────────────────────────────
   {id:'lenovo-cl-1',              name:'LENOVO CHILE (1)',                              country:'CL', centry:false},
   {id:'lenovo-cl-2',              name:'LENOVO CHILE (2)',                              country:'CL', centry:false},
   {id:'lenovo-cl-3',              name:'LENOVO CHILE (3)',                              country:'CL', centry:false},
   {id:'madesa-col',               name:'MADESA MUEBLES COLOMBIA SAS',                  country:'CO', centry:false},
-  {id:'maletaschile',             name:'MALETASCHILE.COM',                             country:'CL', centry:false},
-  {id:'saideep',                  name:'SAIDEEP',                                      country:'CL', centry:false},
-  // ── MARÍA nuevos ────────────────────────────────────────────────────────────
   {id:'lenovo-ar',                name:'LENOVO ARGENTINA SRL',                         country:'AR', centry:false},
   {id:'natura-ar',                name:'NATURA COSMETICOS - AR',                       country:'AR', centry:false},
   {id:'adidas-cl',                name:'ADIDAS - CL',                                  country:'CL', centry:false},
@@ -1009,43 +1149,53 @@ const PORT = [
   {id:'ngarden-mx',               name:'NGARDEN MEXICO',                               country:'MX', centry:false},
   {id:'vh-textiles',              name:'VH TEXTILES SAS DE CV',                        country:'MX', centry:false},
 ];
-const SEED_VERSION = '2026-06-17b';
+const SEED_VERSION = '2026-06-26b';
+const ISOLATION_VERSION = '2026-06-25b'; // bump to force CSM store cleanup
+(function isolationCleanup() {
+  const key = 'cs-isolation-v';
+  if (localStorage.getItem(key) === ISOLATION_VERSION) return; // already ran
+  // Clear all CSM action stores to eliminate stale cross-user data
+  ['maria','german','clientes-de','sami'].forEach(id => {
+    localStorage.removeItem('cs-v3-actions-' + id);
+  });
+  localStorage.setItem(key, ISOLATION_VERSION);
+})();
 const SEED = [
-  {nombre:"FASHIONS PARK",                               tickets:2, bugs:0, ticketsPendientes:2, ticketDetalle:"#19843 - RUT cliente Shopify (hold, 24-jun) | #30657 - Cambios integración MercadoLibre (abierto 19-jun)", causaRaiz:"Integración Shopify no captura RUT del cliente — afecta facturación y despacho",          gmv:12918685400,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-05-11", centry:false},
-  {nombre:"COBOE S/A - BOTIGA",                          tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:247659908,    upPlan:null, qtUp:null, nps:-100,   lastContact:"2026-06-08", centry:false},
-  {nombre:"COBOE S/A - FARMASHOP",                       tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:811908825,    upPlan:null, qtUp:null, nps:100,    lastContact:"2026-06-08", centry:false},
+  {nombre:"FASHIONS PARK",                               tickets:0, bugs:0, ticketsPendientes:0, ticketDetalle:null, causaRaiz:null,                                                                                                                                                                                                                               gmv:12918685400,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"COBOE S/A - BOTIGA",                          tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:247659908,    upPlan:null, qtUp:null, nps:-100,   lastContact:"2026-06-26", centry:false},
+  {nombre:"COBOE S/A - FARMASHOP",                       tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:811908825,    upPlan:null, qtUp:null, nps:100,    lastContact:"2026-06-26", centry:false},
   {nombre:"D&F FARMA",                                   tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"DIVINO S.A",                                  tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:778623000,    upPlan:null, qtUp:null, nps:null,   lastContact:"2026-05-27", centry:false},
+  {nombre:"DIVINO S.A",                                  tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:778623000,    upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"DTODOYMAS",                                   tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"FORUS COLOMBIA",                              tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2025-12-15", centry:true},
-  {nombre:"FORUS SA",                                    tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:-100,   lastContact:"2026-06-17", centry:true},
-  {nombre:"GINO",                                        tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-16", centry:true},
-  {nombre:"INVERSIONES MALAGA",                          tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:5146764473,   upPlan:null, qtUp:null, nps:null,   lastContact:"2026-02-06", centry:false},
-  {nombre:"LOI CHILE",                                   tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:18226158700,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-05-13", centry:false},
-  {nombre:"LOUNGE S/A",                                  tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-12", centry:false},
-  {nombre:"MAISA",                                       tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-12", centry:false},
-  {nombre:"MAUI AND SONS",                               tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:74659220800,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-15", centry:false},
-  {nombre:"BEITGROUP S.A. (PILLIN)",                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-03-26", centry:true},
-  {nombre:"POINTBREAK",                                  tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-10", centry:false},
-  {nombre:"BEL STAR S/A - BELCORP Colombia",             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:16375786500,  upPlan:null, qtUp:null, nps:0,     lastContact:"2026-06-15", centry:false},
-  {nombre:"COLOMBIANA DE COMERCIO S/A",                  tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"EMMA SLEEP - CL",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:97742205200,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-15", centry:false},
-  {nombre:"LACOSTE - CL",                                tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:14416074900,  upPlan:36,   qtUp:10,   nps:null,   lastContact:null,         centry:false},
-  {nombre:"PROMOTORA DE BELLEZA S/A - BELCORP Chile",    tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:7374581000,   upPlan:36,   qtUp:3,    nps:null,   lastContact:null,         centry:false},
-  {nombre:"TRANSBEL S.A. DE C.V. - BELCORP Mexico",      tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:478865027,    upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"WHIRLPOOL",                                   tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:100,    lastContact:null,         centry:false},
-  {nombre:"BEITGROUP PE",                                tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:1711666,      upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
+  {nombre:"FORUS COLOMBIA",                              tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:true},
+  {nombre:"FORUS SA",                                    tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:-100,   lastContact:"2026-06-26", centry:true},
+  {nombre:"GINO",                                        tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:true},
+  {nombre:"INVERSIONES MALAGA",                          tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:5146764473,   upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"LOI CHILE",                                   tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:18226158700,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"LOUNGE S/A",                                  tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#31639 - Diferencias de stock con bodegas Full (24-jun)",                                                                              causaRaiz:"Desincronización de stock con bodegas Full — impacta disponibilidad de inventario",                        gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"MAISA",                                       tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"MAUI AND SONS",                               tickets:2, bugs:0, ticketsPendientes:1, ticketDetalle:"#32047 - Carga documentos tributarios sellers (urgente, 25-jun) | #32353 - Consulta Sebastian Alvares (26-jun)",                             causaRaiz:"Proceso de carga de documentos tributarios de sellers bloqueado — afecta operación de marketplace",        gmv:74659220800,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"BEITGROUP S.A. (PILLIN)",                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:true},
+  {nombre:"POINTBREAK",                                  tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#31258 - Pedido llega sin detalle de documento tributario (urgente, 23-jun)",                                                               causaRaiz:"Pedidos sin documento tributario en detalle — riesgo de rechazo en despacho",                              gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"BEL STAR S/A - BELCORP Colombia",             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:16375786500,  upPlan:null, qtUp:null, nps:0,     lastContact:"2026-06-26", centry:false},
+  {nombre:"COLOMBIANA DE COMERCIO S/A",                  tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#32320 - Consulta Maria Fernanda Cifuentes (26-jun)",                                                                                        causaRaiz:"Consulta operativa pendiente de resolución",                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
+  {nombre:"EMMA SLEEP - CL",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:97742205200,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"LACOSTE - CL",                                tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:14416074900,  upPlan:36,   qtUp:10,   nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"PROMOTORA DE BELLEZA S/A - BELCORP Chile",    tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:7374581000,   upPlan:36,   qtUp:3,    nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"TRANSBEL S.A. DE C.V. - BELCORP Mexico",      tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:478865027,    upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"WHIRLPOOL",                                   tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:100,    lastContact:"2026-06-26", centry:false},
+  {nombre:"BEITGROUP PE",                                tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:1711666,      upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"RIP CURL",                                    tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
   {nombre:"UPDOWN JUEGOS",                               tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"PROSURF",                                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:11063256000,  upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"BEL STAR S/A - BELCORP Mexico",               tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:478865027,    upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"BEL STAR S/A - BELCORP Peru",                 tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:1736582,      upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"EMMA SLEEP - CO",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:41441886400,  upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"FORUS PERU",                                  tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"KAYSER",                                      tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#30958 - Actualización de imágenes en Walmart (abierto 22-jun)",                          causaRaiz:"Imágenes de productos sin actualizar en canal Walmart",                                    gmv:11408661300,  upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"LACOSTE",                                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:14416074900,  upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"TRAMONTINA - CL",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:28378500,     upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
-  {nombre:"TRAMONTINA - MX",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:64928426,     upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
+  {nombre:"PROSURF",                                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:11063256000,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"BEL STAR S/A - BELCORP Mexico",               tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:478865027,    upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"BEL STAR S/A - BELCORP Peru",                 tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:1736582,      upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"EMMA SLEEP - CO",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:41441886400,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"FORUS PERU",                                  tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"KAYSER",                                      tickets:0, bugs:0, ticketsPendientes:0, ticketDetalle:null, causaRaiz:null,                                                                                                                                                                                                                               gmv:11408661300,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"LACOSTE",                                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:14416074900,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"TRAMONTINA - CL",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:28378500,     upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"TRAMONTINA - MX",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:64928426,     upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
 
   // ── Sami nuevos ──────────────────────────────────────────────────────────
   {nombre:"LENOVO CHILE (1)", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
@@ -1054,6 +1204,7 @@ const SEED = [
   {nombre:"MADESA MUEBLES COLOMBIA SAS", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"MALETASCHILE.COM", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"SAIDEEP", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
+  {nombre:"COMERCIALIZADORA TODO CLICK", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   // ── María nuevos ─────────────────────────────────────────────────────────
   {nombre:"LENOVO ARGENTINA SRL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"NATURA COSMETICOS - AR", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
@@ -1077,7 +1228,7 @@ const SEED = [
   {nombre:"CHANTILLY", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"CIENCO - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"CITOTOOLS SPA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
-  {nombre:"COMERCIAL AGUSTIN SPA - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
+  {nombre:"COMERCIAL AGUSTIN SPA - CL", tickets:3, bugs:0, ticketsPendientes:2, ticketDetalle:"#32221 - Error vinculación MercadoLibre | #32211 - Error vinculación MercadoLibre | #31640 - Error vinculación MercadoLibre (urgente)", causaRaiz:"Falla en vinculación MercadoLibre — 3 tickets activos del mismo issue sin resolver", gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"COMERCIAL MIKES CHILE LIMITADA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"CUBO24.COM / TOP BRANDS", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"DIVINO JEANS", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
@@ -1098,12 +1249,12 @@ const SEED = [
   {nombre:"LABORATORIO PETRIZZIO LIMITADA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"MACME", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"MALI - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
-  {nombre:"MANUFACTURAS ELÉCTRICAS BYP LTDA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
+  {nombre:"MANUFACTURAS ELÉCTRICAS BYP LTDA", tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#30386 - Contacto soporte (1-jun)", causaRaiz:"Ticket de contacto general sin resolución — 26 días abierto", gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"MIBUY.CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"MOUVAIR - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
-  {nombre:"MUNDO JOVEN", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
+  {nombre:"MUNDO JOVEN", tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#31638 - Atributos automatizados (24-jun)", causaRaiz:"Problema con configuración de atributos automatizados", gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"NACIONAL LIBRERÍA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
-  {nombre:"NEUMATICOS DE MAULE - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
+  {nombre:"NEUMATICOS DE MAULE - CL", tickets:1, bugs:1, ticketsPendientes:1, ticketDetalle:"#18014 - Configuración Bsale (urgente, 4-may — 53 días sin resolver)", causaRaiz:"Error configuración Bsale sin resolución en 53+ días — ticket urgente no gestionado", gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"NIPON ANDINO - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"PLATANITOS - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"PLAZA MÚSICA - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
@@ -1112,7 +1263,7 @@ const SEED = [
   {nombre:"RANN STORE - AUKEY", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"RED SALE", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"SAMIA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
-  {nombre:"SEDUCETE - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
+  {nombre:"SEDUCETE - CL", tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#20662 - Pedidos no traspasados (urgente, +44 días sin resolver)", causaRaiz:"Pedidos no se traspasan al sistema — issue crítico sin resolución en 44+ días", gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"SOC. INVERSIONES HITWAY MUSIC SPA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"SPIRAX (1)", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"SPIRAX (2)", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
@@ -1121,11 +1272,11 @@ const SEED = [
   {nombre:"TODOCLICK SPA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"TPV - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"TRAIL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
-  {nombre:"YEPPO CHILE - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
+  {nombre:"YEPPO CHILE - CL", tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#17220 - 'otra vez problemas' — sentimiento muy negativo (29-abr, +58 días sin resolver)", causaRaiz:"Problema recurrente con sentimiento muy negativo — 58+ días sin cierre — alto riesgo de churn", gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"ZIG ZAG - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"JUAMPPE - PE", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"EL TÚNEL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
-  {nombre:"KASMENKO CALANDRA IVAN NICOLAS", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
+  {nombre:"KASMENKO CALANDRA IVAN NICOLAS", tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#32339 - Integración no funciona (26-jun)", causaRaiz:"Integración sin funcionar — reporte reciente sin resolución", gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"PRONTOMETAL S/A", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"ZONATECNO - UY", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"COMERCIALIZADORA MODA SCARPA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
@@ -1156,7 +1307,7 @@ const SEED = [
   {nombre:"DISTRITHUNDER SOLUCIONES SPA", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"DTPARTS SPA - LUCAS DIESEL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"ENIGMATICA BOUTIQUE", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
-  {nombre:"ESTOY KUKU / HANUMAN - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
+  {nombre:"ESTOY KUKU / HANUMAN - CL", tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#25822 - Integración Walmart no funciona (13-may)", causaRaiz:"Integración con Walmart sin funcionar — 44 días sin resolución", gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"FERDEL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"FRAZADAS ANDES - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
   {nombre:"FROM MEIGGS - CL", tickets:null, bugs:null, ticketsPendientes:null, gmv:null, upPlan:null, qtUp:null, nps:null, lastContact:null, centry:false},
@@ -1324,47 +1475,73 @@ const SEED_ACTIONS = [
   {tipo:'cs', clientId:'tramontina-mx',title:'México — Alinear con Mauricio sobre estado y próximos pasos',                    desc:'Reunión de alineación con Mauricio para México.',                              causa:'Desalineación entre equipos de los distintos países',                                           status:'por-hacer',  priority:'alta',   bottleneck:false,dueDate:'2026-06-25',notes:'Responsable: Samiramis'},
   {tipo:'cs', clientId:'tramontina-mx',title:'Liverpool — Revisar avance y dependencias del proyecto',                         desc:'Revisar con João el avance del proyecto Liverpool y sus dependencias.',          causa:'Proyecto Liverpool con avance incierto y dependencias no resueltas',                             status:'por-hacer',  priority:'alta',   bottleneck:true, dueDate:'2026-06-25',notes:'Responsable: João'},
   {tipo:'cs', clientId:'tramontina-cl',title:'Integración — Levantar y analizar flujo Vitex → AnyMarket → Marketplaces',         desc:'Levantar y analizar el flujo actual Vitex → AnyMarket → Marketplaces para identificar oportunidades de automatización y centralización operativa. Validar alternativas para resolver las limitaciones de DBnet y el mapeo de Falabella, con foco en reducir procesos manuales, mejorar la adopción de la plataforma y habilitar futuras expansiones a Ripley y Paris.',causa:'Limitaciones de DBnet y mapeo Falabella generan procesos manuales — bloquean expansión a Ripley y Paris y frenan adopción de plataforma', status:'por-hacer',  priority:'alta',   bottleneck:true, dueDate:'2026-06-30',notes:'Responsable: Samiramis. Involucrar Producto para evaluar alternativas técnicas a DBnet.'},
-  {tipo:'cs', clientId:'tramontina-pe',title:'Perú — Presentación formal y diagnóstico de operación',                         desc:'Contactar equipo Tramontina Perú, presentarse como CSM y levantar estado.',     causa:'Nueva asignación — operación Perú sin diagnóstico actualizado',                                  status:'por-hacer',  priority:'alta',   bottleneck:false,dueDate:'2026-06-30',notes:'Responsable: Samiramis'},
+  {tipo:'cs', clientId:'tramontina-mx',title:'Tramontina Perú — Presentación formal y diagnóstico de operación',               desc:'Contactar equipo Tramontina Perú, presentarse como CSM y levantar estado de la operación.',causa:'Nueva asignación — operación Perú sin diagnóstico actualizado',               status:'por-hacer',  priority:'alta',   bottleneck:false,dueDate:'2026-06-30',notes:'Responsable: Samiramis'},
+  // ── GERMAN — TICKETS URGENTES ──
+  {tipo:'soporte',clientId:'comercial-agustin',title:'Resolver vinculación MercadoLibre — 3 tickets activos (#32221, #32211, #31640)',desc:'3 tickets abiertos sobre el mismo problema de vinculación ML. Revisar con soporte si hay un bug activo o una configuración incorrecta.',causa:'Falla recurrente en vinculación MercadoLibre — 3 tickets del mismo issue sin causa raíz identificada',status:'por-hacer',priority:'alta',bottleneck:false,dueDate:'2026-06-30',notes:'Responsable: German'},
+  {tipo:'soporte',clientId:'neumaticos-maule',title:'Escalar resolución Bsale — #18014 urgente (53 días sin resolver)',desc:'Ticket urgente sobre configuración Bsale sin resolver en 53 días. Verificar estado, escalar si sigue abierto.',causa:'Ticket urgente sin gestión activa durante 53+ días — posible problema de Bsale no configurado',status:'por-hacer',priority:'critica',bottleneck:false,dueDate:'2026-06-27',notes:'Responsable: German — escalar a soporte y verificar con cliente'},
+  {tipo:'soporte',clientId:'seducete-cl',title:'Resolver pedidos no traspasados — #20662 urgente (44 días)',desc:'Pedidos no se traspasan al sistema — issue crítico sin resolución en 44+ días. Contactar cliente y escalar.',causa:'Pedidos sin traspaso bloqueando operación — ticket urgente no gestionado en 44 días',status:'por-hacer',priority:'critica',bottleneck:false,dueDate:'2026-06-27',notes:'Responsable: German'},
+  {tipo:'cs',clientId:'yeppo-cl',title:'Gestionar cliente insatisfecho — #17220 sentimiento muy negativo (58 días)',desc:'Ticket con mensaje "otra vez problemas" — cliente muy negativo. Contacto urgente para evitar escalamiento o churn.',causa:'Problema recurrente + sentimiento muy negativo expresado — 58 días sin cierre ni seguimiento CS',status:'por-hacer',priority:'critica',bottleneck:false,dueDate:'2026-06-27',notes:'Responsable: German — llamar proactivamente antes del fin de semana'},
+  // ── GERMAN — ALERTAS FACTURACIÓN VENCIDA ──
+  {tipo:'finanzas',clientId:'mouvair-cl',title:'🔴 Factura VENCIDA 57 días — MOUVAIR (CLP $711.174 / ~USD 749)',desc:'Factura de abril 2026 vencida hace 57 días sin pago. Verificar con finanzas y contactar al cliente.',causa:'Factura impaga durante 57 días — riesgo de corte de servicio',status:'por-hacer',priority:'critica',bottleneck:false,dueDate:'2026-06-27',notes:'Responsable: German + Finanzas DB1. Fuente: relbase.cl/recaudacion'},
+  {tipo:'finanzas',clientId:'trail-cl',title:'🔴 Factura VENCIDA 57 días — TRAIL (CLP $426.705 / ~USD 449)',desc:'Factura de abril 2026 vencida hace 57 días. Verificar con finanzas y contactar al cliente.',causa:'Factura impaga 57 días — posible riesgo de baja o corte',status:'por-hacer',priority:'critica',bottleneck:false,dueDate:'2026-06-27',notes:'Responsable: German + Finanzas DB1. Fuente: relbase.cl/recaudacion'},
+  {tipo:'finanzas',clientId:'tpv-cl',title:'🟠 Factura VENCIDA 26 días — TPV (CLP $768.761 / ~USD 809)',desc:'Factura mayo vencida hace 26 días. Mayor cliente de German por MRR. Prioridad alta.',causa:'Factura impaga 26 días en cliente de alto valor — MRR ~USD 994',status:'por-hacer',priority:'alta',bottleneck:false,dueDate:'2026-06-30',notes:'Responsable: German + Finanzas DB1. Fuente: relbase.cl/recaudacion'},
+  {tipo:'finanzas',clientId:'mali-cl',title:'🟠 Factura VENCIDA 26 días — MALI (CLP $529.383 / ~USD 557)',desc:'Factura mayo vencida hace 26 días.',causa:'Factura impaga 26 días — seguimiento pendiente',status:'por-hacer',priority:'alta',bottleneck:false,dueDate:'2026-06-30',notes:'Responsable: German + Finanzas DB1. Fuente: relbase.cl/recaudacion'},
+  {tipo:'finanzas',clientId:'platanitos-cl',title:'🟠 Factura VENCIDA 26 días — PLATANITOS (CLP $409.493 / ~USD 431)',desc:'Factura mayo vencida hace 26 días.',causa:'Factura impaga 26 días',status:'por-hacer',priority:'alta',bottleneck:false,dueDate:'2026-06-30',notes:'Responsable: German + Finanzas DB1. Fuente: relbase.cl/recaudacion'},
+  {tipo:'finanzas',clientId:'importclick-cl',title:'🟠 Factura VENCIDA 26 días — IMPORTCLICK (CLP $385.005 / ~USD 405)',desc:'Factura mayo vencida hace 26 días.',causa:'Factura impaga 26 días',status:'por-hacer',priority:'media',bottleneck:false,dueDate:'2026-06-30',notes:'Responsable: German + Finanzas DB1. Fuente: relbase.cl/recaudacion'},
 ];
+
+// ── MRR SEED (USD/mes — promedio últimos 3 meses relbase, conversión ~950 CLP/USD) ──
+const SEED_MRR = {
+  'tpv-cl':994, 'imahe-cl':1070, 'gildemeister-cl':729, 'mouvair-cl':749,
+  'flex-cl':705, 'petrizzio':662, 'klik-muebles':637, 'porto-menaje':611,
+  'mali-cl':560, 'cienco-cl':511, 'talong-trade-cl':511, 'drimkip-cl':511,
+  'nipon-andino':458, 'trail-cl':449, 'inkuba':431, 'importclick-cl':407,
+  'fullcompra':407, 'hitway-music':382, 'bookcomputer':382, 'seducete-cl':382,
+  'sporting-brands-cl':381, 'plaza-musica-cl':378, 'mibuy-cl':357, 'cubo24':355,
+  'audiomusica':329, 'todoclick-spa':302, 'garmin-cl':215, 'rann-store':27,
+  'mundo-joven':27
+};
 
 const SEED_USERS = [
   {
     id: 'sami',
     name: 'Samiramis Monterola',
     initials: '★',
+    icon: '⭐',
     color: '#4f8ef7',
     team: 'LATAM CS',
-    role: 'csm',
+    role: 'superadmin',
     clientIds: [
       'fashions-park','coboe-botiga','coboe-farmashop','df-farma','divino',
       'dtodoymas','forus-colombia','forus-sa','gino','malaga','loi-chile',
       'lounge','maisa','maui','pillin','pointbreak','belcorp-col','colombiana',
-      'emma-sleep','lacoste','belcorp-chile','beitgroup-pe','rip-curl',
-      'updown-juegos','prosurf','belcorp-mex','belcorp-peru','emma-sleep-co',
-      'forus-peru','kayser',
+      'emma-sleep','lacoste','lacoste-gen','belcorp-chile','transbel',
+      'beitgroup-pe','rip-curl','updown-juegos','prosurf','belcorp-mex',
+      'belcorp-peru','emma-sleep-co','forus-peru','kayser',
       'whirlpool','tramontina-cl','tramontina-mx',
       // nuevos Sami
-      'madesa-col',
-      'maletaschile','saideep'
+      'maletaschile','saideep','comercializadora-tc'
     ]
   },
   {
     id: 'maria',
     name: 'Maria Laura Senosiain',
     initials: 'ML',
+    icon: '🌸',
     color: '#e91e8c',
     team: 'LATAM CS',
     role: 'csm',
     clientIds: [
-      'transbel','lacoste-gen',
       'lenovo-cl-1','lenovo-cl-2','lenovo-cl-3',
-      'lenovo-ar','natura-ar','adidas-cl','adidas-co','madesa-pe','madesa-mx','natura-mx'
+      'lenovo-ar','natura-ar','adidas-cl','adidas-co',
+      'madesa-col','madesa-pe','madesa-mx','natura-mx'
     ]
   },
   {
     id: 'german',
     name: 'German Rojas',
     initials: 'GR',
+    icon: '⚡',
     color: '#f39c12',
     team: 'LATAM CS',
     role: 'csm',
@@ -1391,6 +1568,7 @@ const SEED_USERS = [
     id: 'clientes-de',
     name: 'Clientes D&E',
     initials: 'DE',
+    icon: '📦',
     color: '#7f8c8d',
     team: 'LATAM CS',
     role: 'csm',
@@ -1414,25 +1592,18 @@ const SEED_USERS = [
     id: 'marcio',
     name: 'Marcio',
     initials: 'MA',
+    icon: '👑',
     color: '#9b59b6',
     team: 'LATAM CS',
     role: 'director',
     clientIds: []
   },
   {
-    id: 'rodolfo',
+    id: 'director',
     name: 'Rodolfo',
     initials: 'RO',
+    icon: '🎯',
     color: '#e74c3c',
-    team: 'LATAM CS',
-    role: 'director',
-    clientIds: []
-  },
-  {
-    id: 'director',
-    name: 'Director CS LATAM',
-    initials: 'DC',
-    color: '#00d4aa',
     team: 'LATAM CS',
     role: 'director',
     clientIds: []
@@ -1564,19 +1735,27 @@ function setActiveUser(userId) {
 function getVisibleClientIds() {
   const user = getActiveUser();
   if (!user) return PORT.map(p => p.id);
-  if (user.role === 'director') return PORT.map(p => p.id);
+  // director y viewer → ven todo; superadmin y csm → solo sus clientIds
+  if (['director','viewer'].includes(user.role)) return PORT.map(p => p.id);
   return user.clientIds;
 }
 
-function isReadOnly() {
+function canEdit() {
   const u = getActiveUser();
-  return !u || u.role === 'director';
+  if (!u) return false;
+  return u.role !== 'viewer'; // solo viewer es read-only
+}
+
+function isReadOnly() { return !canEdit(); }
+
+// Helper: dado un clientId, retorna el CSM dueño
+function getClientOwnerUser(clientId) {
+  return loadUsers().find(u => u.role === 'csm' && u.clientIds.includes(clientId)) || null;
 }
 
 function applyReadOnlyMode() {
   const ro = isReadOnly();
   document.body.classList.toggle('readonly-mode', ro);
-  // Badge visible cuando es Director/visitante
   let badge = document.getElementById('readonly-badge');
   if (ro) {
     if (!badge) {
@@ -1607,12 +1786,20 @@ function load() {
     const sd = localStorage.getItem(LS_DATA);
     if (sd) {
       const p = JSON.parse(sd);
-      if (p.clients && p.seedVersion && p.seedVersion >= SEED_VERSION) {
+      if (p.clients) {
+        // Campos del usuario (persisten siempre, aunque SEED sea más nuevo)
+        const USER_FIELDS = ['lastContact','notes','mood','marketplaces','lifecycle'];
+        // Campos operativos (vienen del SEED cuando hay nuevo deploy)
+        const isSeedNewer = !p.seedVersion || SEED_VERSION > p.seedVersion;
         clients = clients.map(c => {
           const saved = p.clients.find(x => x.id === c.id);
           if (saved && saved.weekly && Object.keys(saved.weekly).length > 0) {
-            // Filtrar nulls/undefined para no pisar valores reales del SEED
-            const delta = Object.fromEntries(Object.entries(saved.weekly).filter(([,v]) => v !== null && v !== undefined));
+            const delta = Object.fromEntries(Object.entries(saved.weekly).filter(([k,v]) => {
+              if (v === null || v === undefined) return false;
+              // Si el SEED es más nuevo, solo preservar campos del usuario
+              if (isSeedNewer && !USER_FIELDS.includes(k)) return false;
+              return true;
+            }));
             return {...c, weekly: {...c.weekly, ...delta}};
           }
           return c;
@@ -1632,10 +1819,27 @@ function load() {
       localStorage.setItem(_actionsKeyForLoad, _legacyActions);
     }
   }
-  const sa = localStorage.getItem(_actionsKeyForLoad);
-  if (sa) { try { actions = JSON.parse(sa); } catch(e) { actions = seedActions(); } }
-  else { actions = seedActions(); }
-  mergeSeedActions();
+  if (_activeUserForLoad && ['director','superadmin','viewer'].includes(_activeUserForLoad.role)) {
+    // Superadmin/Director/Viewer: merge ALL CSMs' actions
+    const _allActions = []; const _seenIds = new Set();
+    loadUsers().filter(u => ['csm','superadmin'].includes(u.role)).forEach(u => {
+      const _k = getActionsKey(u.id);
+      const _stored = localStorage.getItem(_k);
+      if (_stored) { try { JSON.parse(_stored).forEach(a => { if (!_seenIds.has(a.id)) { _seenIds.add(a.id); _allActions.push(a); } }); } catch(e) {} }
+    });
+    // Also load from global seed if no CSM data yet
+    if (_allActions.length === 0) { actions = seedActions(); } else { actions = _allActions; }
+  } else {
+    const sa = localStorage.getItem(_actionsKeyForLoad);
+    if (sa) { try { actions = JSON.parse(sa); } catch(e) { actions = seedActions(); } }
+    else { actions = seedActions(); }
+    mergeSeedActions();
+    // STRICT isolation: strip any leaked actions that don't belong to this CSM's clients
+    if (_activeUserForLoad) {
+      const _ownIds = new Set(_activeUserForLoad.clientIds);
+      actions = actions.filter(a => _ownIds.has(a.clientId));
+    }
+  }
   mergeSeedMarketplaces();
   // Filter clients based on active user
   const _visibleIds = getVisibleClientIds();
@@ -1670,19 +1874,27 @@ function markSeedAsDeleted(title) {
   localStorage.setItem(LS_DELETED_SEEDS, JSON.stringify([...deleted]));
 }
 function mergeSeedActions() {
+  const _u = getActiveUser();
+  // viewer/director aggregate from CSMs — no merge needed here
+  if (_u && ['director','viewer'].includes(_u.role)) return;
+  const visIds = getVisibleClientIds();
+  // HARD isolation FIRST: strip any actions not belonging to this user's clients
+  actions = actions.filter(a => visIds.includes(a.clientId));
   // Remove obsolete seed titles
   actions = actions.filter(a => !REMOVED_SEED_TITLES.has(a.title));
   // Skip seeds deliberately deleted by the user
   const deletedSeeds = getDeletedSeedTitles();
-  // Only ADD seeds not yet present and not deleted by user — never overwrite user edits
+  // Only ADD seeds for this user's clients, not yet present, not deleted
   const existingTitles = new Set(actions.map(a => a.title));
-  const toAdd = SEED_ACTIONS.filter(a => !existingTitles.has(a.title) && !deletedSeeds.has(a.title)).map(a => ({...a, id: uid(), createdAt:'2026-06-12'}));
+  const toAdd = SEED_ACTIONS
+    .filter(a => visIds.includes(a.clientId) && !existingTitles.has(a.title) && !deletedSeeds.has(a.title))
+    .map(a => ({...a, id: uid(), createdAt:'2026-06-12'}));
   if (toAdd.length > 0) { actions = [...actions, ...toAdd]; }
   saveActions();
 }
 function setUpdateLabel(dt) {
   document.getElementById('sidebarFooter').textContent = 'Última act.: ' + (dt||'—');
-  document.getElementById('pageSubtitle').textContent = PORT.length + ' clientes · datos al ' + (dt||'—');
+  document.getElementById('pageSubtitle').textContent = clients.length + ' clientes · datos al ' + (dt||'—');
 }
 function saveData(dt) {
   const val = JSON.stringify({clients, updatedAt: dt, seedVersion: SEED_VERSION});
@@ -1691,13 +1903,28 @@ function saveData(dt) {
 }
 function saveActions() {
   const _activeUserForSave = getActiveUser();
-  const _actionsKeySave = _activeUserForSave ? getActionsKey(_activeUserForSave.id) : (typeof LS_ACTIONS !== 'undefined' ? LS_ACTIONS : 'cs-v3-actions');
-  const val = JSON.stringify(actions);
+  if (!_activeUserForSave || !canEdit()) return; // viewer: read-only
+  if (['superadmin','director'].includes(_activeUserForSave.role)) {
+    // Distribuir acciones de vuelta al store de cada CSM propietario
+    const _csmUsers = loadUsers().filter(u => ['csm','superadmin'].includes(u.role));
+    _csmUsers.forEach(u => {
+      const _uActions = actions.filter(a => u.clientIds.includes(a.clientId));
+      const _val = JSON.stringify(_uActions);
+      localStorage.setItem(getActionsKey(u.id), _val);
+      pushToSupabase(getActionsKey(u.id), _val);
+    });
+    return;
+  }
+  // CSM: guarda solo sus propias acciones
+  const _actionsKeySave = getActionsKey(_activeUserForSave.id);
+  const val = JSON.stringify(actions.filter(a => _activeUserForSave.clientIds.includes(a.clientId)));
   localStorage.setItem(_actionsKeySave, val);
   pushToSupabase(_actionsKeySave, val);
 }
 function populateSelects() {
-  const opts = PORT.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  const visIds = getVisibleClientIds();
+  const visPort = PORT.filter(p => visIds.includes(p.id));
+  const opts = visPort.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
   document.getElementById('filterCliente').innerHTML = '<option value="">🌎 Todos los clientes</option>' + opts;
   document.getElementById('fichaSelect').innerHTML   = '<option value="">— Elegir cliente —</option>' + opts;
 }
@@ -2195,7 +2422,7 @@ function renderFicha() {
             <span class="mrr-prefix">USD</span>
             <input type="number" id="mrr-input-${id}" value="${getMRR(id)||''}"
               style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;font-size:12px;width:140px;outline:none"
-              placeholder="ej. 2500"
+              placeholder="ej. 1500000"
               onblur="saveMRRField('${id}')"
               onkeydown="if(event.key==='Enter'){saveMRRField('${id}');this.blur()}">
             <span id="saved-mrr-${id}" class="saved-tag" style="opacity:0">✓</span>
@@ -2286,27 +2513,334 @@ function closeMktInline(id) {
   disp.style.display = 'flex';
 }
 
+// ── ALERT DETAIL PANEL ─────────────────────────────────────────────────────────
+let _currentAlertData = null;
+
+function openAlertDetail(alertObj) {
+  _currentAlertData = alertObj;
+  const panel = document.getElementById('adpPanel');
+  const overlay = document.getElementById('adpOverlay');
+  const content = document.getElementById('adpContent');
+
+  // Find the full client record
+  const client = clients.find(c => c.id === alertObj.clientId);
+  const w = client?.weekly || {};
+  const hsObj = client ? calcHS(client) : null;
+  const hs = hsObj?.score ?? null;
+  const hsCl = hsObj?.cl ?? null;
+  const hsColor = hsCl === 'green' ? 'var(--green)' : hsCl === 'yellow' ? 'var(--yellow)' : hsCl === 'orange' ? 'var(--orange)' : hsCl === 'red' ? 'var(--red)' : 'var(--text-muted)';
+  const hsLabel = hsCl === 'green' ? '🟢 Saludable' : hsCl === 'yellow' ? '🟡 Observación' : hsCl === 'orange' ? '🟠 En riesgo' : hsCl === 'red' ? '🔴 Crítico' : '⬜ Sin datos';
+
+  // Client actions
+  const clientActions = actions.filter(a => a.clientId === alertObj.clientId && a.status !== 'completado');
+  const blockers = clientActions.filter(a => a.bottleneck);
+  const critActions = clientActions.filter(a => a.priority === 'critica' && !a.bottleneck);
+  const otherActions = clientActions.filter(a => !a.bottleneck && a.priority !== 'critica').slice(0, 3);
+
+  const sevColor = alertObj.sev === 'critica' ? 'adp-sev-red' : alertObj.sev === 'alta' ? 'adp-sev-orange' : 'adp-sev-blue';
+  const sevLabel = alertObj.sev === 'critica' ? '🔴 CRÍTICO' : alertObj.sev === 'alta' ? '🟠 ALTO RIESGO' : '🔵 SEGUIMIENTO';
+  const daysSinceContact = w.lastContact ? daysSince(w.lastContact) : null;
+  const contactColor = !daysSinceContact ? 'var(--text3)' : daysSinceContact > 60 ? 'var(--red)' : daysSinceContact > 30 ? 'var(--orange)' : 'var(--green)';
+
+  const npsColor = w.nps == null ? 'var(--text3)' : w.nps >= 50 ? 'var(--green)' : w.nps >= 0 ? 'var(--yellow)' : 'var(--red)';
+
+  const renderActionCards = (list, cls) => list.map(a => {
+    const overdue = a.dueDate && new Date(a.dueDate) < new Date();
+    return `<div class="adp-action-card ${cls}">
+      <div style="font-size:18px;line-height:1">${a.bottleneck ? '🚧' : a.priority === 'critica' ? '🔴' : '🟠'}</div>
+      <div style="flex:1">
+        <div class="act-text">${a.title}</div>
+        ${a.causa ? `<div style="font-size:11px;color:var(--text3);margin-top:3px">↳ ${a.causa.substring(0,80)}…</div>` : ''}
+      </div>
+      ${a.dueDate ? `<div class="act-due" style="color:${overdue?'var(--red)':'var(--text3)'}">📅 ${fmtD(a.dueDate)}${overdue?' ⚠️':''}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="adp-header">
+      <div class="adp-severity-strip ${sevColor}"></div>
+      <div class="adp-client-name">${alertObj.client}</div>
+      <div class="adp-alert-title">${alertObj.title}</div>
+      <div class="adp-badges">
+        <span class="sev-tag sev-${alertObj.sev}">${sevLabel}</span>
+        ${alertObj.isBottleneck ? '<span class="alert-bottleneck-badge">🚧 BLOQUEANTE</span>' : ''}
+        ${client?.pais ? `<span style="font-size:11px;color:var(--text3);padding:2px 8px;background:var(--surface2);border-radius:10px">${client.pais}</span>` : ''}
+      </div>
+    </div>
+
+    <div class="adp-body">
+
+      ${alertObj.body ? `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--text);line-height:1.6">${alertObj.body.replace(/\n/g,'<br>')}</div>` : ''}
+
+      ${alertObj.causa ? `<div class="adp-causa-box">
+        <div class="label">⚠️ Causa Raíz</div>
+        <div class="text">${alertObj.causa}</div>
+      </div>` : ''}
+
+      <!-- HEALTH SNAPSHOT -->
+      <div class="adp-section">
+        <div class="adp-section-title">📊 Salud del Cliente</div>
+        <div class="adp-metric-row">
+          <div class="adp-metric">
+            <div class="val" style="color:${hsColor}">${hs != null ? hs : '—'}</div>
+            <div class="lbl">Health Score</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${hs != null ? hsLabel : 'Sin datos'}</div>
+          </div>
+          <div class="adp-metric">
+            <div class="val" style="color:${npsColor}">${w.nps != null ? w.nps : '—'}</div>
+            <div class="lbl">NPS</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${w.nps == null ? 'Sin dato' : w.nps >= 50 ? 'Promotor' : w.nps >= 0 ? 'Pasivo' : w.nps >= -50 ? 'Detractor' : 'Detractor crítico'}</div>
+          </div>
+          <div class="adp-metric">
+            <div class="val" style="color:${(w.tickets||0) > 0 ? 'var(--red)' : 'var(--green)'}">${w.tickets ?? '—'}</div>
+            <div class="lbl">Tickets</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${(w.bugs||0)>0 ? `${w.bugs} bug${w.bugs>1?'s':''}` : 'Sin bugs'}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Último Contacto</div>
+            <div style="font-size:13px;font-weight:700;color:${contactColor}">${w.lastContact ? fmtD(w.lastContact) : 'No registrado'}</div>
+            ${daysSinceContact != null ? `<div style="font-size:11px;color:${contactColor}">${daysSinceContact}d atrás</div>` : ''}
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Use Points</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${w.qtUp != null && w.upPlan != null ? `${w.qtUp}/${w.upPlan} UP` : client?.centry ? 'Centry' : '—'}</div>
+            ${w.qtUp != null && w.upPlan ? `<div style="font-size:11px;color:var(--text3)">${Math.round(w.qtUp/w.upPlan*100)}% consumido</div>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCIONES CRÍTICAS -->
+      ${(blockers.length + critActions.length) > 0 ? `<div class="adp-section">
+        <div class="adp-section-title">🚨 Acciones Urgentes (${blockers.length + critActions.length})</div>
+        ${renderActionCards(blockers, 'bloq')}
+        ${renderActionCards(critActions, 'crit')}
+      </div>` : ''}
+
+      <!-- OTRAS ACCIONES -->
+      ${otherActions.length > 0 ? `<div class="adp-section">
+        <div class="adp-section-title">📋 Otras Acciones Abiertas</div>
+        ${renderActionCards(otherActions, '')}
+        ${clientActions.length > blockers.length + critActions.length + 3 ? `<div style="font-size:11px;color:var(--text3);text-align:center;padding:6px">${clientActions.length - blockers.length - critActions.length - 3} más en la ficha del cliente</div>` : ''}
+      </div>` : ''}
+
+      <!-- TICKET DETALLE -->
+      ${w.ticketDetalle ? `<div class="adp-section">
+        <div class="adp-section-title">🎫 Ticket Activo</div>
+        <div style="background:rgba(231,76,60,.05);border:1px solid rgba(231,76,60,.2);border-radius:8px;padding:12px;font-size:12.5px;color:var(--text);line-height:1.5">${w.ticketDetalle}</div>
+      </div>` : ''}
+
+      <!-- ACCIONES RÁPIDAS -->
+      <div class="adp-section">
+        <div class="adp-section-title">⚡ Acción Rápida</div>
+        <div class="adp-quick-actions">
+          <button class="adp-btn adp-btn-primary" onclick="closeAlertDetailPanel();openFicha('${alertObj.clientId}')">📋 Ver Ficha Completa</button>
+          <button class="adp-btn adp-btn-red" onclick="openNewActionForClient('${alertObj.clientId}')">🚨 Crear Acción Urgente</button>
+          <button class="adp-btn" style="background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3);" onclick="registrarContacto('${alertObj.clientId}');closeAlertDetailPanel()">📞 Registrar Contacto Hoy</button>
+          <button class="adp-btn adp-btn-ghost" onclick="closeAlertDetailPanel();nav('acciones',document.getElementById('nav-acciones'))">⚡ Ver Todas las Acciones</button>
+          <button class="adp-btn adp-btn-ghost" onclick="closeAlertDetailPanel()">✕ Cerrar</button>
+        </div>
+      </div>
+
+    </div>`;
+
+  panel.style.display = 'flex';
+  panel.classList.remove('closing');
+  overlay.classList.add('open');
+  panel.scrollTop = 0;
+}
+
+function openNewActionForClient(clientId) {
+  closeAlertDetailPanel();
+  openAddAction(clientId);
+}
+
+function closeAlertDetail(e) {
+  if (e.target === document.getElementById('adpOverlay')) closeAlertDetailPanel();
+}
+
+function closeAlertDetailPanel() {
+  const panel = document.getElementById('adpPanel');
+  const overlay = document.getElementById('adpOverlay');
+  panel.classList.add('closing');
+  overlay.classList.remove('open');
+  setTimeout(() => { panel.style.display = 'none'; panel.classList.remove('closing'); }, 200);
+}
+
 // ── ALERTS ─────────────────────────────────────────────────────────────────────
 function renderAlerts() {
-  const alerts = [];
-  clients.forEach(c => {
-    const w = c.weekly || {}, h = calcHS(c);
-    if (w.tickets>0 && w.prioridad==='critica') alerts.push({type:'ac-red',    client:c.name,title:`🚨 Ticket Crítico — ${c.name}`,body:w.ticketDetalle||'Ticket crítico abierto',causa:w.causaRaiz,fecha:w.tckFecha,sev:'critica',id:c.id});
-    else if (w.tickets>0 && w.prioridad==='alta') alerts.push({type:'ac-orange',client:c.name,title:`⚠ Ticket Alta Prioridad — ${c.name}`,body:w.ticketDetalle||'Ticket alta prioridad',causa:w.causaRaiz,fecha:w.tckFecha,sev:'alta',id:c.id});
-    if (w.bugs>0) alerts.push({type:'ac-red',client:c.name,title:`🐛 Bug Activo — ${c.name}`,body:'Bug activo: '+(w.ticketDetalle||'Ver Zendesk'),causa:w.causaRaiz,fecha:w.tckFecha,sev:'critica',id:c.id});
-    if (w.nps!=null&&w.nps<=0) alerts.push({type:'ac-red',client:c.name,title:`💔 NPS ${w.nps} — ${c.name}`,body:`NPS en ${w.nps}. ${w.nps===-100?'Detractor absoluto — requiere plan de rescate urgente.':'Por debajo de cero — riesgo de churn.'}`,causa:null,fecha:w.lastContact,sev:w.nps<=-50?'critica':'alta',id:c.id});
-    if (w.lastContact&&daysSince(w.lastContact)>60) alerts.push({type:'ac-blue',client:c.name,title:`📵 Sin contacto hace ${daysSince(w.lastContact)}d — ${c.name}`,body:`Último contacto: ${fmtD(w.lastContact)}. Riesgo de desconexión.`,causa:null,fecha:w.lastContact,sev:'alta',id:c.id});
-    if (w.tickets>0&&(!w.prioridad||w.prioridad==='media')) alerts.push({type:'ac-blue',client:c.name,title:`📋 Ticket Abierto — ${c.name}`,body:w.ticketDetalle||'Ticket pendiente de resolución',causa:w.causaRaiz,fecha:w.tckFecha,sev:'media',id:c.id});
+  const allAlerts = [];
+  const visIds = getVisibleClientIds();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // ── 1. ALERTAS DESDE DATOS DEL CLIENTE (tickets, NPS, contacto) ──────────────
+  clients.filter(c => visIds.includes(c.id)).forEach(c => {
+    const w = c.weekly || {};
+    const clientActions = actions.filter(a => a.clientId === c.id);
+    const critActions = clientActions.filter(a => a.priority==='critica' && a.status!=='completado');
+    const bottlenecks = clientActions.filter(a => a.bottleneck && a.status!=='completado');
+    const overdueActions = clientActions.filter(a => a.dueDate && new Date(a.dueDate)<today && a.status!=='completado');
+
+    // Ticket crítico
+    if (w.tickets>0 && w.prioridad==='critica') {
+      allAlerts.push({type:'ac-red', client:c.name, clientId:c.id,
+        title:`🚨 Ticket Crítico Abierto`, body:w.ticketDetalle||'Ticket crítico sin resolver',
+        causa:w.causaRaiz, fecha:w.tckFecha, sev:'critica',
+        extra: critActions.length ? `${critActions.length} acc. crítica${critActions.length>1?'s':''} asociada${critActions.length>1?'s':''}` : null
+      });
+    } else if (w.tickets>0 && w.prioridad==='alta') {
+      allAlerts.push({type:'ac-orange', client:c.name, clientId:c.id,
+        title:`⚠️ Ticket Alta Prioridad`, body:w.ticketDetalle||'Ticket alta prioridad abierto',
+        causa:w.causaRaiz, fecha:w.tckFecha, sev:'alta', extra:null
+      });
+    } else if (w.tickets>0) {
+      allAlerts.push({type:'ac-blue', client:c.name, clientId:c.id,
+        title:`📋 Ticket Abierto`, body:w.ticketDetalle||'Ticket pendiente de resolución',
+        causa:w.causaRaiz, fecha:w.tckFecha, sev:'media', extra:null
+      });
+    }
+
+    // Bug activo
+    if (w.bugs>0) allAlerts.push({type:'ac-red', client:c.name, clientId:c.id,
+      title:`🐛 Bug Activo en Producción`, body:w.ticketDetalle||'Bug activo afectando operación del cliente',
+      causa:w.causaRaiz, fecha:w.tckFecha, sev:'critica', extra:'Escalar a soporte técnico'
+    });
+
+    // NPS negativo
+    if (w.nps!=null && w.nps<=-50) allAlerts.push({type:'ac-red', client:c.name, clientId:c.id,
+      title:`💔 NPS ${w.nps} — Detractor Absoluto`, body:`NPS crítico: ${w.nps}. Requiere plan de rescate urgente. Riesgo alto de churn.`,
+      causa:null, fecha:w.lastContact, sev:'critica', extra:'Plan de rescate urgente'
+    });
+    else if (w.nps!=null && w.nps<0) allAlerts.push({type:'ac-orange', client:c.name, clientId:c.id,
+      title:`😟 NPS Negativo: ${w.nps}`, body:`NPS por debajo de cero. Riesgo de churn si no se actúa.`,
+      causa:null, fecha:w.lastContact, sev:'alta', extra:null
+    });
+
+    // Sin contacto
+    if (w.lastContact && daysSince(w.lastContact)>60) allAlerts.push({type:'ac-orange', client:c.name, clientId:c.id,
+      title:`📵 Sin Contacto Hace ${daysSince(w.lastContact)} Días`, body:`Último contacto: ${fmtD(w.lastContact)}. Riesgo de desvinculación y churn silencioso.`,
+      causa:null, fecha:w.lastContact, sev:'alta', extra:'Programar cadencia urgente'
+    });
+    else if (!w.lastContact && !c.centry) allAlerts.push({type:'ac-blue', client:c.name, clientId:c.id,
+      title:`⏱ Sin Registro de Contacto`, body:`No hay fecha de último contacto registrada. Verificar historial en HubSpot.`,
+      causa:null, fecha:null, sev:'media', extra:null
+    });
   });
-  const so={critica:0,alta:1,media:2}; alerts.sort((a,b)=>(so[a.sev]??3)-(so[b.sev]??3));
-  document.getElementById('alertGrid').innerHTML = alerts.length
-    ? alerts.map(a=>`<div class="alert-card ${a.type}" onclick="openFicha('${a.id}')">
-        <div class="alert-title">${a.title}<span class="sev-tag sev-${a.sev}">${a.sev}</span></div>
-        <div class="alert-body">${a.body}</div>
-        ${a.causa?`<div class="alert-body" style="margin-top:5px;font-size:11px"><strong>Causa raíz:</strong> ${a.causa}</div>`:''}
-        <div class="alert-meta">${a.fecha?'📅 '+fmtD(a.fecha):''}</div>
-      </div>`).join('')
-    : '<div class="empty" style="grid-column:1/-1">✅ Sin alertas activas.</div>';
+
+  // ── 2. ALERTAS DESDE ACCIONES — Bottlenecks y críticas ──────────────────────
+  const seenBottleneck = new Set();
+  actions.filter(a => visIds.includes(a.clientId) && a.status!=='completado')
+    .filter(a => a.bottleneck || a.priority==='critica')
+    .forEach(a => {
+      const key = a.clientId + '|bottleneck';
+      if (seenBottleneck.has(key)) return;
+      seenBottleneck.add(key);
+      const port = PORT.find(p => p.id === a.clientId);
+      const clientName = port?.name || a.clientId;
+      const clientBottlenecks = actions.filter(x => x.clientId===a.clientId && x.bottleneck && x.status!=='completado');
+      const clientCrits = actions.filter(x => x.clientId===a.clientId && x.priority==='critica' && x.status!=='completado');
+      const isOverdue = a.dueDate && new Date(a.dueDate) < today;
+      allAlerts.push({type: a.bottleneck ? 'ac-red' : 'ac-orange',
+        client: clientName, clientId: a.clientId,
+        title: a.bottleneck ? `🚧 Acción Bloqueante` : `🔴 Acción Crítica Pendiente`,
+        body: a.title + (a.desc ? '\n' + a.desc.substring(0,120)+'…' : ''),
+        causa: a.causa || null,
+        fecha: a.dueDate || null,
+        sev: a.bottleneck ? 'critica' : 'critica',
+        extra: (clientBottlenecks.length>1 ? `${clientBottlenecks.length} bloqueantes` : '') +
+               (clientCrits.length>0 ? ` · ${clientCrits.length} críticas` : '') +
+               (isOverdue ? ' · ⏰ VENCIDA' : ''),
+        isBottleneck: a.bottleneck
+      });
+    });
+
+  // ── 3. ACCIONES VENCIDAS (no bloqueantes) ───────────────────────────────────
+  const seenOverdue = new Set();
+  actions.filter(a => visIds.includes(a.clientId) && a.dueDate && new Date(a.dueDate)<today && a.status!=='completado' && !a.bottleneck && a.priority!=='critica')
+    .forEach(a => {
+      const key = a.clientId + '|overdue';
+      if (seenOverdue.has(key)) return;
+      seenOverdue.add(key);
+      const port = PORT.find(p => p.id === a.clientId);
+      const overdueCount = actions.filter(x => x.clientId===a.clientId && x.dueDate && new Date(x.dueDate)<today && x.status!=='completado').length;
+      allAlerts.push({type:'ac-orange', client: port?.name||a.clientId, clientId:a.clientId,
+        title:`⏰ ${overdueCount} Acción${overdueCount>1?'es':''} Vencida${overdueCount>1?'s':''}`,
+        body: `"${a.title.substring(0,80)}"${overdueCount>1?' + '+(overdueCount-1)+' más':''}`,
+        causa: null, fecha: a.dueDate, sev:'alta', extra:`Vencida hace ${Math.ceil((today-new Date(a.dueDate))/(1000*60*60*24))}d`
+      });
+    });
+
+  // ── 4. DEDUPLICAR POR CLIENTE+TIPO Y ORDENAR ─────────────────────────────────
+  const sevOrder = {critica:0, alta:1, media:2};
+  allAlerts.sort((a,b) => (sevOrder[a.sev]??3)-(sevOrder[b.sev]??3) || a.client.localeCompare(b.client));
+
+  // ── 5. RENDER ─────────────────────────────────────────────────────────────────
+  const crit = allAlerts.filter(a=>a.sev==='critica');
+  const alta = allAlerts.filter(a=>a.sev==='alta');
+  const media = allAlerts.filter(a=>a.sev==='media');
+
+  // Summary bar
+  const sb = document.getElementById('alertSummaryBar');
+  if (sb) sb.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);border-radius:10px;flex:1;min-width:140px;">
+      <span style="font-size:22px">🚨</span>
+      <div><div style="font-size:22px;font-weight:800;color:var(--red);line-height:1">${crit.length}</div>
+      <div style="font-size:11px;color:var(--text2);font-weight:600">CRÍTICAS</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(230,126,34,.1);border:1px solid rgba(230,126,34,.25);border-radius:10px;flex:1;min-width:140px;">
+      <span style="font-size:22px">⚠️</span>
+      <div><div style="font-size:22px;font-weight:800;color:var(--orange);line-height:1">${alta.length}</div>
+      <div style="font-size:11px;color:var(--text2);font-weight:600">ALTO RIESGO</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:10px;flex:1;min-width:140px;">
+      <span style="font-size:22px">📋</span>
+      <div><div style="font-size:22px;font-weight:800;color:var(--accent);line-height:1">${media.length}</div>
+      <div style="font-size:11px;color:var(--text2);font-weight:600">SEGUIMIENTO</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;flex:1;min-width:140px;">
+      <span style="font-size:22px">📊</span>
+      <div><div style="font-size:22px;font-weight:800;color:var(--text);line-height:1">${allAlerts.length}</div>
+      <div style="font-size:11px;color:var(--text2);font-weight:600">TOTAL ALERTAS</div></div>
+    </div>`;
+
+  // Store alerts for panel access
+  window._alertsMap = window._alertsMap || {};
+
+  const cardHTML = a => {
+    const aKey = a.clientId + '_' + a.sev + '_' + allAlerts.indexOf(a);
+    window._alertsMap[aKey] = a;
+    const dueDays = a.fecha ? Math.ceil((today - new Date(a.fecha))/(1000*60*60*24)) : null;
+    const isOverdue = dueDays > 0;
+    return `<div class="alert-card ${a.type}" onclick="openAlertDetail(window._alertsMap['${aKey}'])">
+      <div class="alert-header">
+        <span class="alert-client-tag">${a.client}</span>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          ${a.isBottleneck ? '<span class="alert-bottleneck-badge">🚧 BLOQUEANTE</span>' : ''}
+          <span class="sev-tag sev-${a.sev}">${a.sev}</span>
+        </div>
+      </div>
+      <div class="alert-title">${a.title}</div>
+      <div class="alert-body">${a.body.replace(/\n/g,'<br>').substring(0,120)}${a.body.length>120?'…':''}</div>
+      ${a.causa ? `<div class="alert-causa"><strong>Causa raíz:</strong> ${a.causa.substring(0,140)}${a.causa.length>140?'…':''}</div>` : ''}
+      <div class="alert-footer">
+        <div class="alert-meta">
+          ${a.fecha ? `<span>${isOverdue?'⏰ Venció':'📅'} ${fmtD(a.fecha)}${isOverdue?' (+'+dueDays+'d)':''}</span>` : ''}
+          ${a.extra ? `<span class="alert-actions-count">${a.extra}</span>` : ''}
+        </div>
+        <span class="alert-action-link">Ver detalle →</span>
+      </div>
+    </div>`;
+  };
+
+  const sections = [];
+  if (crit.length)  sections.push(`<div class="alert-section-header ash-critica">🚨 Crítico — ${crit.length} alerta${crit.length>1?'s':''} requieren acción inmediata</div>` + crit.map(cardHTML).join(''));
+  if (alta.length)  sections.push(`<div class="alert-section-header ash-alta">⚠️ Alto Riesgo — ${alta.length} alerta${alta.length>1?'s':''}</div>` + alta.map(cardHTML).join(''));
+  if (media.length) sections.push(`<div class="alert-section-header ash-media">📋 Seguimiento — ${media.length} pendiente${media.length>1?'s':''}</div>` + media.map(cardHTML).join(''));
+
+  document.getElementById('alertGrid').innerHTML = allAlerts.length
+    ? sections.join('')
+    : '<div class="empty" style="grid-column:1/-1">✅ Sin alertas activas. Cartera en buena salud.</div>';
 }
 
 // ── METRICS ────────────────────────────────────────────────────────────────────
@@ -2423,7 +2957,9 @@ function toggleBottleneck(el){filterBottleneckOnly=!filterBottleneckOnly;el.clas
 function filterActions(extraPredicate) {
   const cf=document.getElementById('filterCliente')?.value||'';
   const pf=document.getElementById('filterPrioridad')?.value||'';
+  const visIds = getVisibleClientIds();
   return actions.filter(a=>{
+    if(!visIds.includes(a.clientId))return false;
     if(cf&&a.clientId!==cf)return false;
     if(pf&&a.priority!==pf)return false;
     if(filterBottleneckOnly&&!a.bottleneck)return false;
@@ -2434,10 +2970,14 @@ function filterActions(extraPredicate) {
   });
 }
 function renderAcciones() {
-  document.getElementById('ak-total').textContent=actions.filter(a=>a.status!=='resuelto').length;
-  document.getElementById('ak-block').textContent=actions.filter(a=>a.status==='bloqueado').length;
-  document.getElementById('ak-prog').textContent =actions.filter(a=>a.status==='en-progreso').length;
-  document.getElementById('ak-done').textContent =actions.filter(a=>a.status==='resuelto').length;
+  const visIds = getVisibleClientIds();
+  // Hard isolation: strip any action that doesn't belong to this user's visible clients
+  actions = actions.filter(a => visIds.includes(a.clientId));
+  const visActions = actions.filter(a => visIds.includes(a.clientId));
+  document.getElementById('ak-total').textContent=visActions.filter(a=>a.status!=='resuelto').length;
+  document.getElementById('ak-block').textContent=visActions.filter(a=>a.status==='bloqueado').length;
+  document.getElementById('ak-prog').textContent =visActions.filter(a=>a.status==='en-progreso').length;
+  document.getElementById('ak-done').textContent =visActions.filter(a=>a.status==='resuelto').length;
   if(accionView==='timeline'){ renderTimeline(filterActions()); return; }
   const cols=[{key:'por-hacer',label:'Por Hacer',emoji:'📌',cls:'k-ph'},{key:'en-progreso',label:'En Progreso',emoji:'⚡',cls:'k-ep'},{key:'bloqueado',label:'Bloqueado',emoji:'🚧',cls:'k-bl'},{key:'resuelto',label:'Resuelto',emoji:'✅',cls:'k-rs'}];
   const prioO={critica:0,alta:1,media:2,baja:3};
@@ -2504,7 +3044,7 @@ function openAddAction(cId,defStatus,defTipo){
   document.getElementById('addActionTitle').textContent='Nueva Acción';
   document.getElementById('editActionId').value='';
   document.getElementById('fa-tipo').value=defTipo||'soporte';
-  document.getElementById('fa-client').innerHTML=PORT.map(p=>`<option value="${p.id}"${p.id===cId?' selected':''}>${p.name}</option>`).join('');
+  document.getElementById('fa-client').innerHTML=PORT.filter(p=>getVisibleClientIds().includes(p.id)).map(p=>`<option value="${p.id}"${p.id===cId?' selected':''}>${p.name}</option>`).join('');
   document.getElementById('fa-title').value='';document.getElementById('fa-desc').value='';document.getElementById('fa-causa').value='';
   document.getElementById('fa-status').value=defStatus||'por-hacer';document.getElementById('fa-priority').value='media';
   document.getElementById('fa-due').value='';document.getElementById('fa-bottleneck').checked=false;document.getElementById('fa-notes').value='';
@@ -2516,7 +3056,7 @@ function openEditAction(id){
   document.getElementById('addActionTitle').textContent='Editar Acción';
   document.getElementById('editActionId').value=id;
   document.getElementById('fa-tipo').value=a.tipo||'soporte';
-  document.getElementById('fa-client').innerHTML=PORT.map(p=>`<option value="${p.id}"${p.id===a.clientId?' selected':''}>${p.name}</option>`).join('');
+  document.getElementById('fa-client').innerHTML=PORT.filter(p=>getVisibleClientIds().includes(p.id)).map(p=>`<option value="${p.id}"${p.id===a.clientId?' selected':''}>${p.name}</option>`).join('');
   document.getElementById('fa-title').value=a.title||'';document.getElementById('fa-desc').value=a.desc||'';document.getElementById('fa-causa').value=a.causa||'';
   document.getElementById('fa-status').value=a.status||'por-hacer';document.getElementById('fa-priority').value=a.priority||'media';
   document.getElementById('fa-due').value=a.dueDate||'';document.getElementById('fa-bottleneck').checked=!!a.bottleneck;document.getElementById('fa-notes').value=a.notes||'';
@@ -2668,7 +3208,7 @@ function generarResumen() {
     txt += `💰 REVENUE AT RISK:\n`;
     txt += `   MRR total cartera (con datos): USD ${mrrTotal.toLocaleString()}/mes\n`;
     if (mrrAtRisk)  txt += `   🟡 MRR en observación/riesgo: USD ${mrrAtRisk.toLocaleString()}/mes\n`;
-    if (mrrCritico) txt += `   🔴 MRR crítico (acción urgente): USD ${mrrCritico.toLocaleString()}/mes\n`;
+    if (mrrCritico) txt += `   🔴 MRR crítico (acción urgente): CLP ${mrrCritico.toLocaleString()}/mes\n`;
     txt += '\n';
   }
   if (renewals30.length) txt += `🔴 RENOVACIONES URGENTES (<30 días): ${renewals30.map(c=>c.name).join(', ')}\n`;
@@ -2808,7 +3348,7 @@ function renderLifecyclePipeline(){
   const cards=Object.entries(LC_STAGES).map(([key,s])=>{
     const n=counts[key]||0;
     const mrrSum=clients.filter(c=>getLifecycle(c.id)===key&&getMRR(c.id)).reduce((acc,c)=>acc+getMRR(c.id),0);
-    const mrrStr=mrrSum>0?`<div class="lp-mrr" style="color:${s.color}">USD ${mrrSum>=1000?(mrrSum/1000).toFixed(0)+'K':mrrSum}</div>`:'';
+    const mrrStr=mrrSum>0?`<div class="lp-mrr" style="color:${s.color}">CLP ${mrrSum>=1000?(mrrSum/1000).toFixed(0)+'K':mrrSum}</div>`:'';
     return `<div class="lc-pipe-card" onclick="filterByLifecycle('${key}')" title="Ver clientes en ${s.label}">
       <div class="lp-bar" style="background:${s.color}"></div>
       <div class="lp-emoji">${s.emoji}</div>
@@ -2840,7 +3380,7 @@ function filterByLifecycle(lc){
 }
 
 // ── MRR & RENEWAL (contrato) ───────────────────────────────────────────────────
-function getMRR(id){const v=localStorage.getItem('cs-mrr-'+id);return v?parseFloat(v):null;}
+function getMRR(id){const v=localStorage.getItem('cs-mrr-'+id);return v?parseFloat(v):(SEED_MRR&&SEED_MRR[id]?SEED_MRR[id]:null);}
 function getRenewal(id){return localStorage.getItem('cs-renewal-'+id)||null;}
 function saveMRRField(id){
   const v=document.getElementById('mrr-input-'+id)?.value;
@@ -2895,7 +3435,7 @@ function renderRevenueAtRisk(){
           <div style="width:${Math.round(bMRR/mrrTotal*100)}%;height:100%;background:${b.color};border-radius:3px"></div>
         </div>
       </div>
-      <span class="rar-val" style="color:${b.color}">USD ${bMRR.toLocaleString()}</span>
+      <span class="rar-val" style="color:${b.color}">CLP ${bMRR.toLocaleString()}</span>
       <span class="rar-cnt">${bClients.length} ctas</span>
     </div>`;
   }).join('');
@@ -2903,8 +3443,8 @@ function renderRevenueAtRisk(){
   el.innerHTML=`<div class="card-title">💰 Revenue at Risk <span>${mrrClients.length} clientes con MRR</span></div>
   <div style="display:flex;gap:16px;margin-bottom:14px">
     <div><div style="font-size:22px;font-weight:800">USD ${mrrTotal.toLocaleString()}</div><div style="font-size:11px;color:var(--text2)">MRR Total con datos</div></div>
-    <div><div style="font-size:22px;font-weight:800;color:${mrrRisk>0?'var(--orange)':'var(--green)'}">USD ${mrrRisk.toLocaleString()}</div><div style="font-size:11px;color:var(--text2)">MRR en riesgo (${pctRisk}%)</div></div>
-    ${mrrCrit>0?`<div><div style="font-size:22px;font-weight:800;color:var(--red)">USD ${mrrCrit.toLocaleString()}</div><div style="font-size:11px;color:var(--text2)">MRR crítico</div></div>`:''}
+    <div><div style="font-size:22px;font-weight:800;color:${mrrRisk>0?'var(--orange)':'var(--green)'}">CLP ${mrrRisk.toLocaleString()}</div><div style="font-size:11px;color:var(--text2)">MRR en riesgo (${pctRisk}%)</div></div>
+    ${mrrCrit>0?`<div><div style="font-size:22px;font-weight:800;color:var(--red)">CLP ${mrrCrit.toLocaleString()}</div><div style="font-size:11px;color:var(--text2)">MRR crítico</div></div>`:''}
   </div>
   ${bandRows}
   <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)">
@@ -3016,7 +3556,7 @@ function renderRenovaciones(){
 
   const kpis=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px">
     <div class="kpi-card kpi-blue"><div class="kpi-label">MRR Total (con datos)</div><div class="kpi-value" style="font-size:18px">USD ${mrrTotal>0?mrrTotal.toLocaleString():'—'}</div><div class="kpi-sub">${mrrData.filter(x=>x.mrr).length} clientes</div></div>
-    <div class="kpi-card kpi-red"><div class="kpi-label">MRR en Riesgo</div><div class="kpi-value" style="font-size:18px;color:var(--red)">USD ${mrrRisk>0?mrrRisk.toLocaleString():'—'}</div><div class="kpi-sub">${mrrTotal>0?Math.round(mrrRisk/mrrTotal*100):'—'}% del portafolio</div></div>
+    <div class="kpi-card kpi-red"><div class="kpi-label">MRR en Riesgo</div><div class="kpi-value" style="font-size:18px;color:var(--red)">CLP ${mrrRisk>0?mrrRisk.toLocaleString():'—'}</div><div class="kpi-sub">${mrrTotal>0?Math.round(mrrRisk/mrrTotal*100):'—'}% del portafolio</div></div>
     <div class="kpi-card kpi-yellow"><div class="kpi-label">Renuevan en 30d</div><div class="kpi-value" style="color:var(--red)">${clients.filter(c=>{const r=getRenewal(c.id);return r&&daysUntil(r)>=0&&daysUntil(r)<=30;}).length}</div><div class="kpi-sub">acción urgente</div></div>
     <div class="kpi-card kpi-orange"><div class="kpi-label">Renuevan en 60d</div><div class="kpi-value" style="color:var(--orange)">${clients.filter(c=>{const r=getRenewal(c.id);return r&&daysUntil(r)>30&&daysUntil(r)<=60;}).length}</div><div class="kpi-sub">preparar deck de valor</div></div>
   </div>`;
@@ -3036,7 +3576,7 @@ function renderRenovaciones(){
       const d=daysUntil(x.renewal);
       const hs=calcHS(x.c);
       const daysStr=d===null?'—':d<0?`${Math.abs(d)}d vencida`:d===0?'Hoy':''+d+'d';
-      const mrrStr=x.mrr?`USD ${x.mrr.toLocaleString()}`:'-';
+      const mrrStr=x.mrr?`CLP ${x.mrr.toLocaleString()}`:'-';
       const hsBadge=hs.score!=null?`<span class="hp ${hpClass(hs.cl)}" style="font-size:10px;padding:2px 8px">${hpEmoji(hs.cl)} ${hs.score}</span>`:'<span class="no-data">—</span>';
       return `<tr style="cursor:pointer" onclick="openFicha('${x.c.id}')">
         <td style="padding:10px 12px;font-size:12px;font-weight:600">${flags[x.c.country]||'🌎'} ${x.c.name}</td>
@@ -3051,7 +3591,7 @@ function renderRenovaciones(){
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-left:4px solid ${b.color};border-radius:8px">
         <span style="font-size:13px;font-weight:700">${b.label}</span>
         <span style="font-size:11px;font-weight:700;background:var(--surface2);color:var(--text2);padding:2px 8px;border-radius:10px">${items.length} clientes</span>
-        ${items.filter(x=>x.mrr).length?`<span style="font-size:11px;color:${b.color};font-weight:700;margin-left:auto">USD ${items.filter(x=>x.mrr).reduce((s,x)=>s+x.mrr,0).toLocaleString()} MRR</span>`:''}
+        ${items.filter(x=>x.mrr).length?`<span style="font-size:11px;color:${b.color};font-weight:700;margin-left:auto">CLP ${items.filter(x=>x.mrr).reduce((s,x)=>s+x.mrr,0).toLocaleString()} MRR</span>`:''}
       </div>
       <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
         <thead><tr style="background:var(--surface2)">
@@ -3099,12 +3639,12 @@ function showProfilePicker() {
       padding:20px 24px; cursor:pointer; min-width:140px; transition:all .2s;
       display:flex; flex-direction:column; align-items:center; gap:8px;
     " onmouseover="this.style.borderColor='${u.color}'" onmouseout="this.style.borderColor='#2e3250'">
-      <div style="width:48px;height:48px;border-radius:50%;background:${u.color}22;border:2px solid ${u.color};display:flex;align-items:center;justify-content:center;font-weight:700;color:${u.color};font-size:16px;">
-        ${u.initials}
+      <div style="width:52px;height:52px;border-radius:50%;background:${u.color}22;border:2px solid ${u.color};display:flex;align-items:center;justify-content:center;font-size:${u.icon?'26px':'16px'};font-weight:${u.icon?'400':'700'};color:${u.color};">
+        ${u.icon || u.initials}
       </div>
       <div style="color:#e8eaf6;font-weight:600;font-size:14px;">${u.name.split(' ')[0]}</div>
       <div style="color:#8892b0;font-size:11px;">${u.team}</div>
-      <div style="color:#4a5578;font-size:10px;text-transform:uppercase;letter-spacing:.5px;">${u.role === 'director' ? '👑 Director' : '👤 CSM'}</div>
+      <div style="color:#4a5578;font-size:10px;text-transform:uppercase;letter-spacing:.5px;">${u.role==='superadmin'?'⭐ Super Admin':u.role==='director'?'👑 Director':u.role==='viewer'?'👁 Viewer':'👤 CSM'}</div>
     </div>
   `).join('');
   const picker = document.getElementById('profile-picker');
@@ -3137,11 +3677,12 @@ function updateUserBadge() {
     avatar.textContent = user.initials;
   }
   if (nameLabel) nameLabel.textContent = user.name.split(' ')[0];
-  // Show Director nav only for directors
+  // Show Director nav for superadmin, director, viewer
   const dirNav = document.getElementById('nav-director');
   if (dirNav) {
-    dirNav.style.display = user.role === 'director' ? 'flex' : 'none';
-    if (user.role === 'director') {
+    const showDir = ['superadmin','director','viewer'].includes(user.role);
+    dirNav.style.display = showDir ? 'flex' : 'none';
+    if (showDir) {
       // count at-risk across all clients loaded
       const allClients2 = fromSeed();
       const riskCnt = allClients2.filter(c => { const h = calcHS(c); return h.cl==='red'||h.cl==='orange'; }).length;
@@ -3161,7 +3702,7 @@ function logoutUser() {
 
 function getCsmFilter() {
   const user = getActiveUser();
-  if (!user || user.role !== 'director') return null;
+  if (!user || !['superadmin','director','viewer'].includes(user.role)) return null;
   return localStorage.getItem('cs-v3-csm-filter') || 'all';
 }
 
@@ -3176,7 +3717,7 @@ let _editingUserId = null;
 function renderDirector() {
   const el = document.getElementById('page-director');
   if (!el) return;
-  const allUsers = loadUsers().filter(u => u.role === 'csm');
+  const allUsers = loadUsers().filter(u => ['csm','superadmin'].includes(u.role));
   const flags = {Chile:'🇨🇱',Colombia:'🇨🇴',Uruguay:'🇺🇾',Mexico:'🇲🇽',Peru:'🇵🇪'};
 
   // Build per-CSM stats using ALL clients data (not filtered)
@@ -3294,7 +3835,7 @@ function renderDirector() {
 function renderEquipo() {
   const users = loadUsers();
   const activeUser = getActiveUser();
-  const canAdmin = activeUser && activeUser.role === 'director';
+  const canAdmin = activeUser && ['superadmin','director'].includes(activeUser.role);
   const mainEl = document.getElementById('page-equipo');
   if (!mainEl) return;
 
@@ -3308,10 +3849,10 @@ function renderEquipo() {
               <div style="width:40px;height:40px;border-radius:50%;background:${u.color}22;border:2px solid ${u.color};display:flex;align-items:center;justify-content:center;font-weight:700;color:${u.color};">${u.initials}</div>
               <div>
                 <div style="font-weight:600;color:#e8eaf6;">${u.name}</div>
-                <div style="font-size:11px;color:#8892b0;">${u.team} · ${u.role === 'director' ? '👑 Director' : '👤 CSM'}</div>
+                <div style="font-size:11px;color:#8892b0;">${u.team} · ${u.role==='superadmin'?'⭐ Super Admin':u.role==='director'?'👑 Director':u.role==='viewer'?'👁 Viewer':'👤 CSM'}</div>
               </div>
             </div>
-            <div style="font-size:12px;color:#8892b0;">${u.role === 'director' ? 'Acceso completo — todos los clientes' : u.clientIds.length + ' clientes asignados'}</div>
+            <div style="font-size:12px;color:#8892b0;">${u.role==='director'||u.role==='viewer'?'Acceso completo — todos los clientes':u.clientIds.length+' clientes asignados'}</div>
             ${canAdmin ? `
               <button onclick="editUser('${u.id}')" style="margin-top:12px;background:#252840;border:1px solid #2e3250;color:#8892b0;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">✏️ Editar</button>
               ${u.id !== 'sami' && u.id !== 'director' ? `<button onclick="deleteUser('${u.id}')" style="margin-top:12px;margin-left:8px;background:rgba(231,76,60,.1);border:1px solid #e74c3c33;color:#e74c3c;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">🗑️</button>` : ''}
@@ -4583,89 +5124,4 @@ function renderPortfolioA() {
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Estado</label>
-        <select id="fa-status" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
-          <option value="por-hacer">📌 Por Hacer</option>
-          <option value="en-progreso">⚡ En Progreso</option>
-          <option value="bloqueado">🚧 Bloqueado</option>
-          <option value="resuelto">✅ Resuelto</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Prioridad</label>
-        <select id="fa-priority" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
-          <option value="critica">🔴 Crítica</option>
-          <option value="alta">🟠 Alta</option>
-          <option value="media">🟡 Media</option>
-          <option value="baja">🟢 Baja</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Fecha límite</label>
-        <input id="fa-due" type="date" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
-      </div>
-    </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Notas</label>
-      <textarea id="fa-notes" rows="2" placeholder="Notas adicionales, responsable, contexto..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <input id="fa-bottleneck" type="checkbox" style="width:16px;height:16px;accent-color:var(--accent)">
-      <label for="fa-bottleneck" style="font-size:13px;color:var(--text2);cursor:pointer">🚧 Marcar como cuello de botella</label>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="saveAction()">💾 Guardar</button>
-      <button class="btn btn-ghost" onclick="closeAddActionModal()">Cancelar</button>
-      <button id="deleteActionBtn" class="btn btn-ghost" style="margin-left:auto;color:var(--red);display:none" onclick="deleteCurrentAction()">🗑 Eliminar</button>
-    </div>
-  </div>
-</div>
-
-<div id="importOverlay" class="overlay" onclick="closeImport(event)">
-  <div class="modal wide">
-    <button class="modal-close" onclick="closeImportModal()">✕</button>
-    <h2>↑ Importar datos semanales</h2>
-    <p class="modal-sub">Pegá el contenido del archivo JSON generado esta semana y hacé clic en Importar.</p>
-    <textarea id="importTA" style="width:100%;height:240px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:monospace;font-size:12px;resize:vertical;box-sizing:border-box;" placeholder='{ "clientes": [...], "acciones": [] }'></textarea>
-    <div id="importResult" class="import-result"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="processImport()">Importar</button>
-      <button class="btn btn-ghost" onclick="closeImportModal()">Cancelar</button>
-      <button class="btn btn-ghost" style="margin-left:auto;color:var(--red)" onclick="clearAllData()">🗑 Resetear todo</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ── SUPABASE LOGIN SCREEN ──────────────────────────────────────────── -->
-<div id="sb-login-screen" style="display:none; position:fixed; inset:0; background:var(--bg); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
-  <div style="background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:48px 40px; max-width:440px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.5);">
-    <div style="font-size:40px; margin-bottom:12px;">🚀</div>
-    <h2 style="color:var(--text); font-size:22px; font-weight:700; margin-bottom:6px;">CS Command Center</h2>
-    <p style="color:var(--text2); font-size:13px; margin-bottom:32px;">AnyMarket LATAM · Ingresá con tu email @db1.com.br</p>
-    <input id="sb-email-input" type="email" placeholder="tu.nombre@db1.com.br"
-      style="width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:12px 16px; border-radius:10px; font-size:14px; outline:none; box-sizing:border-box; margin-bottom:12px; transition:border-color .15s;"
-      onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
-      onkeydown="if(event.key==='Enter') sendMagicLink()">
-    <button id="sb-login-btn" onclick="sendMagicLink()"
-      style="width:100%; background:var(--accent); color:#fff; border:none; padding:13px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:16px; transition:opacity .2s;"
-      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-      ✨ Ingresar con link mágico
-    </button>
-    <p id="sb-login-msg" style="font-size:13px; color:var(--text2); line-height:1.6; min-height:20px;"></p>
-    <p style="color:var(--text3); font-size:11px; margin-top:28px;">Te enviamos un enlace al email — sin contraseña necesaria.<br>Solo @db1.com.br tiene acceso.</p>
-  </div>
-</div>
-
-<!-- PROFILE PICKER MODAL -->
-<div id="profile-picker" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
-  <div style="background:#1a1d2e; border:1px solid #2e3250; border-radius:16px; padding:40px; max-width:600px; width:90%; text-align:center;">
-    <div style="font-size:28px; margin-bottom:8px;">&#128075;</div>
-    <h2 style="color:#e8eaf6; font-size:20px; margin-bottom:4px;">CS Command Center</h2>
-    <p style="color:#8892b0; font-size:13px; margin-bottom:32px;">Selecciona tu perfil para continuar</p>
-    <div id="profile-cards" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;"></div>
-    <p style="color:#4a5578; font-size:11px; margin-top:24px;">Links compartidos ingresan en modo vista general</p>
-  </div>
-</div>
-
-</body>
-</html>
+        <select id="fa-status" style="width:1
