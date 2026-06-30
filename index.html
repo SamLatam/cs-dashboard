@@ -1328,7 +1328,7 @@ const PORT = [
   {id:'ngarden-mx',               name:'NGARDEN MEXICO',                               country:'MX', centry:false},
   {id:'vh-textiles',              name:'VH TEXTILES SAS DE CV',                        country:'MX', centry:false},
 ];
-const SEED_VERSION = '2026-06-30d';
+const SEED_VERSION = '2026-06-30e';
 const ISOLATION_VERSION = '2026-06-25b'; // bump to force CSM store cleanup
 (function isolationCleanup() {
   const key = 'cs-isolation-v';
@@ -1669,8 +1669,28 @@ const SEED_ACTIONS = [
   {tipo:'finanzas',clientId:'importclick-cl',title:'🟠 Factura VENCIDA 26 días — IMPORTCLICK (CLP $385.005 / ~USD 405)',desc:'Factura mayo vencida hace 26 días.',causa:'Factura impaga 26 días',status:'por-hacer',priority:'media',bottleneck:false,dueDate:'2026-06-30',notes:'Responsable: German + Finanzas DB1. Fuente: relbase.cl/recaudacion'},
 ];
 
-// ── MRR SEED (USD/mes — promedio últimos 3 meses relbase, conversión ~950 CLP/USD) ──
+// ── MRR SEED (USD/mes — promedio últimos 3 meses relbase, conversión ~920 CLP/USD, Jun 2026) ──
 const SEED_MRR = {
+  // Cartera SAMI — extraído de relbase.cl Mar-May 2026, convertido a USD ÷920
+  'forus-sa':15925,       // Forus SA — $14.651.422 CLP/mes
+  'gino':7497,            // Gino — $6.897.558 CLP/mes
+  'maisa':3329,           // MAISA — $3.062.753 CLP/mes
+  'forus-colombia':2748,  // Forus Colombia — $2.528.306 CLP/mes
+  'pillin':2231,          // BEITGROUP S.A. (PILLIN) — $2.052.198 CLP/mes
+  'loi-chile':2218,       // LOI CHILE — $2.040.285 CLP/mes
+  'lounge':1889,          // LOUNGE S/A — $1.738.276 CLP/mes
+  'fashions-park':1892,   // FASHIONS PARK — $1.741.069 CLP/mes (2 meses)
+  'emma-sleep':1436,      // EMMA SLEEP CL — $1.321.334 CLP/mes
+  'pointbreak':1477,      // POINTBREAK — $1.358.911 CLP/mes
+  'dtodoymas':1284,       // DTODOYMAS — $1.181.148 CLP/mes
+  'updown-juegos':1123,   // UPDOWN JUEGOS — $1.033.231 CLP/mes
+  'lacoste':1043,         // LACOSTE — $959.956 CLP/mes
+  'forus-peru':764,       // FORUS PERU — $702.603 CLP/mes
+  'kayser':622,           // KAYSER — $572.168 CLP/mes
+  'tramontina-mx':494,    // TRAMONTINA MX — $454.654 CLP/mes
+  'divino':392,           // DIVINO S.A — $360.377 CLP/mes
+  'tramontina-cl':280,    // TRAMONTINA CL — $257.660 CLP/mes
+  // Cartera German/otros — valores anteriores
   'tpv-cl':994, 'imahe-cl':1070, 'gildemeister-cl':729, 'mouvair-cl':749,
   'flex-cl':705, 'petrizzio':662, 'klik-muebles':637, 'porto-menaje':611,
   'mali-cl':560, 'cienco-cl':511, 'talong-trade-cl':511, 'drimkip-cl':511,
