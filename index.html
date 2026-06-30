@@ -1328,7 +1328,7 @@ const PORT = [
   {id:'ngarden-mx',               name:'NGARDEN MEXICO',                               country:'MX', centry:false},
   {id:'vh-textiles',              name:'VH TEXTILES SAS DE CV',                        country:'MX', centry:false},
 ];
-const SEED_VERSION = '2026-06-30e';
+const SEED_VERSION = '2026-06-30f';
 const ISOLATION_VERSION = '2026-06-25b'; // bump to force CSM store cleanup
 (function isolationCleanup() {
   const key = 'cs-isolation-v';
@@ -2113,14 +2113,13 @@ function saveActions() {
   const _activeUserForSave = getActiveUser();
   if (!_activeUserForSave || !canEdit()) return; // viewer: read-only
   if (['superadmin','director'].includes(_activeUserForSave.role)) {
-    // Distribuir acciones de vuelta al store de cada CSM propietario
-    const _csmUsers = loadUsers().filter(u => ['csm','superadmin'].includes(u.role));
-    _csmUsers.forEach(u => {
-      const _uActions = actions.filter(a => u.clientIds.includes(a.clientId));
-      const _val = JSON.stringify(_uActions);
-      localStorage.setItem(getActionsKey(u.id), _val);
-      pushToSupabase(getActionsKey(u.id), _val);
-    });
+    // Superadmin: SOLO guarda en su propio key — no sobreescribe datos de otros CSMs
+    // (evita borrar acciones de German/D&E/María cuando Sami guarda)
+    const _actionsKeySelf = getActionsKey(_activeUserForSave.id);
+    const _valSelf = JSON.stringify(actions.filter(a => _activeUserForSave.clientIds.includes(a.clientId)));
+    localStorage.setItem(_actionsKeySelf, _valSelf);
+    pushToSupabase(_actionsKeySelf, _valSelf);
+    scheduleGistSave();
     return;
   }
   // CSM: guarda solo sus propias acciones
