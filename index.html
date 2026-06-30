@@ -1867,6 +1867,14 @@ function loadUsers() {
     localStorage.setItem(LS_USERS, JSON.stringify(SEED_USERS));
     return SEED_USERS;
   }
+  // Purge users that no longer exist in SEED_USERS (prevents stale duplicates)
+  const seedIds = new Set(SEED_USERS.map(u => u.id));
+  const before = saved.length;
+  const pruned = saved.filter(u => seedIds.has(u.id));
+  if (pruned.length !== before) {
+    localStorage.setItem(LS_USERS, JSON.stringify(pruned));
+    return loadUsers(); // re-run with clean list
+  }
   // Sync all managed fields from SEED_USERS (visual + clientIds + role)
   let changed = false;
   const MANAGED = ['initials','color','name','team','role','clientIds'];
