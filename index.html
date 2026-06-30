@@ -1170,7 +1170,7 @@ const PORT = [
   {id:'ngarden-mx',               name:'NGARDEN MEXICO',                               country:'MX', centry:false},
   {id:'vh-textiles',              name:'VH TEXTILES SAS DE CV',                        country:'MX', centry:false},
 ];
-const SEED_VERSION = '2026-06-26d';
+const SEED_VERSION = '2026-06-30a';
 const ISOLATION_VERSION = '2026-06-25b'; // bump to force CSM store cleanup
 (function isolationCleanup() {
   const key = 'cs-isolation-v';
@@ -4960,27 +4960,28 @@ function filterFaq(q) {
 // ── PORTFOLIO A — ACELERACIÓN ──────────────────────────────────────────────
 
 const PORTFOLIO_GAP = [
-  // Gap 1 (B→A) — Quick Wins
-  {id:'fashions-park',  current:'B', gap:1, accion:'Activar AnyTools + Repricing. Proponer Mercado Shops como canal adicional.'},
-  {id:'emma-sleep',     current:'B', gap:1, accion:'QBR ejecutivo. Proponer Repricing automático CL (Falabella, Paris, Ripley).', grupo:'Emma Sleep'},
-  {id:'malaga',         current:'B', gap:1, accion:'Revisar adopción Use Points. Activar funcionalidades premium pendientes.'},
-  {id:'divino',         current:'B', gap:1, accion:'Diagnóstico operativo completo. Mapear oportunidades de expansión de canales.'},
-  {id:'colombiana',     current:'B', gap:1, accion:'Diagnóstico operativo. Identificar palanca principal de crecimiento.'},
-  {id:'lounge',         current:'B', gap:1, accion:'Acelerar migración Centry → AnyMarket. Cada milestone completado = avance de tier.'},
-  {id:'dtodoymas',      current:'B', gap:1, accion:'Diagnóstico operativo. Expansión de canales activos.'},
-  {id:'pointbreak',     current:'B', gap:1, accion:'Diagnóstico operativo. Expansión de canales activos.'},
+  // Gap 1 (B→A) — Quick Wins — datos BPG 30/06/2026
+  {id:'fashions-park',       current:'B', gap:1, avgMrr:10840, accion:'Activar AnyTools + Repricing. Proponer Mercado Shops como canal adicional.'},
+  {id:'emma-sleep',          current:'B', gap:1, avgMrr:7013,  accion:'QBR ejecutivo. Proponer Repricing automático CL (Falabella, Paris, Ripley).', grupo:'Emma Sleep'},
+  {id:'inversiones-malaga',  current:'B', gap:1, avgMrr:9518,  accion:'Revisar adopción Use Points. Activar funcionalidades premium pendientes.'},
+  {id:'divino',              current:'B', gap:1, avgMrr:6557,  accion:'Diagnóstico operativo completo. Mapear oportunidades de expansión de canales.'},
+  {id:'lounge',              current:'B', gap:1, avgMrr:9787,  accion:'Acelerar migración Centry → AnyMarket. Cada milestone completado = avance de tier.'},
+  {id:'dtodoymas',           current:'B', gap:1, avgMrr:6949,  accion:'Diagnóstico operativo. Expansión de canales activos.'},
+  {id:'pointbreak',          current:'B', gap:1, avgMrr:7888,  accion:'Diagnóstico operativo. Expansión de canales activos.'},
   // Gap 2 (C→A) — Push Estratégico
-  {id:'belcorp-col',    current:'C', gap:2, accion:'BELCORP Corporate Review: una reunión mueve Chile + Colombia + México simultáneamente.', grupo:'Belcorp LATAM'},
-  {id:'belcorp-chile',  current:'C', gap:2, accion:'BELCORP Corporate Review: coordinar expansión LATAM con ejecutivo regional.', grupo:'Belcorp LATAM'},
-  {id:'transbel',       current:'C', gap:2, accion:'BELCORP Corporate Review: alinear roadmap de canales a nivel LATAM.', grupo:'Belcorp LATAM'},
-  {id:'kayser',         current:'C', gap:2, accion:'Activar Repricing en CL (Falabella, Paris, Ripley). Revisión de adopción Use Points.'},
-  {id:'forus-peru',     current:'C', gap:2, accion:'Acelerar migración Centry + primeros marketplaces en AnyMarket. Milestone = tier up.'},
-  {id:'emma-sleep-co',  current:'C', gap:2, accion:'Replicar modelo Chile en CO: agregar Falabella + Ripley + Walmart.', grupo:'Emma Sleep'},
-  {id:'tramontina-mx',  current:'C', gap:2, accion:'Executive Review. Activar features premium. Usar como benchmark para CL.', grupo:'Tramontina'},
+  {id:'colombiana',          current:'C', gap:2, avgMrr:6207,  accion:'Diagnóstico operativo. Identificar palanca principal de crecimiento.'},
+  {id:'belcorp-col',         current:'C', gap:2, avgMrr:2174,  accion:'BELCORP Corporate Review: una reunión mueve Chile + Colombia + México simultáneamente.', grupo:'Belcorp LATAM'},
+  {id:'belcorp-chile',       current:'C', gap:2, avgMrr:2174,  accion:'BELCORP Corporate Review: coordinar expansión LATAM con ejecutivo regional.', grupo:'Belcorp LATAM'},
+  {id:'transbel',            current:'C', gap:2, avgMrr:4653,  accion:'BELCORP Corporate Review: alinear roadmap de canales a nivel LATAM.', grupo:'Belcorp LATAM'},
+  {id:'kayser',              current:'C', gap:2, avgMrr:4075,  accion:'Activar Repricing en CL (Falabella, Paris, Ripley). Revisión de adopción Use Points.'},
+  {id:'forus-colombia',      current:'C', gap:2, avgMrr:10549, accion:'Prioridad: completar migración Centry → AnyMarket. Cada canal activado = avance de tier.', nota:'En migración activa'},
+  {id:'forus-peru',          current:'C', gap:2, avgMrr:3433,  accion:'Acelerar migración Centry + primeros marketplaces en AnyMarket. Milestone = tier up.'},
+  {id:'emma-sleep-co',       current:'C', gap:2, avgMrr:3261,  accion:'Replicar modelo Chile en CO: agregar Falabella + Ripley + Walmart.', grupo:'Emma Sleep'},
+  {id:'tramontina-mx',       current:'C', gap:2, avgMrr:2548,  accion:'Executive Review. Activar features premium. Usar como benchmark para CL.', grupo:'Tramontina'},
   // Gap 3 (D→A) — Trabajo profundo
-  {id:'tramontina-cl',  current:'D', gap:3, accion:'Expansion Talk urgente: agregar Falabella, Ripley, ML, Hites. Presentar TRAMONTINA MX como caso de éxito.', grupo:'Tramontina'},
+  {id:'tramontina-cl',       current:'D', gap:3, avgMrr:1533,  accion:'Expansion Talk urgente: agregar Falabella, Ripley, ML, Hites. Presentar TRAMONTINA MX como caso de éxito.', grupo:'Tramontina'},
   // Gap 4 (E→A) — Recovery total
-  {id:'lacoste',        current:'E', gap:4, accion:'CRÍTICO: Diagnóstico urgente + reunión ejecutiva + Recovery Plan conjunto con Producto y Soporte.'},
+  {id:'lacoste',             current:'E', gap:4, avgMrr:280,   accion:'CRÍTICO: Diagnóstico urgente + reunión ejecutiva + Recovery Plan conjunto con Producto y Soporte.'},
 ];
 
 const GRUPO_ESTRATEGICO = [
@@ -5041,6 +5042,8 @@ function renderPortfolioA() {
       <td style="text-align:center">${tierBadge(p.current)}</td>
       <td style="text-align:center">${tierBadge('A')}</td>
       <td style="text-align:center">${gapDots(p.gap)}</td>
+      <td style="text-align:right;font-size:12px;color:var(--text2)">${p.avgMrr?'R$'+p.avgMrr.toLocaleString('pt-BR'):'—'}</td>
+      <td style="text-align:right;font-size:12px;color:var(--green);font-weight:600">${p.avgMrr?'+R$'+(28344-p.avgMrr).toLocaleString('pt-BR'):'—'}</td>
       <td style="text-align:center">${scoreChip(p.id)}</td>
       <td style="font-size:12px;color:var(--text2);max-width:340px;line-height:1.5">${p.accion}</td>
       <td>${grupoBadge}</td>
@@ -5084,6 +5087,11 @@ function renderPortfolioA() {
         <div style="font-size:12px;font-weight:700;color:var(--text)">📊 Total</div>
         <div style="font-size:11px;color:var(--text3)">clientes con potencial A</div>
       </div>
+      <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
+        <div style="font-size:22px;font-weight:800;color:var(--green)">+R$${(PORTFOLIO_GAP.filter(p=>p.avgMrr).reduce((s,p)=>s+(28344-p.avgMrr),0)/1000).toFixed(0)}k</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text)">💰 Upside Total</div>
+        <div style="font-size:11px;color:var(--text3)">si todos llegan a tier A · BPG 30/06</div>
+      </div>
     </div>
 
     <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">⚡ Grupos Multiplicadores — Una reunión, múltiples upgrades</div>
@@ -5098,6 +5106,8 @@ function renderPortfolioA() {
             <th style="text-align:center;width:72px">Actual</th>
             <th style="text-align:center;width:72px">Meta</th>
             <th style="text-align:center;width:80px">Gap</th>
+            <th style="text-align:center;width:90px">MRR Actual</th>
+            <th style="text-align:center;width:90px">Upside →A</th>
             <th style="text-align:center;width:72px">Health</th>
             <th>Acción Clave CS</th>
             <th style="width:110px">Grupo</th>
