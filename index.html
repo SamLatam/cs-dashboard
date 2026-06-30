@@ -989,22 +989,46 @@ const GH_SYNC_KEY   = 'cs-gh-last-sync';
 
 let _gistSaveTimer  = null;
 
-function buildGistSnapshot() {
-  const snap = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k && k.startsWith('cs-')) snap[k] = localStorage.getItem(k);
-  }
-  return snap;
-}
+// ── GIST SYNC v2 — Compartido multi-usuario ───────────────────────────────────
+// Un solo Gist compartido por todo el equipo.
+// Cada CSM escribe su propio archivo: cs-{userId}.json
+// Superadmin/Director leen TODOS los archivos y fusionan datos.
+// Token y Gist ID son iguales para todos — admin los distribuye.
 
-function applyGistSnapshot(snap) {
-  if (!snap || typeof snap !== 'object') return;
-  Object.entries(snap).forEach(([k, v]) => {
-    // Don't overwrite GitHub config itself, or active-user with snapshot value
-    if (k === GH_TOKEN_KEY || k === GH_GIST_KEY || k === GH_SYNC_KEY) return;
-    localStorage.setItem(k, v);
+function buildUserSnapshot() {
+  const user = getActiveUser();
+  if (!user) return {};
+  const snap = { _userId: user.id, _savedAt: new Date().toISOString() };
+
+  // Datos de clientes — solo los propios
+  try {
+    const allData = JSON.parse(localStorage.getItem(LS_DATA) || '{}');
+    if (allData.clients) {
+      const myClients = allData.clients.filter(c => user.clientIds.includes(c.id));
+      snap[LS_DATA] = JSON.stringify({ lastUpdate: allData.lastUpdate, clients: myClients });
+    }
+  } catch(e) {}
+
+  // Acciones propias
+  const actKey = getActionsKey(user.id);
+  const acts = localStorage.getItem(actKey);
+  if (acts) snap[actKey] = acts;
+
+  // Notas (clave con userId para no pisar las de otros)
+  const notes = localStorage.getItem(LS_NOTES);
+  if (notes) snap['cs-v3-notes-' + user.id] = notes;
+
+  // Historial de health score
+  const hist = localStorage.getItem(LS_HISTORY);
+  if (hist) snap[LS_HISTORY] = hist;
+
+  // Mood por cliente propio
+  user.clientIds.forEach(id => {
+    const mood = localStorage.getItem('cs-mood-' + id);
+    if (mood) snap['cs-mood-' + id] = mood;
   });
+
+  return snap;
 }
 
 function scheduleGistSave() {
@@ -1017,24 +1041,28 @@ function scheduleGistSave() {
 async function doGistSave() {
   const token  = localStorage.getItem(GH_TOKEN_KEY);
   const gistId = localStorage.getItem(GH_GIST_KEY);
-  if (!token) return;
-  const content = JSON.stringify(buildGistSnapshot(), null, 2);
+  const user   = getActiveUser();
+  if (!token || !user) return;
+
+  const filename = `cs-${user.id}.json`;
+  const content  = JSON.stringify(buildUserSnapshot(), null, 2);
+
   try {
     let res, data;
     if (gistId) {
       res = await fetch(`https://api.github.com/gists/${gistId}`, {
         method: 'PATCH',
         headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ files: { 'cs-dashboard-data.json': { content } } })
+        body: JSON.stringify({ files: { [filename]: { content } } })
       });
     } else {
       res = await fetch('https://api.github.com/gists', {
         method: 'POST',
         headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          description: 'CS Dashboard AnyMarket LATAM — sincronización automática',
+          description: 'CS Dashboard AnyMarket LATAM — sync compartido equipo',
           public: false,
-          files: { 'cs-dashboard-data.json': { content } }
+          files: { [filename]: { content } }
         })
       });
     }
@@ -1054,20 +1082,82 @@ async function loadFromCloud() {
   const token  = localStorage.getItem(GH_TOKEN_KEY);
   const gistId = localStorage.getItem(GH_GIST_KEY);
   if (!token || !gistId) return false;
+
+  const user    = getActiveUser();
+  const isAdmin = user && ['superadmin','director'].includes(user.role);
+
   try {
     const res = await fetch(`https://api.github.com/gists/${gistId}`, {
       headers: { Authorization: `token ${token}` }
     });
     if (!res.ok) return false;
-    const data = await res.json();
-    const file = data.files && data.files['cs-dashboard-data.json'];
-    if (!file) return false;
-    const snap = JSON.parse(file.content);
-    applyGistSnapshot(snap);
-    const ts = data.updated_at;
+    const gistData = await res.json();
+    const files    = gistData.files || {};
+
+    let mergedClients = [];
+    let appliedOwn    = false;
+
+    for (const [fname, fileObj] of Object.entries(files)) {
+      if (!fname.startsWith('cs-') || !fname.endsWith('.json')) continue;
+      try {
+        const snap       = JSON.parse(fileObj.content);
+        const fileUserId = snap._userId;
+        const isOwnFile  = user && fname === `cs-${user.id}.json`;
+
+        // CSM solo procesa su propio archivo; admin procesa todos
+        if (!isAdmin && !isOwnFile) continue;
+
+        // Fusionar datos de clientes
+        if (snap[LS_DATA]) {
+          try {
+            const parsed = JSON.parse(snap[LS_DATA]);
+            if (parsed.clients) mergedClients.push(...parsed.clients);
+          } catch(e) {}
+        }
+
+        // Acciones del usuario de este archivo
+        if (fileUserId) {
+          const actKey = `cs-v3-actions-${fileUserId}`;
+          if (snap[actKey]) localStorage.setItem(actKey, snap[actKey]);
+        }
+
+        // Notas (solo aplicar las propias)
+        const notesKey = `cs-v3-notes-${fileUserId}`;
+        if (snap[notesKey] && isOwnFile) localStorage.setItem(LS_NOTES, snap[notesKey]);
+
+        // Historial
+        if (snap[LS_HISTORY] && isOwnFile) localStorage.setItem(LS_HISTORY, snap[LS_HISTORY]);
+
+        // Mood
+        Object.entries(snap).forEach(([k, v]) => {
+          if (k.startsWith('cs-mood-')) localStorage.setItem(k, v);
+        });
+
+        if (isOwnFile) appliedOwn = true;
+
+      } catch(e) { console.warn('[GistSync] error parsing', fname, e); }
+    }
+
+    // Fusionar datos de clientes en localStorage
+    if (mergedClients.length > 0) {
+      try {
+        const existingRaw = localStorage.getItem(LS_DATA);
+        const existing    = existingRaw ? JSON.parse(existingRaw) : {};
+        const localList   = existing.clients || [];
+        // Índice de clientes remotos (tienen prioridad)
+        const remoteMap   = new Map(mergedClients.map(c => [c.id, c]));
+        // Clientes que solo están en local (sin datos remotos)
+        const localOnly   = localList.filter(c => !remoteMap.has(c.id));
+        const merged      = [...mergedClients, ...localOnly];
+        localStorage.setItem(LS_DATA, JSON.stringify({ lastUpdate: existing.lastUpdate, clients: merged }));
+      } catch(e) {}
+    }
+
+    const ts = gistData.updated_at;
     localStorage.setItem(GH_SYNC_KEY, ts);
     updateCloudIndicator('ok', ts);
-    return true;
+    return appliedOwn || isAdmin;
+
   } catch(e) {
     console.warn('[GistSync] load failed:', e.message);
     return false;
@@ -1096,11 +1186,33 @@ function updateCloudIndicator(state, ts) {
   }
 }
 
+function getTeamCode() {
+  const token  = localStorage.getItem(GH_TOKEN_KEY) || '';
+  const gistId = localStorage.getItem(GH_GIST_KEY)  || '';
+  if (!token || !gistId) return '';
+  return btoa(JSON.stringify({ t: token, g: gistId }));
+}
+
+function applyTeamCode(code) {
+  try {
+    const parsed = JSON.parse(atob(code.trim()));
+    if (parsed.t) localStorage.setItem(GH_TOKEN_KEY, parsed.t);
+    if (parsed.g) localStorage.setItem(GH_GIST_KEY,  parsed.g);
+    return true;
+  } catch(e) { return false; }
+}
+
 function openCloudSetup() {
   const overlay = document.getElementById('cloud-setup-overlay');
   if (!overlay) return;
   document.getElementById('cloud-token-input').value = localStorage.getItem(GH_TOKEN_KEY) || '';
   document.getElementById('cloud-gist-input').value  = localStorage.getItem(GH_GIST_KEY)  || '';
+  // Mostrar código de equipo si ya está configurado
+  const teamCode = getTeamCode();
+  const tcEl = document.getElementById('team-code-display');
+  if (tcEl) tcEl.value = teamCode;
+  const tcSection = document.getElementById('team-code-section');
+  if (tcSection) tcSection.style.display = teamCode ? 'block' : 'none';
   overlay.style.display = 'flex';
 }
 
@@ -1112,6 +1224,10 @@ function closeCloudSetup() {
 async function saveCloudConfig() {
   const token  = (document.getElementById('cloud-token-input').value || '').trim();
   const gistId = (document.getElementById('cloud-gist-input').value  || '').trim();
+  // También aceptar código de equipo pegado en el campo token
+  if (token && token.length > 40 && !token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+    if (applyTeamCode(token)) { closeCloudSetup(); await doGistSave(); return; }
+  }
   if (!token) { alert('El token de GitHub es requerido.'); return; }
   localStorage.setItem(GH_TOKEN_KEY, token);
   if (gistId) localStorage.setItem(GH_GIST_KEY, gistId);
@@ -1120,24 +1236,28 @@ async function saveCloudConfig() {
   await doGistSave();
 }
 
+function copyTeamCode() {
+  const code = getTeamCode();
+  if (!code) { alert('Primero guarda la configuración.'); return; }
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('copy-team-code-btn');
+    if (btn) { btn.textContent = '✅ Copiado'; setTimeout(() => btn.textContent = '📋 Copiar código de equipo', 2000); }
+  });
+}
+
 async function syncNow() {
-  const token  = localStorage.getItem(GH_TOKEN_KEY);
+  const token = localStorage.getItem(GH_TOKEN_KEY);
   if (!token) { openCloudSetup(); return; }
   updateCloudIndicator('pending');
   const loaded = await loadFromCloud();
   if (loaded) {
-    // Reload data into app after pulling from cloud
     try {
-      const raw = localStorage.getItem(LS_DATA);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.clients) { clients = parsed.clients; renderAll(); }
-      }
+      load(); renderKPIs(); renderOverview();
     } catch(e) {}
   }
   await doGistSave();
 }
-// ── END GITHUB GIST SYNC ──────────────────────────────────────────────────────
+// ── END GITHUB GIST SYNC v2 ───────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PORT = [
@@ -5424,6 +5544,13 @@ function renderPortfolioA() {
     <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">ID del Gist (opcional — dejar vacío para crear uno nuevo)</label>
     <input id="cloud-gist-input" type="text" placeholder="e.g. a1b2c3d4e5f6..."
       style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg-card);color:var(--text);margin-bottom:20px">
+    <!-- Sección de Código de Equipo (se muestra solo si hay configuración activa) -->
+    <div id="team-code-section" style="display:none;margin-bottom:16px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+      <label style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:6px">📋 Código de Equipo</label>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Comparte este código con tu equipo para que conecten al mismo Gist.</p>
+      <textarea id="team-code-display" rows="2" readonly style="width:100%;background:var(--bg-card);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:11px;font-family:monospace;resize:none;box-sizing:border-box;margin-bottom:8px"></textarea>
+      <button id="copy-team-code-btn" class="btn btn-ghost btn-sm" onclick="copyTeamCode()" style="font-size:12px">📋 Copiar código de equipo</button>
+    </div>
     <div style="display:flex;gap:10px;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="closeCloudSetup()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveCloudConfig()">Guardar y sincronizar</button>
@@ -5466,4 +5593,56 @@ function renderPortfolioA() {
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Estado</label>
-        <select id="fa-status" style="width:1
+        <select id="fa-status" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
+          <option value="por-hacer">📌 Por hacer</option>
+          <option value="en-progreso">⚡ En progreso</option>
+          <option value="bloqueado">🔴 Bloqueado</option>
+          <option value="completado">✅ Completado</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Prioridad</label>
+        <select id="fa-priority" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
+          <option value="alta">🔥 Alta</option>
+          <option value="media">⭐ Media</option>
+          <option value="baja">➖ Baja</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Fecha límite</label>
+        <input id="fa-due" type="date" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <input id="fa-bottleneck" type="checkbox" style="width:16px;height:16px;accent-color:var(--red)">
+      <label for="fa-bottleneck" style="font-size:13px;color:var(--text);cursor:pointer">🔴 Bottleneck — está bloqueando al cliente</label>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Notas internas</label>
+      <textarea id="fa-notes" rows="2" placeholder="Notas adicionales para el equipo..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-danger btn-sm" onclick="deleteCurrentAction()" id="deleteActionBtn" style="margin-right:auto;display:none">Eliminar</button>
+      <button class="btn btn-ghost" onclick="closeAddActionModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAction()">Guardar acción</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── IMPORT MODAL ─────────────────────────────────────────────────────── -->
+<div id="importOverlay" class="overlay" onclick="closeImport(event)" style="display:none">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="closeImportModal()">✕</button>
+    <h3 style="margin-bottom:8px">📥 Importar datos</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Pega el JSON de actualización semanal. Debe ser un array de clientes o un objeto con claves <code>"clientes"</code> y <code>"acciones"</code>.</p>
+    <textarea id="importTA" rows="10" placeholder='[{"nombre":"CLIENTE","tickets":0,...}]' style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:12px;font-family:monospace;outline:none;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
+    <div id="importResult" class="import-result"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+      <button class="btn btn-ghost" onclick="closeImportModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="processImport()">Importar</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
