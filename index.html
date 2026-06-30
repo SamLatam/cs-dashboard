@@ -1170,7 +1170,7 @@ const PORT = [
   {id:'ngarden-mx',               name:'NGARDEN MEXICO',                               country:'MX', centry:false},
   {id:'vh-textiles',              name:'VH TEXTILES SAS DE CV',                        country:'MX', centry:false},
 ];
-const SEED_VERSION = '2026-06-30b';
+const SEED_VERSION = '2026-06-30c';
 const ISOLATION_VERSION = '2026-06-25b'; // bump to force CSM store cleanup
 (function isolationCleanup() {
   const key = 'cs-isolation-v';
@@ -4332,9 +4332,10 @@ function renderGuia() {
 function calcChurnRisk(c) {
   const w = c.weekly || {};
   let score = 0, factors = [];
-  const hs = healthScore(c);
-  if (hs < 30) { score += 40; factors.push('Health Score crítico (' + hs + ')'); }
-  else if (hs < 50) { score += 20; factors.push('Health Score bajo (' + hs + ')'); }
+  const hsObj = calcHS(c);
+  const hs = hsObj.score;
+  if (hs != null && hs < 30) { score += 40; factors.push('Health Score crítico (' + hs + ')'); }
+  else if (hs != null && hs < 50) { score += 20; factors.push('Health Score bajo (' + hs + ')'); }
   if ((w.tickets||0) >= 3) { score += 20; factors.push((w.tickets) + ' tickets abiertos'); }
   if ((w.bugs||0) > 0) { score += 15; factors.push((w.bugs) + ' bug(s) activo(s)'); }
   if (w.nps !== null && w.nps !== undefined && w.nps < 0) { score += 15; factors.push('NPS negativo (' + w.nps + ')'); }
@@ -4351,7 +4352,8 @@ function calcTicketImpact(c) {
   const w = c.weekly || {};
   const tickets = w.tickets || 0;
   if (tickets === 0) return null;
-  const hsNow = healthScore(c);
+  const hsObj = calcHS(c);
+  const hsNow = hsObj.score != null ? hsObj.score : 50;
   const days7 = Math.max(0, hsNow - Math.min(25 * tickets * 0.5, 20));
   return { hsNow, hs7d: Math.round(days7), tickets, detail: w.ticketDetalle || null };
 }
