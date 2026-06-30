@@ -586,6 +586,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
       <p id="pageSubtitle">Cargando datos…</p>
     </div>
     <div class="topbar-actions">
+      <button id="cloud-sync-btn" class="btn btn-ghost" onclick="syncNow()" title="Configurar sincronización">🔌 Sync</button>
       <button class="btn btn-ghost" onclick="exportarJSON()">↓ Exportar JSON</button>
       <button class="btn btn-ghost hide-if-readonly" onclick="openImport()">↑ Importar JSON</button>
       <button class="btn btn-primary hide-if-readonly" onclick="nav('acciones',document.getElementById('nav-acciones'));openAddAction(null)">+ Nueva Acción</button>
@@ -980,6 +981,163 @@ async function sbLogout() {
   loginScreen.style.display = 'flex';
   showSbMsg('Sesión cerrada. ¡Hasta pronto!', 'var(--green)');
 }
+
+// ── GITHUB GIST SYNC ─────────────────────────────────────────────────────────
+const GH_TOKEN_KEY  = 'cs-gh-token';
+const GH_GIST_KEY   = 'cs-gh-gist-id';
+const GH_SYNC_KEY   = 'cs-gh-last-sync';
+
+let _gistSaveTimer  = null;
+
+function buildGistSnapshot() {
+  const snap = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('cs-')) snap[k] = localStorage.getItem(k);
+  }
+  return snap;
+}
+
+function applyGistSnapshot(snap) {
+  if (!snap || typeof snap !== 'object') return;
+  Object.entries(snap).forEach(([k, v]) => {
+    // Don't overwrite GitHub config itself, or active-user with snapshot value
+    if (k === GH_TOKEN_KEY || k === GH_GIST_KEY || k === GH_SYNC_KEY) return;
+    localStorage.setItem(k, v);
+  });
+}
+
+function scheduleGistSave() {
+  if (!localStorage.getItem(GH_TOKEN_KEY)) return;
+  clearTimeout(_gistSaveTimer);
+  _gistSaveTimer = setTimeout(doGistSave, 3000);
+  updateCloudIndicator('pending');
+}
+
+async function doGistSave() {
+  const token  = localStorage.getItem(GH_TOKEN_KEY);
+  const gistId = localStorage.getItem(GH_GIST_KEY);
+  if (!token) return;
+  const content = JSON.stringify(buildGistSnapshot(), null, 2);
+  try {
+    let res, data;
+    if (gistId) {
+      res = await fetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'PATCH',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files: { 'cs-dashboard-data.json': { content } } })
+      });
+    } else {
+      res = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: 'CS Dashboard AnyMarket LATAM — sincronización automática',
+          public: false,
+          files: { 'cs-dashboard-data.json': { content } }
+        })
+      });
+    }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    data = await res.json();
+    if (!gistId) localStorage.setItem(GH_GIST_KEY, data.id);
+    const now = new Date().toISOString();
+    localStorage.setItem(GH_SYNC_KEY, now);
+    updateCloudIndicator('ok', now);
+  } catch(e) {
+    console.warn('[GistSync] save failed:', e.message);
+    updateCloudIndicator('error');
+  }
+}
+
+async function loadFromCloud() {
+  const token  = localStorage.getItem(GH_TOKEN_KEY);
+  const gistId = localStorage.getItem(GH_GIST_KEY);
+  if (!token || !gistId) return false;
+  try {
+    const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+      headers: { Authorization: `token ${token}` }
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    const file = data.files && data.files['cs-dashboard-data.json'];
+    if (!file) return false;
+    const snap = JSON.parse(file.content);
+    applyGistSnapshot(snap);
+    const ts = data.updated_at;
+    localStorage.setItem(GH_SYNC_KEY, ts);
+    updateCloudIndicator('ok', ts);
+    return true;
+  } catch(e) {
+    console.warn('[GistSync] load failed:', e.message);
+    return false;
+  }
+}
+
+function updateCloudIndicator(state, ts) {
+  const btn = document.getElementById('cloud-sync-btn');
+  if (!btn) return;
+  const icons = { ok: '☁️', pending: '⏳', error: '⚠️', off: '🔌' };
+  const token = localStorage.getItem(GH_TOKEN_KEY);
+  if (!token) { btn.textContent = icons.off + ' Sync'; btn.title = 'Configurar sincronización'; return; }
+  if (state === 'ok') {
+    const when = ts ? new Date(ts).toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'}) : '';
+    btn.textContent = icons.ok + ' Sync';
+    btn.title = 'Sincronizado' + (when ? ' a las ' + when : '');
+    btn.style.color = 'var(--green)';
+  } else if (state === 'pending') {
+    btn.textContent = icons.pending + ' Guardando…';
+    btn.title = 'Guardando en la nube…';
+    btn.style.color = 'var(--yellow)';
+  } else {
+    btn.textContent = icons.error + ' Sync';
+    btn.title = 'Error de sincronización — click para configurar';
+    btn.style.color = 'var(--red)';
+  }
+}
+
+function openCloudSetup() {
+  const overlay = document.getElementById('cloud-setup-overlay');
+  if (!overlay) return;
+  document.getElementById('cloud-token-input').value = localStorage.getItem(GH_TOKEN_KEY) || '';
+  document.getElementById('cloud-gist-input').value  = localStorage.getItem(GH_GIST_KEY)  || '';
+  overlay.style.display = 'flex';
+}
+
+function closeCloudSetup() {
+  const overlay = document.getElementById('cloud-setup-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+async function saveCloudConfig() {
+  const token  = (document.getElementById('cloud-token-input').value || '').trim();
+  const gistId = (document.getElementById('cloud-gist-input').value  || '').trim();
+  if (!token) { alert('El token de GitHub es requerido.'); return; }
+  localStorage.setItem(GH_TOKEN_KEY, token);
+  if (gistId) localStorage.setItem(GH_GIST_KEY, gistId);
+  else localStorage.removeItem(GH_GIST_KEY);
+  closeCloudSetup();
+  await doGistSave();
+}
+
+async function syncNow() {
+  const token  = localStorage.getItem(GH_TOKEN_KEY);
+  if (!token) { openCloudSetup(); return; }
+  updateCloudIndicator('pending');
+  const loaded = await loadFromCloud();
+  if (loaded) {
+    // Reload data into app after pulling from cloud
+    try {
+      const raw = localStorage.getItem(LS_DATA);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.clients) { clients = parsed.clients; renderAll(); }
+      }
+    } catch(e) {}
+  }
+  await doGistSave();
+}
+// ── END GITHUB GIST SYNC ──────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PORT = [
@@ -1170,7 +1328,7 @@ const PORT = [
   {id:'ngarden-mx',               name:'NGARDEN MEXICO',                               country:'MX', centry:false},
   {id:'vh-textiles',              name:'VH TEXTILES SAS DE CV',                        country:'MX', centry:false},
 ];
-const SEED_VERSION = '2026-06-30c';
+const SEED_VERSION = '2026-06-30d';
 const ISOLATION_VERSION = '2026-06-25b'; // bump to force CSM store cleanup
 (function isolationCleanup() {
   const key = 'cs-isolation-v';
@@ -1911,6 +2069,7 @@ function saveData(dt) {
   const val = JSON.stringify({clients, updatedAt: dt, seedVersion: SEED_VERSION});
   localStorage.setItem(LS_DATA, val);
   pushToSupabase(LS_DATA, val);
+  scheduleGistSave();
 }
 function saveActions() {
   const _activeUserForSave = getActiveUser();
@@ -1931,6 +2090,7 @@ function saveActions() {
   const val = JSON.stringify(actions.filter(a => _activeUserForSave.clientIds.includes(a.clientId)));
   localStorage.setItem(_actionsKeySave, val);
   pushToSupabase(_actionsKeySave, val);
+  scheduleGistSave();
 }
 function populateSelects() {
   const visIds = getVisibleClientIds();
@@ -3997,6 +4157,17 @@ function startApp() {
   }
   renderKPIs();
   renderOverview();
+  // GitHub Gist sync — actualizar indicador y cargar datos de la nube si hay token
+  setTimeout(() => {
+    updateCloudIndicator(localStorage.getItem(GH_TOKEN_KEY) ? 'ok' : 'off', localStorage.getItem(GH_SYNC_KEY));
+    if (localStorage.getItem(GH_TOKEN_KEY)) {
+      loadFromCloud().then(loaded => {
+        if (loaded) {
+          load(); renderKPIs(); renderOverview();
+        }
+      });
+    }
+  }, 1500);
   // Auto-fetch Zendesk en segundo plano
   setTimeout(() => autoFetchAll(true), 2000);
   setInterval(() => autoFetchAll(true), 30 * 60 * 1000);
@@ -5198,6 +5369,30 @@ function renderPortfolioA() {
   </div>`;
 }
 </script>
+
+<!-- ── CLOUD SYNC SETUP MODAL ─────────────────────────────────────────── -->
+<div id="cloud-setup-overlay" class="overlay" style="display:none" onclick="if(event.target===this)closeCloudSetup()">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeCloudSetup()">✕</button>
+    <h3 style="margin-bottom:8px">☁️ Sincronización entre dispositivos</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px">
+      Tus datos se guardarán en un Gist privado de GitHub y estarán disponibles en cualquier dispositivo donde uses el dashboard.
+    </p>
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Token de GitHub (classic)</label>
+    <input id="cloud-token-input" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+      style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg-card);color:var(--text);margin-bottom:4px">
+    <p style="font-size:11px;color:var(--text-muted);margin-bottom:14px">
+      Crear en <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" style="color:var(--blue)">github.com/settings/tokens</a> — scope requerido: <code>gist</code>
+    </p>
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">ID del Gist (opcional — dejar vacío para crear uno nuevo)</label>
+    <input id="cloud-gist-input" type="text" placeholder="e.g. a1b2c3d4e5f6..."
+      style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg-card);color:var(--text);margin-bottom:20px">
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeCloudSetup()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCloudConfig()">Guardar y sincronizar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── IMPORT MODAL ────────────────────────────────────────────────────── -->
 <div id="addActionOverlay" class="overlay" onclick="closeAddAction(event)">
