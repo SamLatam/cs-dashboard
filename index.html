@@ -1289,9 +1289,9 @@ const PORT = [
   {id:'malaga',          name:'INVERSIONES MALAGA',                       country:'CL', centry:false},
   {id:'loi-chile',       name:'LOI CHILE',                                country:'CL', centry:false},
   {id:'lounge',          name:'LOUNGE S/A',                               country:'CL', centry:false},
-  {id:'maisa',           name:'MAISA',                                    country:'CL', centry:true},
+  {id:'maisa',           name:'MAISA',                                    country:'CL', centry:true},  // Centry → migrando a AnyMarket
   {id:'maui',            name:'MAUI AND SONS',                            country:'CL', centry:false},
-  {id:'pillin',          name:'BEITGROUP S.A. (PILLIN)',                  country:'CL', centry:true},
+  {id:'pillin',          name:'BEITGROUP S.A. (PILLIN)',                  country:'CL', centry:false},
   {id:'pointbreak',      name:'POINTBREAK',                               country:'CL', centry:false},
   {id:'belcorp-col',     name:'BEL STAR S/A - BELCORP Colombia',          country:'CO', centry:false},
   {id:'colombiana',      name:'COLOMBIANA DE COMERCIO S/A',               country:'CO', centry:false},
@@ -1488,9 +1488,9 @@ const SEED = [
   {nombre:"INVERSIONES MALAGA",                          tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:5146764473,   upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"LOI CHILE",                                   tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:18226158700,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"LOUNGE S/A",                                  tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#31639 - Diferencias de stock con bodegas Full (24-jun)",                                                                              causaRaiz:"Desincronización de stock con bodegas Full — impacta disponibilidad de inventario",                        gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
-  {nombre:"MAISA",                                       tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"MAISA",                                       tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:true},
   {nombre:"MAUI AND SONS",                               tickets:2, bugs:0, ticketsPendientes:1, ticketDetalle:"#32047 - Carga documentos tributarios sellers (urgente, 25-jun) | #32353 - Consulta Sebastian Alvares (26-jun)",                             causaRaiz:"Proceso de carga de documentos tributarios de sellers bloqueado — afecta operación de marketplace",        gmv:74659220800,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
-  {nombre:"BEITGROUP S.A. (PILLIN)",                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:true},
+  {nombre:"BEITGROUP S.A. (PILLIN)",                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"POINTBREAK",                                  tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#31258 - Pedido llega sin detalle de documento tributario (urgente, 23-jun)",                                                               causaRaiz:"Pedidos sin documento tributario en detalle — riesgo de rechazo en despacho",                              gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"BEL STAR S/A - BELCORP Colombia",             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:16375786500,  upPlan:null, qtUp:null, nps:0,     lastContact:"2026-06-26", centry:false},
   {nombre:"COLOMBIANA DE COMERCIO S/A",                  tickets:1, bugs:0, ticketsPendientes:1, ticketDetalle:"#32320 - Consulta Maria Fernanda Cifuentes (26-jun)",                                                                                        causaRaiz:"Consulta operativa pendiente de resolución",                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
@@ -3660,7 +3660,7 @@ Para cada cliente necesito que me des un objeto JSON con esta estructura exacta:
 }
 
 IMPORTANTE: Si no tenés el dato real de algún campo, poné null. NUNCA inventar valores.
-Los clientes CENTRY (FORUS SA, FORUS COLOMBIA, GINO, MAISA) no tienen upPlan ni qtUp aún.
+Los clientes CENTRY (FORUS SA, FORUS COLOMBIA, FORUS PERU, GINO, LOUNGE, MAISA) no tienen upPlan ni qtUp aún — operan en Centry, en proceso de migración a AnyMarket.
 
 Devolveme un array JSON listo para pegar en el dashboard.`;
 
@@ -4283,7 +4283,7 @@ function renderDirector() {
     {id:'forus-peru',    name:'FORUS PERU',      country:'PE', status:'en-migracion', bloqueado:false, nota:'Proceso activo — PM asignado'},
     {id:'gino',          name:'GINO',            country:'CL', status:'en-migracion', bloqueado:false, nota:'Migración en curso'},
     {id:'lounge',        name:'LOUNGE S/A',      country:'CL', status:'en-migracion', bloqueado:false, nota:'Migración en curso'},
-    {id:'pillin',        name:'BEITGROUP (PILLIN)',country:'CL',status:'en-migracion', bloqueado:false, nota:'Migración en curso'},
+    {id:'maisa',         name:'MAISA',           country:'CL', status:'en-migracion', bloqueado:false, nota:'Migración en curso — PM asignado'},
   ];
   const centryRows = centryClients.map(cc => {
     const stBg  = cc.status==='bloqueada'?'rgba(231,76,60,.15)':cc.status==='completada'?'rgba(46,204,113,.15)':'rgba(243,156,18,.12)';
