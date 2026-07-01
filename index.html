@@ -638,6 +638,9 @@ textarea.ficha-note:focus { border-color: var(--accent); }
   </div>
   <pre id="resumenText" style="white-space:pre-wrap;font-size:12px;color:var(--text2);line-height:1.7;font-family:inherit"></pre>
 </div>
+      <!-- INSIGHTS PANEL — se llena desde renderOverview() -->
+      <div id="insights-panel" style="margin-bottom:16px"></div>
+
       <div class="grid-2">
         <div class="card">
           <div class="card-title">Distribución por Health Status</div>
@@ -2596,6 +2599,48 @@ function renderKPIs() {
 // ── OVERVIEW ───────────────────────────────────────────────────────────────────
 function renderOverview() {
   renderKPIs();
+
+  // ── Insights panel (mi cartera) ──
+  const _ip = document.getElementById('insights-panel');
+  if (_ip) {
+    const _ins = [];
+    const _reds   = clients.filter(c => calcHS(c).cl === 'red');
+    const _orgs   = clients.filter(c => calcHS(c).cl === 'orange');
+    const _negNPS = clients.filter(c => c.weekly?.nps != null && c.weekly.nps < 0);
+    const _promos = clients.filter(c => c.weekly?.nps != null && c.weekly.nps >= 9);
+    const _hiTix  = clients.filter(c => (c.weekly?.tickets||0) >= 2);
+    const _topG   = [...clients].filter(c=>c.weekly?.gmv>0).sort((a,b)=>b.weekly.gmv-a.weekly.gmv)[0];
+    const _today2 = new Date(); _today2.setHours(0,0,0,0);
+    const _noContact = clients.filter(c => {
+      if (!c.weekly?.lastContact) return true;
+      const d=new Date(c.weekly.lastContact); d.setHours(0,0,0,0);
+      return (_today2-d)/86400000 > 30;
+    });
+
+    if (_reds.length)      _ins.push({icon:'🔴',type:'risk',text:`${_reds.length} cliente${_reds.length>1?'s':''} con Health ROJO — acción urgente: ${_reds.slice(0,2).map(c=>c.name).join(', ')}${_reds.length>2?' +'+(_reds.length-2)+' más':''}`});
+    if (_orgs.length)      _ins.push({icon:'🟠',type:'risk',text:`${_orgs.length} cliente${_orgs.length>1?'s':''} en observación: ${_orgs.slice(0,2).map(c=>c.name).join(', ')}`});
+    if (_negNPS.length)    _ins.push({icon:'😟',type:'risk',text:`NPS negativo: ${_negNPS.map(c=>`${c.name} (${c.weekly.nps})`).join(' · ')} — priorizar rescate`});
+    if (_hiTix.length)     _ins.push({icon:'🎫',type:'risk',text:`Tickets acumulados: ${_hiTix.map(c=>`${c.name} (${c.weekly.tickets})`).join(' · ')}`});
+    if (_noContact.length) _ins.push({icon:'📵',type:'risk',text:`Sin contacto hace +30 días: ${_noContact.slice(0,3).map(c=>c.name).join(', ')}${_noContact.length>3?' +'+(_noContact.length-3)+' más':''}`});
+    if (_promos.length)    _ins.push({icon:'🌟',type:'good',text:`Promotores NPS (9-10): ${_promos.map(c=>c.name).join(', ')} — capitalizar para expansión`});
+    if (_topG)             _ins.push({icon:'📈',type:'good',text:`Mayor GMV de tu cartera: ${_topG.name} con ${fmtG(_topG.weekly.gmv)} este mes`});
+
+    _ip.innerHTML = _ins.length ? `
+      <div style="background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.22);border-radius:12px;overflow:hidden">
+        <div style="background:rgba(99,102,241,.11);padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(99,102,241,.15)">
+          <span style="font-size:15px">💡</span>
+          <span style="font-size:12px;font-weight:800;color:#a78bfa;letter-spacing:.3px">Insights de mi Cartera</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--text3)">${_ins.length} insight${_ins.length>1?'s':''} · auto-generado</span>
+        </div>
+        <div style="padding:10px 16px;display:flex;flex-direction:column;gap:6px">
+          ${_ins.map(i=>`<div style="display:flex;align-items:flex-start;gap:9px;background:${i.type==='risk'?'rgba(231,76,60,.07)':'rgba(46,204,113,.07)'};border:1px solid ${i.type==='risk'?'rgba(231,76,60,.16)':'rgba(46,204,113,.16)'};border-radius:7px;padding:8px 12px">
+            <span style="font-size:13px;flex-shrink:0">${i.icon}</span>
+            <span style="font-size:11.5px;color:var(--text);line-height:1.5">${i.text}</span>
+          </div>`).join('')}
+        </div>
+      </div>` : '';
+  }
+
   // Health donut
   const dist = {Sano:0,Observación:0,'En riesgo':0,Crítico:0};
   const dColors = {Sano:'#2ecc71',Observación:'#f39c12','En riesgo':'#e67e22',Crítico:'#e74c3c'};
@@ -4299,6 +4344,54 @@ function renderDirector() {
     </div>`;
   }).join('');
 
+  // ── Insights de Sami (cartera propia) ──
+  const samiUser2  = allUsers.find(u => u.id === 'sami' || u.name.toLowerCase().includes('sami'));
+  const samiClients= samiUser2 ? allClients.filter(c => {
+    const port = PORT.find(p => norm(p.name) === norm(c.name));
+    return port && samiUser2.clientIds.includes(port.id);
+  }) : [];
+  const samiInsights = [];
+  const _sReds   = samiClients.filter(c => calcHS(c).cl === 'red');
+  const _sOrgs   = samiClients.filter(c => calcHS(c).cl === 'orange');
+  const _sNegNPS = samiClients.filter(c => c.weekly?.nps != null && c.weekly.nps < 0);
+  const _sPromos = samiClients.filter(c => c.weekly?.nps != null && c.weekly.nps >= 9);
+  const _sHiTix  = samiClients.filter(c => (c.weekly?.tickets||0) >= 2);
+  const _sTopG   = [...samiClients].filter(c=>c.weekly?.gmv>0).sort((a,b)=>b.weekly.gmv-a.weekly.gmv)[0];
+  const _sBlocked= centryClients.filter(c=>c.bloqueado);
+  const _today3  = new Date(); _today3.setHours(0,0,0,0);
+  const _sNoCtc  = samiClients.filter(c => {
+    if (!c.weekly?.lastContact) return true;
+    const d=new Date(c.weekly.lastContact); d.setHours(0,0,0,0);
+    return (_today3-d)/86400000 > 30;
+  });
+  const samiMRRAtRisk = samiClients.filter(c=>{const h=calcHS(c);return h.cl==='red'||h.cl==='orange';}).reduce((s,c)=>s+(getMRR(c.id)||0),0);
+
+  if (_sReds.length)    samiInsights.push({icon:'🔴',type:'risk',text:`${_sReds.length} cliente${_sReds.length>1?'s':''} con Health ROJO: ${_sReds.slice(0,2).map(c=>c.name).join(', ')}${_sReds.length>2?` +${_sReds.length-2} más`:''} — acción urgente`});
+  if (_sOrgs.length)    samiInsights.push({icon:'🟠',type:'risk',text:`${_sOrgs.length} en observación: ${_sOrgs.slice(0,2).map(c=>c.name).join(', ')}`});
+  if (_sNegNPS.length)  samiInsights.push({icon:'😟',type:'risk',text:`NPS negativo: ${_sNegNPS.map(c=>`${c.name} (${c.weekly.nps})`).join(' · ')} — riesgo de churn activo`});
+  if (samiMRRAtRisk>0)  samiInsights.push({icon:'💸',type:'risk',text:`Revenue at Risk en cartera Sami: ${fmtMRR(samiMRRAtRisk)} USD`});
+  if (_sHiTix.length)   samiInsights.push({icon:'🎫',type:'risk',text:`Tickets acumulados: ${_sHiTix.map(c=>`${c.name} (${c.weekly.tickets})`).join(' · ')}`});
+  if (_sBlocked.length) samiInsights.push({icon:'🚫',type:'risk',text:`Migración bloqueada: ${_sBlocked.map(c=>c.name+' — '+c.nota).join('; ')}`});
+  if (_sNoCtc.length)   samiInsights.push({icon:'📵',type:'risk',text:`Sin contacto +30 días: ${_sNoCtc.slice(0,3).map(c=>c.name).join(', ')}${_sNoCtc.length>3?` +${_sNoCtc.length-3} más`:''}`});
+  if (_sPromos.length)  samiInsights.push({icon:'🌟',type:'good',text:`Promotores NPS (9-10): ${_sPromos.map(c=>c.name).join(', ')} — oportunidad de expansión`});
+  if (_sTopG)           samiInsights.push({icon:'📈',type:'good',text:`Mayor GMV de la cartera: ${_sTopG.name} con ${fmtGMV(_sTopG.weekly.gmv)} este mes`});
+
+  const samiInsightsHTML = samiInsights.length ? `
+    <div style="margin-top:16px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.22);border-radius:12px;overflow:hidden">
+      <div style="background:rgba(99,102,241,.11);padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(99,102,241,.14)">
+        <span style="font-size:14px">💡</span>
+        <span style="font-size:12px;font-weight:800;color:#a78bfa">Insights de mi Cartera — Semana ${weekLabel}</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--text3)">${samiInsights.length} insight${samiInsights.length>1?'s':''} · auto-generado</span>
+      </div>
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:6px">
+        ${samiInsights.map(ins=>`
+          <div style="display:flex;align-items:flex-start;gap:9px;background:${ins.type==='risk'?'rgba(231,76,60,.07)':'rgba(46,204,113,.07)'};border:1px solid ${ins.type==='risk'?'rgba(231,76,60,.16)':'rgba(46,204,113,.16)'};border-radius:8px;padding:8px 12px">
+            <span style="font-size:13px;flex-shrink:0">${ins.icon}</span>
+            <span style="font-size:11.5px;color:var(--text);line-height:1.5">${ins.text}</span>
+          </div>`).join('')}
+      </div>
+    </div>` : '';
+
   // ── Print handler ──
   const printBtn = `<button onclick="window.print()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px">🖨️ Imprimir</button>`;
 
@@ -4346,6 +4439,8 @@ function renderDirector() {
         </div>
         <div style="font-size:10px;background:rgba(79,142,247,.15);color:#4f8ef7;border:1px solid rgba(79,142,247,.3);border-radius:8px;padding:4px 10px;white-space:nowrap">✍️ editable · guardado automático</div>
       </div>
+      <!-- Insights de Sami (auto-generados) -->
+      ${samiInsightsHTML}
       <!-- Cuadrante de notas Sami -->
       <div style="padding:16px">
         <div class="dir-weekly-grid">
