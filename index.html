@@ -4111,14 +4111,25 @@ let _editingUserId = null;
 // ── DIRECTOR VIEW ─────────────────────────────────────────────────────────────
 const DIR_NOTES_KEY = 'cs-dir-weekly-notes';
 
-function saveDirNote(field) {
-  const notes = JSON.parse(localStorage.getItem(DIR_NOTES_KEY) || '{}');
-  const el = document.getElementById('dir-note-' + field);
+// ── Migrate old global notes → per-user key for Sami ──
+(function migrateDirNotes() {
+  try {
+    const old = localStorage.getItem(DIR_NOTES_KEY);
+    if (old && !localStorage.getItem('cs-dir-notes-sami')) {
+      localStorage.setItem('cs-dir-notes-sami', old);
+    }
+  } catch(e) {}
+})();
+
+function saveDirNote(userId, field) {
+  const key = `cs-dir-notes-${userId}`;
+  const notes = JSON.parse(localStorage.getItem(key) || '{}');
+  const el = document.getElementById(`dir-note-${userId}-${field}`);
   if (el) notes[field] = el.value;
   notes._week = _dirCurrentWeek;
   notes._savedAt = new Date().toISOString();
-  localStorage.setItem(DIR_NOTES_KEY, JSON.stringify(notes));
-  const tag = document.getElementById('dir-saved-' + field);
+  localStorage.setItem(key, JSON.stringify(notes));
+  const tag = document.getElementById(`dir-saved-${userId}-${field}`);
   if (tag) { tag.style.opacity = 1; setTimeout(() => { tag.style.opacity = 0; }, 1500); }
 }
 
@@ -4139,8 +4150,12 @@ function renderDirector() {
   const weekLabel = `${fmtDate(startOfWeek)} – ${fmtDate(endOfWeek)}, ${now.getFullYear()}`;
   _dirCurrentWeek = weekLabel;
 
-  // Load saved notes
-  const savedNotes = JSON.parse(localStorage.getItem(DIR_NOTES_KEY) || '{}');
+  // Load saved notes per user
+  const activeUser = getActiveUser();
+  const samiNotes  = JSON.parse(localStorage.getItem('cs-dir-notes-sami') || '{}');
+  // backward compat: also read old global key if sami notes empty
+  const _legacyNotes = JSON.parse(localStorage.getItem(DIR_NOTES_KEY) || '{}');
+  const samiNotesEff = (samiNotes.done||samiNotes.plan||samiNotes.valor||samiNotes.solicitudes) ? samiNotes : _legacyNotes;
 
   // Build allClients from all CSM data
   const _rawData = JSON.parse(localStorage.getItem('cs-v3-data') || '{}');
@@ -4308,51 +4323,51 @@ function renderDirector() {
       <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">Cadencia</div><div class="kpi-value" style="color:${cadColor}">${cadPct}%</div><div class="kpi-sub">${cadClients.length}/${totalAll} contactados ≤30d</div></div>
     </div>
 
-    <!-- INFORME SEMANAL SAMI — SEPARADOR -->
-    <div style="margin:28px 0 16px 0;display:flex;align-items:center;gap:12px">
-      <div style="flex:1;height:1px;background:var(--border)"></div>
-      <div style="display:flex;align-items:center;gap:10px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);border-radius:20px;padding:6px 16px">
-        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700">S</div>
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--accent)">Informe Semanal · Samiramis Monterola</div>
-          <div style="font-size:10px;color:var(--text3)">CSM Senior — AnyMarket LATAM · ${weekLabel}</div>
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- MI INFORME SEMANAL — SAMIRAMIS MONTEROLA     -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div style="margin:28px 0 0;background:linear-gradient(135deg,rgba(79,142,247,.08),rgba(99,102,241,.05));border:2px solid rgba(79,142,247,.35);border-radius:16px;overflow:hidden">
+      <!-- Header bloque Sami -->
+      <div style="background:rgba(79,142,247,.12);padding:14px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(79,142,247,.2)">
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#6366f1);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:800;flex-shrink:0">⭐</div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:800;color:#4f8ef7">Informe Semanal — Samiramis Monterola (Sami)</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">CSM Senior · AnyMarket LATAM · Semana: ${weekLabel}</div>
         </div>
+        <div style="font-size:10px;background:rgba(79,142,247,.15);color:#4f8ef7;border:1px solid rgba(79,142,247,.3);border-radius:8px;padding:4px 10px;white-space:nowrap">✍️ editable · guardado automático</div>
       </div>
-      <div style="flex:1;height:1px;background:var(--border)"></div>
-    </div>
-
-    <!-- RESUMEN EJECUTIVO EDITABLE -->
-    <div class="card" style="margin-bottom:20px;border:1px solid rgba(99,102,241,.25)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:0">📝 Resumen Ejecutivo Semanal</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="font-size:10px;color:var(--text3);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 8px">✍️ Escrito por Sami · ${weekLabel}</div>
-          <span style="font-size:10px;color:var(--text3)">se guarda automáticamente</span>
-        </div>
-      </div>
-      <div class="dir-weekly-grid">
-        <div class="dir-note-box" style="border-left:3px solid var(--green)">
-          <div class="dir-note-label">✅ Acciones realizadas esta semana <span id="dir-saved-done" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
-          <textarea class="dir-note-area" id="dir-note-done" placeholder="• Reunión de rescate con COBOE BOTIGA — acordado plan de mejora&#10;• Seguimiento migración FORUS SA — cronograma actualizado&#10;• QBR con FORUS PERU — objetivos Q3 definidos&#10;..." onblur="saveDirNote('done')">${savedNotes.done||''}</textarea>
-        </div>
-        <div class="dir-note-box" style="border-left:3px solid var(--accent)">
-          <div class="dir-note-label">📅 Plan próxima semana <span id="dir-saved-plan" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
-          <textarea class="dir-note-area" id="dir-note-plan" placeholder="• Llamada de seguimiento NPS con COBOE BOTIGA&#10;• Definir fecha Go Live FORUS SA&#10;• Reunión ejecutiva con LACOSTE&#10;..." onblur="saveDirNote('plan')">${savedNotes.plan||''}</textarea>
-        </div>
-        <div class="dir-note-box" style="border-left:3px solid var(--yellow)">
-          <div class="dir-note-label">💡 Valor entregado / Oportunidades <span id="dir-saved-valor" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
-          <textarea class="dir-note-area" id="dir-note-valor" placeholder="• Implementamos CS Command Center — visibilidad en tiempo real&#10;• Identificamos oportunidad TikTok Shop en 3 cuentas&#10;• Recuperamos NPS de BOTIGA y FORUS mediante plan de rescate&#10;..." onblur="saveDirNote('valor')">${savedNotes.valor||''}</textarea>
-        </div>
-        <div class="dir-note-box" style="border-left:3px solid var(--red)">
-          <div class="dir-note-label">🚨 Solicitudes a Dirección / Escalamientos <span id="dir-saved-solicitudes" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
-          <textarea class="dir-note-area" id="dir-note-solicitudes" placeholder="• ⚠️ FORUS COLOMBIA — Dafiti bloqueando migración: necesito respaldo para escalar&#10;• COBOE BOTIGA — necesito criterios claros para decisión de descuento/NC&#10;..." onblur="saveDirNote('solicitudes')">${savedNotes.solicitudes||''}</textarea>
+      <!-- Cuadrante de notas Sami -->
+      <div style="padding:16px">
+        <div class="dir-weekly-grid">
+          <div class="dir-note-box" style="border-left:3px solid var(--green)">
+            <div class="dir-note-label">✅ Acciones realizadas esta semana <span id="dir-saved-sami-done" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
+            <textarea class="dir-note-area" id="dir-note-sami-done" placeholder="• Reunión de rescate con COBOE BOTIGA&#10;• Seguimiento migración FORUS SA&#10;..." onblur="saveDirNote('sami','done')">${samiNotesEff.done||''}</textarea>
+          </div>
+          <div class="dir-note-box" style="border-left:3px solid var(--accent)">
+            <div class="dir-note-label">📅 Plan próxima semana <span id="dir-saved-sami-plan" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
+            <textarea class="dir-note-area" id="dir-note-sami-plan" placeholder="• Llamada de seguimiento NPS BOTIGA&#10;• Definir fecha Go Live FORUS SA&#10;..." onblur="saveDirNote('sami','plan')">${samiNotesEff.plan||''}</textarea>
+          </div>
+          <div class="dir-note-box" style="border-left:3px solid var(--yellow)">
+            <div class="dir-note-label">💡 Valor entregado / Oportunidades <span id="dir-saved-sami-valor" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
+            <textarea class="dir-note-area" id="dir-note-sami-valor" placeholder="• CS Command Center en producción&#10;• 2 NPS críticos recuperados&#10;..." onblur="saveDirNote('sami','valor')">${samiNotesEff.valor||''}</textarea>
+          </div>
+          <div class="dir-note-box" style="border-left:3px solid var(--red)">
+            <div class="dir-note-label">🚨 Solicitudes a Dirección / Escalamientos <span id="dir-saved-sami-solicitudes" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
+            <textarea class="dir-note-area" id="dir-note-sami-solicitudes" placeholder="• 🔴 DECISIÓN HOY: Firma hoja personas involucradas&#10;• 🔴 ESCALAR: PBI 1673726 sin ETA&#10;..." onblur="saveDirNote('sami','solicitudes')">${samiNotesEff.solicitudes||''}</textarea>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- PERFORMANCE POR CSM -->
-    <div style="margin-bottom:20px">
-      <div class="card-title" style="margin-bottom:14px">👤 Performance por CSM — Semana ${weekLabel}</div>
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- MÓDULO EQUIPO CS — OTROS CSMs (separado)      -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div style="margin-top:32px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px">👥 Equipo CS — Performance por CSM</div>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <div style="font-size:11px;color:var(--text3)">Semana ${weekLabel}</div>
+      </div>
       <div class="dir-csm-grid">${csmCards}</div>
     </div>
 
