@@ -442,6 +442,22 @@ textarea.ficha-note:focus { border-color: var(--accent); }
 .dir-risk-row { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
 .dir-risk-item { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 6px; margin-bottom: 4px; cursor: pointer; }
 .dir-risk-item:hover { color: var(--red); }
+/* Director weekly notes */
+.dir-weekly-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.dir-note-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.dir-note-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.dir-note-area { width: 100%; min-height: 110px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; padding: 10px; resize: vertical; font-family: inherit; line-height: 1.6; box-sizing: border-box; }
+.dir-note-area:focus { outline: none; border-color: var(--accent); }
+.dir-semaforo { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; }
+.dir-week-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.dir-week-title { font-size: 18px; font-weight: 800; color: var(--text); }
+.dir-week-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.dir-centry-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.dir-centry-row:last-child { border-bottom: none; }
+.dir-centry-status { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; min-width: 80px; text-align: center; }
+.dir-exp-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.dir-exp-row:last-child { border-bottom: none; }
+@media (max-width:700px) { .dir-weekly-grid { grid-template-columns: 1fr; } }
 
 /* ── MISC ── */
 .empty { text-align: center; padding: 48px; color: var(--text3); }
@@ -1708,8 +1724,8 @@ const SEED_ACTIONS = [
   {tipo:'soporte',clientId:'gino',         title:'Resolver publicación SKU L743 — #27681',                    desc:'Error en SKU L743 — mapeo o publicación rechazada.',                            causa:'Atributo mal mapeado o publicación rechazada para SKU L743',                                      status:'resuelto',   priority:'media',  bottleneck:false,dueDate:'2026-06-17',notes:'✅ Cerrado 18-jun.'},
   {tipo:'soporte',clientId:'pointbreak',   title:'Gestionar información de doble despacho — #28016',          desc:'Cliente no puede configurar doble despacho.',                                   causa:'Información doble despacho no disponible — posible feature gap',                                  status:'por-hacer',  priority:'media',  bottleneck:false,dueDate:'2026-06-20',notes:''},
   {tipo:'soporte',clientId:'transbel',     title:'Gestionar pendientes FTP BELCORP Mexico post 16-jun',        desc:'Reinyección de archivos al FTP desde AnyMarket.',                               causa:'Falta llegada de archivos al FTP — reinyección pendiente',                                        status:'por-hacer',  priority:'alta',   bottleneck:false,dueDate:'2026-06-20',notes:''},
-  {tipo:'cs',clientId:'forus-sa',          title:'Plan de recuperación NPS -100 — FORUS SA',                  desc:'Contactar cliente, entender causa NPS -100. Armar plan de rescate.',             causa:'NPS en -100 sin plan de acción — riesgo de churn elevado',                                       status:'por-hacer',  priority:'critica',bottleneck:false,dueDate:'2026-06-16',notes:''},
-  {tipo:'cs',clientId:'coboe-botiga',      title:'Plan de rescate NPS -100 — COBOE BOTIGA',                   desc:'NPS -100. Entender motivo, plan de mejora, reunión ejecutiva.',                  causa:'NPS en -100 — experiencia muy negativa reportada',                                                status:'por-hacer',  priority:'critica',bottleneck:false,dueDate:'2026-06-18',notes:''},
+  {tipo:'cs',clientId:'forus-sa',          title:'Plan de recuperación NPS -100 — FORUS SA',                  desc:'Contactar cliente, entender causa NPS -100. Armar plan de rescate.',             causa:'NPS en -100 sin plan de acción — riesgo de churn elevado',                                       status:'resuelto',   priority:'critica',bottleneck:false,dueDate:'2026-06-16',notes:'✅ NPS resuelto. Cerrado 01-Jul-2026.'},
+  {tipo:'cs',clientId:'coboe-botiga',      title:'Plan de rescate NPS -100 — COBOE BOTIGA',                   desc:'NPS -100. Entender motivo, plan de mejora, reunión ejecutiva.',                  causa:'NPS en -100 — experiencia muy negativa reportada',                                                status:'resuelto',   priority:'critica',bottleneck:false,dueDate:'2026-06-18',notes:'✅ NPS resuelto. Cerrado 01-Jul-2026.'},
   {tipo:'cs',clientId:'coboe-botiga',      title:'Partnerships — Seguimiento caso N° 4630608 ML — Reputación Farmashop/Botiga', desc:'Gestionar junto a Partnerships el seguimiento del caso N° 4630608 en Mercado Libre. Buscar alternativas de recuperación reputacional de Farmashop/Botiga Uruguay tras incidente confirmado con origen en AnyMarket.', causa:'Incidente con origen en AnyMarket confirmado — daño reputacional en ML impacta operación de Farmashop y Botiga Uruguay', status:'en-progreso', priority:'critica',bottleneck:true, dueDate:'2026-06-27',notes:'Gestionar con Partnerships. Caso ML: N° 4630608. Impacta reputación y ventas de ambas marcas en Uruguay.'},
   {tipo:'cs',clientId:'loi-chile',         title:'Reactivar contacto — sin interacción desde nov-2025',       desc:'Último contacto hace +7 meses. Agendar llamada.',                               causa:'Sin contacto prolongado — riesgo de churn silencioso',                                            status:'por-hacer',  priority:'alta',   bottleneck:false,dueDate:'2026-06-25',notes:''},
   {tipo:'cs',clientId:'malaga',            title:'Reactivar contacto — sin interacción desde marzo',          desc:'Sin contacto desde 31-mar. Agendar check-in.',                                  causa:'Sin contacto prolongado — riesgo de desconexión',                                                 status:'por-hacer',  priority:'media',  bottleneck:false,dueDate:'2026-06-25',notes:''},
@@ -4086,122 +4102,274 @@ function setCsmFilter(val) {
 let _editingUserId = null;
 
 // ── DIRECTOR VIEW ─────────────────────────────────────────────────────────────
+const DIR_NOTES_KEY = 'cs-dir-weekly-notes';
+
+function saveDirNote(field) {
+  const notes = JSON.parse(localStorage.getItem(DIR_NOTES_KEY) || '{}');
+  const el = document.getElementById('dir-note-' + field);
+  if (el) notes[field] = el.value;
+  notes._week = _dirCurrentWeek;
+  notes._savedAt = new Date().toISOString();
+  localStorage.setItem(DIR_NOTES_KEY, JSON.stringify(notes));
+  const tag = document.getElementById('dir-saved-' + field);
+  if (tag) { tag.style.opacity = 1; setTimeout(() => { tag.style.opacity = 0; }, 1500); }
+}
+
+let _dirCurrentWeek = '';
+
 function renderDirector() {
   const el = document.getElementById('page-director');
   if (!el) return;
+
   const allUsers = loadUsers().filter(u => ['csm','superadmin'].includes(u.role));
   const flags = {Chile:'🇨🇱',Colombia:'🇨🇴',Uruguay:'🇺🇾',Mexico:'🇲🇽',Peru:'🇵🇪'};
 
-  // Build per-CSM stats using ALL clients data (not filtered)
+  // Week label
+  const now = new Date();
+  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+  const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
+  const fmtDate = d => d.toLocaleDateString('es', {day:'2-digit',month:'short'});
+  const weekLabel = `${fmtDate(startOfWeek)} – ${fmtDate(endOfWeek)}, ${now.getFullYear()}`;
+  _dirCurrentWeek = weekLabel;
+
+  // Load saved notes
+  const savedNotes = JSON.parse(localStorage.getItem(DIR_NOTES_KEY) || '{}');
+
+  // Build allClients from all CSM data
+  const savedData = JSON.parse(localStorage.getItem('cs-v3-data') || '[]');
   const allClients = fromSeed().map(c => {
-    const port = PORT.find(p => norm(p.name) === norm(c.name));
-    const saved = JSON.parse(localStorage.getItem('cs-v3-data') || '[]');
-    const ls = saved.find(s => s.id === c.id);
-    if (ls) Object.assign(c, ls);
+    const ls = savedData.find(s => s.id === c.id);
+    if (ls) Object.assign(c, ls, { weekly: {...(c.weekly||{}), ...(ls.weekly||{})} });
     return c;
   });
 
-  // Global risk table: all clients with red/orange health or negative NPS
-  const globalRisk = allClients.filter(c => {
-    const sigs = getRiskSignals(c);
-    return sigs.some(s => s.type === 'health' || s.type === 'nps');
-  }).sort((a,b) => (calcHS(a).score ?? 999) - (calcHS(b).score ?? 999));
+  // ── KPIs globales ──
+  const totalAll = allClients.length;
+  const allHS = allClients.map(c => calcHS(c));
+  const greens  = allHS.filter(h=>h.cl==='green').length;
+  const yellows = allHS.filter(h=>h.cl==='yellow').length;
+  const oranges = allHS.filter(h=>h.cl==='orange').length;
+  const reds    = allHS.filter(h=>h.cl==='red').length;
+  const scores  = allHS.map(h=>h.score).filter(s=>s!=null);
+  const avgHSAll = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null;
 
-  // Per-CSM cards
+  const totalMRR = allClients.reduce((s,c) => s + (getMRR(c.id)||0), 0);
+  const atRiskClients = allClients.filter((_,i)=>allHS[i].cl==='red'||allHS[i].cl==='orange');
+  const mrrAtRisk = atRiskClients.reduce((s,c) => s + (getMRR(c.id)||0), 0);
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const cadClients = allClients.filter(c => {
+    if (!c.weekly?.lastContact) return false;
+    const d = new Date(c.weekly.lastContact); d.setHours(0,0,0,0);
+    return Math.round((today-d)/86400000) <= 30;
+  });
+  const cadPct = totalAll ? Math.round(cadClients.length/totalAll*100) : 0;
+  const totalTickets = allClients.reduce((s,c) => s+(c.weekly?.tickets||0), 0);
+  const totalGMV = allClients.reduce((s,c) => s+(c.weekly?.gmv||0), 0);
+
+  const hsColor = avgHSAll==null?'var(--text3)':avgHSAll>=70?'var(--green)':avgHSAll>=50?'var(--yellow)':avgHSAll>=30?'var(--orange)':'var(--red)';
+  const cadColor = cadPct>=80?'var(--green)':cadPct>=60?'var(--yellow)':'var(--red)';
+  const semColor = (reds+oranges)===0?'#1a3a2a':(reds+oranges)<=3?'#2a2a18':'#3a1a1a';
+  const semTxt   = (reds+oranges)===0?'var(--green)':(reds+oranges)<=3?'var(--yellow)':'var(--red)';
+  const semMsg   = (reds+oranges)===0?'🟢 Portfolio saludable — sin clientes críticos'
+                 : reds>0?`🔴 ${reds} cliente${reds>1?'s':''} crítico${reds>1?'s':''} — acción urgente requerida`
+                 : `🟡 ${oranges} cliente${oranges>1?'s':''} en riesgo — monitoreo activo`;
+
+  const fmtMRR = v => v>=1000?`$${(v/1000).toFixed(1)}K`:`$${v}`;
+  const fmtGMV = v => {
+    if (!v) return '—';
+    const m = v/100;
+    return m>=1e9?`${(m/1e9).toFixed(1)}B`:m>=1e6?`${(m/1e6).toFixed(1)}M`:`${(m/1e3).toFixed(0)}K`;
+  };
+
+  // ── Per-CSM cards ──
   const csmCards = allUsers.map(u => {
     const csmClients = allClients.filter(c => {
       const port = PORT.find(p => norm(p.name) === norm(c.name));
       return port && u.clientIds.includes(port.id);
     });
-    const scores = csmClients.map(c => calcHS(c).score).filter(s => s != null);
-    const avgHS = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null;
-    const atRisk = csmClients.filter(c => { const h=calcHS(c); return h.cl==='red'||h.cl==='orange'; });
-    const atRiskClients = atRisk.slice(0,3);
-    const hsColor = avgHS==null?'var(--text3)':avgHS>=70?'var(--green)':avgHS>=50?'var(--yellow)':avgHS>=30?'var(--orange)':'var(--red)';
+    const sc = csmClients.map(c => calcHS(c).score).filter(s=>s!=null);
+    const avg = sc.length ? Math.round(sc.reduce((a,b)=>a+b,0)/sc.length) : null;
+    const risk = csmClients.filter(c => { const h=calcHS(c); return h.cl==='red'||h.cl==='orange'; });
+    const top3 = risk.slice(0,3);
+    const csmMRR = csmClients.reduce((s,c)=>s+(getMRR(c.id)||0),0);
+    const csmTix = csmClients.reduce((s,c)=>s+(c.weekly?.tickets||0),0);
+    const hc = avg==null?'var(--text3)':avg>=70?'var(--green)':avg>=50?'var(--yellow)':avg>=30?'var(--orange)':'var(--red)';
     return `
       <div class="dir-csm-card" style="border-top:3px solid ${u.color}">
         <div class="dir-csm-name">
           <div class="dir-csm-avatar" style="background:${u.color}22;border:2px solid ${u.color};color:${u.color}">${u.initials}</div>
           <div>
             <div style="font-size:13px;font-weight:700">${u.name.split(' ')[0]}</div>
-            <div style="font-size:11px;color:var(--text3)">${csmClients.length} clientes</div>
+            <div style="font-size:11px;color:var(--text3)">${csmClients.length} clientes · MRR ${fmtMRR(csmMRR)} USD</div>
           </div>
         </div>
         <div class="dir-kpi-row">
-          <div class="dir-kpi"><div class="dir-kpi-val" style="color:${hsColor}">${avgHS ?? '—'}</div><div class="dir-kpi-lbl">Health Avg</div></div>
-          <div class="dir-kpi"><div class="dir-kpi-val" style="color:${atRisk.length>3?'var(--red)':atRisk.length>1?'var(--orange)':'var(--green)'}">${atRisk.length}</div><div class="dir-kpi-lbl">En riesgo</div></div>
-          <div class="dir-kpi"><div class="dir-kpi-val" style="color:var(--text)">${csmClients.filter(c=>(c.weekly?.tickets||0)>0).length}</div><div class="dir-kpi-lbl">Con tickets</div></div>
+          <div class="dir-kpi"><div class="dir-kpi-val" style="color:${hc}">${avg??'—'}</div><div class="dir-kpi-lbl">Health</div></div>
+          <div class="dir-kpi"><div class="dir-kpi-val" style="color:${risk.length>3?'var(--red)':risk.length>0?'var(--orange)':'var(--green)'}">${risk.length}</div><div class="dir-kpi-lbl">En riesgo</div></div>
+          <div class="dir-kpi"><div class="dir-kpi-val" style="color:${csmTix>5?'var(--red)':csmTix>2?'var(--yellow)':'var(--text)'}">${csmTix}</div><div class="dir-kpi-lbl">Tickets</div></div>
         </div>
-        ${atRiskClients.length ? `
+        ${top3.length?`
         <div class="dir-risk-row">
-          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">⚠️ Clientes críticos</div>
-          ${atRiskClients.map(c => {
-            const h = calcHS(c);
-            return `<div class="dir-risk-item" onclick="openFicha('${c.id}')">
-              <span class="hp ${hpClass(h.cl)}" style="font-size:10px;padding:1px 6px">${hpEmoji(h.cl)} ${h.score??'—'}</span>
-              <span>${c.name}</span>
-            </div>`;
-          }).join('')}
-          ${atRisk.length>3?`<div style="font-size:11px;color:var(--text3);margin-top:4px">+${atRisk.length-3} más</div>`:''}
-        </div>` : `<div style="margin-top:12px;font-size:12px;color:var(--green)">✅ Sin clientes en riesgo</div>`}
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">⚠️ Críticos</div>
+          ${top3.map(c=>{const h=calcHS(c);return `<div class="dir-risk-item" onclick="openFicha('${c.id}')">
+            <span class="hp ${hpClass(h.cl)}" style="font-size:10px;padding:1px 6px">${hpEmoji(h.cl)} ${h.score??'—'}</span>
+            <span>${c.name}</span>
+          </div>`;}).join('')}
+          ${risk.length>3?`<div style="font-size:11px;color:var(--text3);margin-top:4px">+${risk.length-3} más</div>`:''}
+        </div>`:`<div style="margin-top:12px;font-size:12px;color:var(--green)">✅ Sin críticos</div>`}
       </div>`;
   }).join('');
 
-  // Global risk table
-  const riskRows = globalRisk.slice(0,20).map(c => {
-    const h = calcHS(c), w = c.weekly||{};
-    const ownerUser = allUsers.find(u => {
-      const port = PORT.find(p => norm(p.name) === norm(c.name));
-      return port && u.clientIds.includes(port.id);
-    });
+  // ── Global risk table ──
+  const globalRisk = allClients.filter(c => {
+    const h = calcHS(c); const w = c.weekly||{};
+    return h.cl==='red'||h.cl==='orange'||(w.nps!=null&&w.nps<0);
+  }).sort((a,b)=>(calcHS(a).score??999)-(calcHS(b).score??999));
+
+  const riskRows = globalRisk.slice(0,25).map(c => {
+    const h=calcHS(c), w=c.weekly||{};
+    const owner = allUsers.find(u=>{ const port=PORT.find(p=>norm(p.name)===norm(c.name)); return port&&u.clientIds.includes(port.id); });
+    const mrr = getMRR(c.id);
     const sigs = getRiskSignals(c);
     return `<tr style="cursor:pointer" onclick="openFicha('${c.id}')">
       <td><span class="hp ${hpClass(h.cl)}">${hpEmoji(h.cl)} ${h.score??'—'}</span></td>
-      <td><div style="font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--text2)">${flags[c.country]||'🌎'} ${c.country}</div></td>
-      <td>${ownerUser?`<span style="background:${ownerUser.color}22;color:${ownerUser.color};border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600">${ownerUser.name.split(' ')[0]}</span>`:'—'}</td>
-      <td>${sigs.map(s=>`<span title="${s.label}" style="margin-right:3px">${s.icon}</span>`).join('')}</td>
+      <td><div style="font-weight:600;font-size:12px">${c.name}</div><div style="font-size:10px;color:var(--text2)">${flags[c.country]||'🌎'} ${c.country||''}</div></td>
+      <td>${owner?`<span style="background:${owner.color}22;color:${owner.color};border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600">${owner.name.split(' ')[0]}</span>`:'—'}</td>
       <td>${w.nps!=null?`<span class="${w.nps>=50?'nps-pos':w.nps>=0?'nps-mid':'nps-neg'}">${w.nps>0?'+':''}${w.nps}</span>`:'<span class="no-data">—</span>'}</td>
       <td>${w.tickets??'<span class="no-data">—</span>'}</td>
+      <td>${mrr?`<span style="font-size:11px;font-weight:700;color:var(--orange)">$${mrr}</span>`:'<span class="no-data">—</span>'}</td>
+      <td style="font-size:11px">${sigs.map(s=>`<span title="${s.label}">${s.icon}</span>`).join(' ')}</td>
     </tr>`;
   }).join('');
 
-  // Health distribution
-  const totalAll = allClients.length;
-  const greens = allClients.filter(c=>calcHS(c).cl==='green').length;
-  const yellows = allClients.filter(c=>calcHS(c).cl==='yellow').length;
-  const oranges = allClients.filter(c=>calcHS(c).cl==='orange').length;
-  const reds = allClients.filter(c=>calcHS(c).cl==='red').length;
-  const nulls = allClients.filter(c=>calcHS(c).score==null).length;
+  // ── Centry migrations ──
+  const centryClients = [
+    {id:'forus-sa',      name:'FORUS SA',       country:'CL', status:'en-migracion', bloqueado:false, nota:'Go Live planificado Jul 2026'},
+    {id:'forus-colombia',name:'FORUS COLOMBIA',  country:'CO', status:'bloqueada',    bloqueado:true,  nota:'Bloqueada por Dafiti — pendiente resolución'},
+    {id:'forus-peru',    name:'FORUS PERU',      country:'PE', status:'en-migracion', bloqueado:false, nota:'Proceso activo — PM asignado'},
+    {id:'gino',          name:'GINO',            country:'CL', status:'en-migracion', bloqueado:false, nota:'Migración en curso'},
+    {id:'lounge',        name:'LOUNGE S/A',      country:'CL', status:'en-migracion', bloqueado:false, nota:'Migración en curso'},
+    {id:'pillin',        name:'BEITGROUP (PILLIN)',country:'CL',status:'en-migracion', bloqueado:false, nota:'Migración en curso'},
+  ];
+  const centryRows = centryClients.map(cc => {
+    const stBg  = cc.status==='bloqueada'?'rgba(231,76,60,.15)':cc.status==='completada'?'rgba(46,204,113,.15)':'rgba(243,156,18,.12)';
+    const stCol = cc.status==='bloqueada'?'var(--red)':cc.status==='completada'?'var(--green)':'var(--yellow)';
+    const stLbl = cc.status==='bloqueada'?'🚫 Bloqueada':cc.status==='completada'?'✅ Completada':'⏳ En migración';
+    const mrr = getMRR(cc.id);
+    return `<div class="dir-centry-row">
+      <span style="min-width:28px">${flags[cc.country]||'🌎'}</span>
+      <span style="flex:1;font-weight:600;font-size:12px">${cc.name}</span>
+      <span class="dir-centry-status" style="background:${stBg};color:${stCol}">${stLbl}</span>
+      <span style="flex:2;font-size:11px;color:var(--text2)">${cc.nota}</span>
+      ${mrr?`<span style="font-size:11px;color:var(--text3)">MRR $${mrr}</span>`:''}
+    </div>`;
+  }).join('');
+
+  // ── Print handler ──
+  const printBtn = `<button onclick="window.print()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px">🖨️ Imprimir</button>`;
 
   el.innerHTML = `
-    <div style="margin-bottom:20px">
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px">
-        <div class="kpi-card kpi-blue"><div class="kpi-label">Total Clientes</div><div class="kpi-value">${totalAll}</div><div class="kpi-sub">${allUsers.length} CSMs activos</div></div>
-        <div class="kpi-card kpi-green"><div class="kpi-label">🟢 Sanos</div><div class="kpi-value">${greens}</div><div class="kpi-sub">${totalAll?Math.round(greens/totalAll*100):0}% del portfolio</div></div>
-        <div class="kpi-card kpi-yellow"><div class="kpi-label">🟡 Observación</div><div class="kpi-value">${yellows}</div><div class="kpi-sub">${totalAll?Math.round(yellows/totalAll*100):0}% del portfolio</div></div>
-        <div class="kpi-card kpi-orange"><div class="kpi-label">🟠 En riesgo</div><div class="kpi-value">${oranges}</div><div class="kpi-sub">${totalAll?Math.round(oranges/totalAll*100):0}% del portfolio</div></div>
-        <div class="kpi-card kpi-red"><div class="kpi-label">🔴 Críticos</div><div class="kpi-value">${reds}</div><div class="kpi-sub">${totalAll?Math.round(reds/totalAll*100):0}% del portfolio</div></div>
+    <!-- HEADER SEMANA -->
+    <div class="dir-week-header">
+      <div>
+        <div class="dir-week-title">👑 Informe Semanal CS</div>
+        <div class="dir-week-sub">Semana: ${weekLabel} · AnyMarket LATAM · ${allUsers.length} CSMs · ${totalAll} clientes</div>
       </div>
-
-      <div style="margin-bottom:20px">
-        <div class="card-title" style="margin-bottom:14px">👤 Performance por CSM</div>
-        <div class="dir-csm-grid">${csmCards}</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${printBtn}
       </div>
+    </div>
 
-      ${globalRisk.length ? `
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-title">⚠️ Clientes en Riesgo — Vista Global (${globalRisk.length}) <span>health rojo/naranja o NPS negativo</span></div>
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr>
-              <th>Health</th><th>Cliente</th><th>CSM</th><th>Señales</th><th>NPS</th><th>Tickets</th>
-            </tr></thead>
-            <tbody>${riskRows}</tbody>
-          </table>
-          ${globalRisk.length>20?`<div style="text-align:center;padding:12px;color:var(--text3);font-size:12px">Mostrando los 20 más críticos de ${globalRisk.length}</div>`:''}
+    <!-- SEMÁFORO -->
+    <div class="dir-semaforo" style="background:${semColor}">
+      <div style="font-size:24px">📊</div>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:${semTxt}">${semMsg}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Portfolio global: ${greens} sanos · ${yellows} observación · ${oranges} riesgo · ${reds} críticos</div>
+      </div>
+    </div>
+
+    <!-- KPIs GLOBALES -->
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px">
+      <div class="kpi-card kpi-blue"><div class="kpi-label">Clientes</div><div class="kpi-value">${totalAll}</div><div class="kpi-sub">${allUsers.length} CSMs activos</div></div>
+      <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">Health Avg</div><div class="kpi-value" style="color:${hsColor}">${avgHSAll??'—'}</div><div class="kpi-sub">${greens} sanos (${totalAll?Math.round(greens/totalAll*100):0}%)</div></div>
+      <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">GMV Total</div><div class="kpi-value" style="font-size:18px">${fmtGMV(totalGMV)}</div><div class="kpi-sub">Mes actual</div></div>
+      <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">MRR Total</div><div class="kpi-value" style="font-size:18px">${fmtMRR(totalMRR)}</div><div class="kpi-sub">USD/mes</div></div>
+      <div class="kpi-card" style="background:${mrrAtRisk>0?'rgba(231,76,60,.08)':'var(--surface)'};border:1px solid ${mrrAtRisk>0?'var(--red)':'var(--border)'}"><div class="kpi-label">Revenue at Risk</div><div class="kpi-value" style="color:${mrrAtRisk>0?'var(--red)':'var(--green)'}">${fmtMRR(mrrAtRisk)}</div><div class="kpi-sub">${atRiskClients.length} clientes críticos/riesgo</div></div>
+      <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">Cadencia</div><div class="kpi-value" style="color:${cadColor}">${cadPct}%</div><div class="kpi-sub">${cadClients.length}/${totalAll} contactados ≤30d</div></div>
+    </div>
+
+    <!-- RESUMEN EJECUTIVO EDITABLE -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title" style="margin-bottom:14px">📝 Resumen Ejecutivo Semanal <span style="font-size:10px;color:var(--text3);font-weight:400">— editable · se guarda automáticamente</span></div>
+      <div class="dir-weekly-grid">
+        <div class="dir-note-box" style="border-left:3px solid var(--green)">
+          <div class="dir-note-label">✅ Acciones realizadas esta semana <span id="dir-saved-done" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
+          <textarea class="dir-note-area" id="dir-note-done" placeholder="• Reunión de rescate con COBOE BOTIGA — acordado plan de mejora&#10;• Seguimiento migración FORUS SA — cronograma actualizado&#10;• QBR con FORUS PERU — objetivos Q3 definidos&#10;..." onblur="saveDirNote('done')">${savedNotes.done||''}</textarea>
         </div>
-      </div>` : `<div class="card" style="padding:32px;text-align:center;color:var(--green)">✅ Sin clientes críticos en el portfolio</div>`}
-    </div>`;
+        <div class="dir-note-box" style="border-left:3px solid var(--accent)">
+          <div class="dir-note-label">📅 Plan próxima semana <span id="dir-saved-plan" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
+          <textarea class="dir-note-area" id="dir-note-plan" placeholder="• Llamada de seguimiento NPS con COBOE BOTIGA&#10;• Definir fecha Go Live FORUS SA&#10;• Reunión ejecutiva con LACOSTE&#10;..." onblur="saveDirNote('plan')">${savedNotes.plan||''}</textarea>
+        </div>
+        <div class="dir-note-box" style="border-left:3px solid var(--yellow)">
+          <div class="dir-note-label">💡 Valor entregado / Oportunidades <span id="dir-saved-valor" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
+          <textarea class="dir-note-area" id="dir-note-valor" placeholder="• Implementamos CS Command Center — visibilidad en tiempo real&#10;• Identificamos oportunidad TikTok Shop en 3 cuentas&#10;• Recuperamos NPS de BOTIGA y FORUS mediante plan de rescate&#10;..." onblur="saveDirNote('valor')">${savedNotes.valor||''}</textarea>
+        </div>
+        <div class="dir-note-box" style="border-left:3px solid var(--red)">
+          <div class="dir-note-label">🚨 Solicitudes a Dirección / Escalamientos <span id="dir-saved-solicitudes" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
+          <textarea class="dir-note-area" id="dir-note-solicitudes" placeholder="• ⚠️ FORUS COLOMBIA — Dafiti bloqueando migración: necesito respaldo para escalar&#10;• COBOE BOTIGA — necesito criterios claros para decisión de descuento/NC&#10;..." onblur="saveDirNote('solicitudes')">${savedNotes.solicitudes||''}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE POR CSM -->
+    <div style="margin-bottom:20px">
+      <div class="card-title" style="margin-bottom:14px">👤 Performance por CSM — Semana ${weekLabel}</div>
+      <div class="dir-csm-grid">${csmCards}</div>
+    </div>
+
+    <!-- CLIENTES EN RIESGO -->
+    ${globalRisk.length ? `
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">⚠️ Clientes en Riesgo — Vista Global (${globalRisk.length}) <span>health rojo/naranja o NPS negativo</span></div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Health</th><th>Cliente</th><th>CSM</th><th>NPS</th><th>Tickets</th><th>MRR USD</th><th>Señales</th></tr></thead>
+          <tbody>${riskRows}</tbody>
+        </table>
+        ${globalRisk.length>25?`<div style="text-align:center;padding:12px;color:var(--text3);font-size:12px">Mostrando los 25 más críticos de ${globalRisk.length}</div>`:''}
+      </div>
+    </div>` : `<div class="card" style="padding:32px;text-align:center;color:var(--green);margin-bottom:20px">✅ Sin clientes críticos en el portfolio esta semana</div>`}
+
+    <!-- MIGRACIONES CENTRY -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title" style="margin-bottom:14px">🔄 Estado Migraciones Centry → AnyMarket (${centryClients.length} cuentas)</div>
+      ${centryRows}
+    </div>
+
+    <!-- TICKETS TOTALES -->
+    ${totalTickets>0?`
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title" style="margin-bottom:14px">🎫 Resumen Tickets — Portfolio Global</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+        ${allUsers.map(u=>{
+          const cc=allClients.filter(c=>{const p=PORT.find(q=>norm(q.name)===norm(c.name));return p&&u.clientIds.includes(p.id);});
+          const tix=cc.reduce((s,c)=>s+(c.weekly?.tickets||0),0);
+          if(!tix) return '';
+          const conTix=cc.filter(c=>(c.weekly?.tickets||0)>0);
+          return `<div style="background:var(--surface2);border-radius:10px;padding:14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <div style="width:24px;height:24px;border-radius:50%;background:${u.color}22;border:2px solid ${u.color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:${u.color}">${u.initials}</div>
+              <span style="font-size:12px;font-weight:600">${u.name.split(' ')[0]}</span>
+              <span style="margin-left:auto;font-size:16px;font-weight:800;color:${tix>5?'var(--red)':tix>2?'var(--yellow)':'var(--text)'}">${tix}</span>
+            </div>
+            ${conTix.map(c=>`<div style="font-size:11px;color:var(--text2);margin-bottom:3px">· ${c.name} (${c.weekly?.tickets})</div>`).join('')}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`:''}
+  `;
 }
 
 function renderEquipo() {
