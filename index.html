@@ -4281,8 +4281,8 @@ function renderDirector() {
     <!-- HEADER SEMANA -->
     <div class="dir-week-header">
       <div>
-        <div class="dir-week-title">👑 Informe Semanal CS</div>
-        <div class="dir-week-sub">Semana: ${weekLabel} · AnyMarket LATAM · ${allUsers.length} CSMs · ${totalAll} clientes</div>
+        <div class="dir-week-title">👑 Dashboard CS — AnyMarket LATAM</div>
+        <div class="dir-week-sub">Semana: ${weekLabel} · ${allUsers.length} CSMs activos · ${totalAll} clientes · <span style="color:#a78bfa;font-weight:600">Informe Sami incluido ↓</span></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         ${printBtn}
@@ -4308,9 +4308,28 @@ function renderDirector() {
       <div class="kpi-card" style="background:var(--surface);border:1px solid var(--border)"><div class="kpi-label">Cadencia</div><div class="kpi-value" style="color:${cadColor}">${cadPct}%</div><div class="kpi-sub">${cadClients.length}/${totalAll} contactados ≤30d</div></div>
     </div>
 
+    <!-- INFORME SEMANAL SAMI — SEPARADOR -->
+    <div style="margin:28px 0 16px 0;display:flex;align-items:center;gap:12px">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);border-radius:20px;padding:6px 16px">
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700">S</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--accent)">Informe Semanal · Samiramis Monterola</div>
+          <div style="font-size:10px;color:var(--text3)">CSM Senior — AnyMarket LATAM · ${weekLabel}</div>
+        </div>
+      </div>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
     <!-- RESUMEN EJECUTIVO EDITABLE -->
-    <div class="card" style="margin-bottom:20px">
-      <div class="card-title" style="margin-bottom:14px">📝 Resumen Ejecutivo Semanal <span style="font-size:10px;color:var(--text3);font-weight:400">— editable · se guarda automáticamente</span></div>
+    <div class="card" style="margin-bottom:20px;border:1px solid rgba(99,102,241,.25)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0">📝 Resumen Ejecutivo Semanal</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:10px;color:var(--text3);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 8px">✍️ Escrito por Sami · ${weekLabel}</div>
+          <span style="font-size:10px;color:var(--text3)">se guarda automáticamente</span>
+        </div>
+      </div>
       <div class="dir-weekly-grid">
         <div class="dir-note-box" style="border-left:3px solid var(--green)">
           <div class="dir-note-label">✅ Acciones realizadas esta semana <span id="dir-saved-done" style="font-size:10px;color:var(--green);opacity:0;transition:opacity .3s">Guardado</span></div>
