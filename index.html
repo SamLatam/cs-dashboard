@@ -4118,6 +4118,16 @@ const DIR_NOTES_KEY = 'cs-dir-weekly-notes';
     if (old && !localStorage.getItem('cs-dir-notes-sami')) {
       localStorage.setItem('cs-dir-notes-sami', old);
     }
+    // Fix: correct wrong text about firma (was CS Command Center, is actually Belcorp supplier)
+    const samiKey = 'cs-dir-notes-sami';
+    const saved = JSON.parse(localStorage.getItem(samiKey) || '{}');
+    if (saved.solicitudes && saved.solicitudes.includes('CS Command Center como proveedor oficial DB1')) {
+      saved.solicitudes = saved.solicitudes.replace(
+        /DECISIÓN HOY: Firma hoja de personas involucradas[^\n]*/,
+        'DECISIÓN HOY: BELCORP — Firma hoja personas involucradas → Rodolfo firma y devuelve a Sami para enviar a Belcorp (alta de proveedor, impacta CL/CO/PE/MX)'
+      );
+      localStorage.setItem(samiKey, JSON.stringify(saved));
+    }
   } catch(e) {}
 })();
 
