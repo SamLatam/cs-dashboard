@@ -76,6 +76,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
 .kpi-sub { font-size: 11px; color: var(--text2); margin-top: 5px; }
 
 /* ── GRID 2-col ── */
+.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
@@ -585,6 +586,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     <div class="nav-item"        id="nav-notas"     onclick="nav('notas',this)">     <span class="nav-icon">📝</span> Notas</div>
     <div class="nav-label">Revenue</div>
     <div class="nav-item"        id="nav-renovaciones" onclick="nav('renovaciones',this)"><span class="nav-icon">💰</span> Renovaciones <span class="nav-badge yellow" id="nb-renovaciones" style="display:none">0</span></div>
+    <div class="nav-item" id="nav-expansion" onclick="nav('expansion',this)"><span class="nav-icon">📈</span> Expansión</div>
     <div class="nav-label">Ayuda</div>
     <div class="nav-item"        id="nav-faq"       onclick="nav('faq',this)">       <span class="nav-icon">💡</span> FAQ CS & AnyTools</div>
     <div class="nav-item"        id="nav-guia"      onclick="nav('guia',this)">      <span class="nav-icon">🧭</span> Guía Operacional</div>
@@ -849,6 +851,10 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     <!-- PAGE: RENOVACIONES & REVENUE -->
     <div class="page" id="page-renovaciones">
       <div id="renovacionesContent"></div>
+    <div class="page" id="page-expansion">
+      <div id="expansionContent"></div>
+    </div>
+
     </div>
 
   <div class="page" id="page-equipo">
@@ -2446,7 +2452,7 @@ function hpEmoji(cl) { return cl==='green'?'🟢':cl==='yellow'?'🟡':cl==='ora
 function hpLabel(cl) { return cl==='green'?'Sano':cl==='yellow'?'Observación':cl==='orange'?'En riesgo':'Crítico'; }
 
 // ── NAVIGATION ─────────────────────────────────────────────────────────────────
-const PAGE_TITLES = {overview:'Vista General de Cartera',portfolio:'Mis Clientes',ficha:'Ficha Cliente',acciones:'Gestión de Acciones',alertas:'Alertas & Riesgos',predicciones:'🔮 Predicciones & Sugerencias',capacitacion:'🎓 Capacitación & Entrega de Valor',catalogo:'Catálogo & GMV',metricas:'Métricas','portfolio-a':'🎯 Aceleración Portfolio A',faq:'💡 FAQ — CS & AnyMarket & AnyTools',notas:'Notas',guia:'Guía Operacional CS',renovaciones:'💰 Renovaciones & Revenue at Risk',equipo:'👥 Gestión de Equipo',director:'👑 Vista Director — Portfolio Global',churned:'🚪 Clientes Cancelados'};
+const PAGE_TITLES = {overview:'Vista General de Cartera',portfolio:'Mis Clientes',ficha:'Ficha Cliente',acciones:'Gestión de Acciones',alertas:'Alertas & Riesgos',predicciones:'🔮 Predicciones & Sugerencias',capacitacion:'🎓 Capacitación & Entrega de Valor',catalogo:'Catálogo & GMV',metricas:'Métricas','portfolio-a':'🎯 Aceleración Portfolio A',faq:'💡 FAQ — CS & AnyMarket & AnyTools',notas:'Notas',guia:'Guía Operacional CS',renovaciones:'💰 Renovaciones & Revenue at Risk,expansion:'📈 Expansion Radar'',equipo:'👥 Gestión de Equipo',director:'👑 Vista Director — Portfolio Global',churned:'🚪 Clientes Cancelados'};
 function nav(page, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -2466,6 +2472,7 @@ function nav(page, el) {
   if (page==='faq')            renderFaq();
   if (page==='guia')           renderGuia();
   if (page==='renovaciones')   renderRenovaciones();
+  if (page==='expansion')      renderExpansion();
   if (page==='equipo')         renderEquipo();
   if (page==='director')       renderDirector();
   if (page==='churned')        renderChurned();
@@ -3067,6 +3074,72 @@ function unchurnClient(id){
   c.weekly=c.weekly||{};c.weekly.churned=false;c.weekly.churnDate=null;
   saveData();scheduleGistSave();renderChurned();renderTable();renderKPIs();
 }
+
+// ── EXPANSION RADAR ───────────────────────────────────────────────────────────────────────────────────
+function calcExpansionScore(c){
+  const w=c.weekly||{};let score=0,signals=[],opportunity='';
+  if(w.nps!=null){
+    if(w.nps>=50){score+=30;signals.push({t:'p',l:'Promotor NPS '+w.nps,col:'green'});}
+    else if(w.nps>=0){score+=15;signals.push({t:'n',l:'NPS Neutro '+w.nps,col:'yellow'});}
+    else{signals.push({t:'d',l:'Detractor '+w.nps,col:'red'});}
+  }
+  const hs=calcHS(c);
+  if(hs>=70){score+=25;signals.push({t:'h',l:'Salud '+hs,col:'green'});}
+  else if(hs>=50){score+=12;}
+  if(w.upPlan&&w.qtUp!=null){
+    const pct=w.qtUp/w.upPlan;
+    if(pct<0.5){score+=20;signals.push({t:'u',l:'UP '+Math.round(pct*100)+'% gap',col:'orange'});}
+    else if(pct<0.8){score+=10;}else{score+=5;}
+  }else if(c.centry){score+=10;signals.push({t:'m',l:'Post-migración Centry',col:'blue'});}
+  if(w.gmv>0){score+=15;}
+  if(!w.tickets){score+=10;signals.push({t:'c',l:'Sin tickets',col:'green'});}
+  else if(w.tickets<=2){score+=5;}
+  if(signals.find(s=>s.t==='u'))opportunity='Activar features + AnyTools';
+  else if(signals.find(s=>s.t==='p')&&hs>=70)opportunity='Expansión a nuevos marketplaces';
+  else if(signals.find(s=>s.t==='m'))opportunity='Upsell post-migración → plan AnyMarket completo';
+  else opportunity='Revisión estratégica de adopción';
+  return{score,signals,opportunity};
+}
+function renderExpansion(){
+  const el=document.getElementById('expansionContent');if(!el)return;
+  const user=getActiveUser();
+  const myC=clients.filter(c=>!c.weekly?.churned&&(user?user.clientIds.includes(c.id):true));
+  const scored=myC.map(c=>({c,...calcExpansionScore(c),hs:calcHS(c)})).sort((a,b)=>b.score-a.score);
+  const top=scored.slice(0,10);
+  const flags={Chile:'🇨🇱',Colombia:'🇨🇴',Uruguay:'🇺🇾',Mexico:'🇲🇽',Peru:'🇵🇪'};
+  const hi=scored.filter(s=>s.score>=70).length,mid=scored.filter(s=>s.score>=50&&s.score<70).length;
+  const upG=scored.filter(s=>s.signals.find(sg=>sg.t==='u')).length,pro=scored.filter(s=>s.signals.find(sg=>sg.t==='p')).length;
+  let html='<div style="margin-bottom:20px"><h3 style="color:var(--text);margin:0 0 4px">📈 Expansion Radar</h3>';
+  html+='<p style="color:var(--text3);font-size:13px;margin:0">Score = NPS 30% + Salud 25% + Adopción 20% + GMV 15% + Tickets 10%</p></div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:24px">';
+  html+='<div class="card" style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--green)">'+hi+'</div><div style="font-size:12px;color:var(--text3)">🔥 Alto potencial</div></div>';
+  html+='<div class="card" style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--yellow)">'+mid+'</div><div style="font-size:12px;color:var(--text3)">⭐ Potencial medio</div></div>';
+  html+='<div class="card" style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--accent)">'+upG+'</div><div style="font-size:12px;color:var(--text3)">📦 UP subutilizados</div></div>';
+  html+='<div class="card" style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--text)">'+pro+'</div><div style="font-size:12px;color:var(--text3)">😍 Promotores NPS</div></div></div>';
+  html+='<div class="card" style="padding:0;overflow:hidden"><div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center"><span style="font-weight:600;color:var(--text)">Top '+top.length+' candidatos de expansión</span><span style="font-size:11px;color:var(--text3);margin-left:auto">ordenado por score</span></div>';
+  top.forEach((item,idx)=>{
+    const sc=item.score>=70?'var(--green)':item.score>=50?'var(--yellow)':'var(--text3)';
+    const medal=idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':(idx+1)+'.';
+    html+='<div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;gap:16px">';
+    html+='<div style="font-size:18px;min-width:32px">'+medal+'</div>';
+    html+='<div style="flex:1">';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
+    html+='<span style="font-weight:700;font-size:14px;color:var(--text)">'+item.c.name+'</span>';
+    html+='<span style="font-size:11px;color:var(--text3)">'+(flags[item.c.country]||'')+' '+(item.c.country||'')+'</span>';
+    html+='<span style="margin-left:auto;font-size:22px;font-weight:800;color:'+sc+'">'+item.score+'</span>';
+    html+='<span style="font-size:10px;color:var(--text3)">pts</span></div>';
+    html+='<div style="font-size:12px;color:var(--accent);margin-bottom:6px">🎯 '+item.opportunity+'</div>';
+    html+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+    item.signals.forEach(sg=>{
+      const c2=sg.col==='green'?'var(--green)':sg.col==='yellow'?'var(--yellow)':sg.col==='orange'?'#f97316':sg.col==='red'?'var(--red)':'var(--accent)';
+      html+='<span style="font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid '+c2+';color:'+c2+'">'+sg.l+'</span>';
+    });
+    html+='</div></div></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 function renderChurned(){
   const el=document.getElementById('churnedContent');if(!el)return;
   const churned=clients.filter(c=>c.weekly?.churned);
