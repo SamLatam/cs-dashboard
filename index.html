@@ -4977,68 +4977,16 @@ if (document.readyState === 'loading') {
 
 // ── CAPACITACIÓN & VALOR ──────────────────────────────────────────────────────
 function renderCapacitacion(){
-  const el=document.getElementById('capacitacionGrid');if(!el)return;
-  el.innerHTML=`
-<div style="margin-bottom:20px"><h3 style="color:var(--text);margin:0 0 4px">Recursos & Suite AnyTools</h3><p style="color:var(--text3);font-size:13px;margin:0">Base de conocimiento, ecosistema de productos y planes disponibles para tus clientes.</p></div>
-<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">
-<button onclick="showCapTab(0)" id="capTab0" class="btn btn-ghost" style="border-bottom:2px solid var(--accent);border-radius:4px 4px 0 0;color:var(--accent)">Base de Conocimiento</button>
-<button onclick="showCapTab(1)" id="capTab1" class="btn btn-ghost" style="border-radius:4px 4px 0 0">Suite AnyTools</button>
-<button onclick="showCapTab(2)" id="capTab2" class="btn btn-ghost" style="border-radius:4px 4px 0 0">Predize - Planes</button>
-</div>
-<div id="capPanel0">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-<div style="font-weight:700;color:var(--text);font-size:13px;grid-column:1/-1;margin-top:8px">Productos</div>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104824" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Como registrar productos</div><div style="font-size:11px;color:var(--text3)">Guia paso a paso</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104822" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Registrar productos por planilla</div><div style="font-size:11px;color:var(--text3)">Carga masiva de catalogo</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104834" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Registrar caracteristicas</div><div style="font-size:11px;color:var(--text3)">Atributos y ficha tecnica</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000122861" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Registrar producto Combo/KIT</div><div style="font-size:11px;color:var(--text3)">Productos compuestos</div></a>
-<div style="font-weight:700;color:var(--text);font-size:13px;grid-column:1/-1;margin-top:8px">Inventario</div>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104852" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Reglas de Inventario</div><div style="font-size:11px;color:var(--text3)">Reglas de stock por canal</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000077640" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Inventario Virtual</div><div style="font-size:11px;color:var(--text3)">Stock reservado y virtual</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000074834" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Crossdocking / Plazo Adicional</div><div style="font-size:11px;color:var(--text3)">Tiempos de despacho</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000160544" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Reglas aplicadas en transmision</div><div style="font-size:11px;color:var(--text3)">Verificar reglas activas</div></a>
-<div style="font-weight:700;color:var(--text);font-size:13px;grid-column:1/-1;margin-top:8px">Transmisiones</div>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104884" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Verificar anuncio en Marketplace</div><div style="font-size:11px;color:var(--text3)">Confirmar que el SKU se publico</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105083" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Que es Buy Box</div><div style="font-size:11px;color:var(--text3)">Ganar posicionamiento en ML</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104885" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Vincular anuncio con producto</div><div style="font-size:11px;color:var(--text3)">Linkear SKU en marketplace</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000125791" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Verificar precio e inventario</div><div style="font-size:11px;color:var(--text3)">Confirmar sincronizacion</div></a>
-<div style="font-weight:700;color:var(--text);font-size:13px;grid-column:1/-1;margin-top:8px">Ventas y Pedidos</div>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104841" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Donde miro las ventas</div><div style="font-size:11px;color:var(--text3)">Panel de pedidos</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104836" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Actualizar pedido manualmente</div><div style="font-size:11px;color:var(--text3)">Cambiar estado de pedidos</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104842" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Pedido no importado</div><div style="font-size:11px;color:var(--text3)">Resolver pedidos sin sincronizar</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000095056" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Curva ABC</div><div style="font-size:11px;color:var(--text3)">Analisis de ventas por producto</div></a>
-<div style="font-weight:700;color:var(--text);font-size:13px;grid-column:1/-1;margin-top:8px">Marketplaces</div>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104675" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Configurar integracion Amazon</div><div style="font-size:11px;color:var(--text3)">Setup y credenciales</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105210" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Configurar integracion Dafiti</div><div style="font-size:11px;color:var(--text3)">Setup Dafiti</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/folders/19000157195" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Mercado Libre (50 articulos)</div><div style="font-size:11px;color:var(--text3)">Guias completas ML</div></a>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105916" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">Solicitar nuevo Marketplace</div><div style="font-size:11px;color:var(--text3)">Activar nuevos canales</div></a>
-</div>
-<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions" target="_blank" class="btn btn-ghost" style="font-size:12px">Ver todos los articulos en el Help Center</a>
-</div>
-<div id="capPanel1" style="display:none">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-<div class="card" style="border-top:3px solid var(--accent)"><div style="font-size:15px;font-weight:700;margin-bottom:4px">AnyMarket</div><div style="font-size:12px;color:var(--text3);margin-bottom:8px">Hub de integracion omnicanal</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px">Centraliza catalogo, stock, pedidos y precios de todos los marketplaces. +200 funcionalidades, +150 canales.</div><a href="https://anytools.global/cl/" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver producto</a></div>
-<div class="card" style="border-top:3px solid var(--yellow)"><div style="font-size:15px;font-weight:700;margin-bottom:4px">WinnerBox</div><div style="font-size:12px;color:var(--text3);margin-bottom:8px">Pricing dinamico</div><div style="font-size:12px;color:var(--text2);margin-bottom:8px">Optimiza precios automaticamente, monitorea Buy Box, protege margen.</div><div style="font-size:11px;color:var(--green);margin-bottom:12px">+30% facturacion</div><a href="https://anytools.global/cl/" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver producto</a></div>
-<div class="card" style="border-top:3px solid var(--green)"><div style="font-size:15px;font-weight:700;margin-bottom:4px">Predize</div><div style="font-size:12px;color:var(--text3);margin-bottom:8px">SAC con IA</div><div style="font-size:12px;color:var(--text2);margin-bottom:8px">Centraliza atencion pre y post venta de todos los marketplaces. IA Mia responde 24/7.</div><div style="font-size:11px;color:var(--green);margin-bottom:12px">+USD 25M en ventas por IA</div><a href="https://predize.cl" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver producto</a> <a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver planes</a></div>
-<div class="card" style="border-top:3px solid #8b5cf6"><div style="font-size:15px;font-weight:700;margin-bottom:4px">Koncili</div><div style="font-size:12px;color:var(--text3);margin-bottom:8px">Conciliacion financiera</div><div style="font-size:12px;color:var(--text2);margin-bottom:8px">Cruza informacion financiera de marketplaces, detecta inconsistencias, valida comisiones.</div><div style="font-size:11px;color:var(--green);margin-bottom:12px">+14.000M GMV conciliado</div><a href="https://unikon.koncili.com/es/docs/introducao" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver documentacion</a></div>
-</div>
-</div>
-<div id="capPanel2" style="display:none">
-<div style="margin-bottom:16px"><div style="font-weight:700;font-size:15px">Predize - Planes disponibles</div><div style="font-size:12px;color:var(--text3)">Todos los planes incluyen IA Mia 24/7 e integraciones con marketplaces.</div></div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px">
-<div class="card" style="border-top:3px solid var(--accent);text-align:center"><div style="font-size:18px;font-weight:800;margin-bottom:6px">Start</div><div style="font-size:11px;color:var(--text3);margin-bottom:10px">Desde 3 usuarios</div><div style="font-size:12px;color:var(--text2);text-align:left">Desde 3 usuarios. IA Mia completa. Soporte correo y chat.</div><a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px;margin-top:10px;display:block">Ver precio</a></div>
-<div class="card" style="border-top:3px solid var(--yellow);text-align:center"><div style="font-size:18px;font-weight:800;margin-bottom:6px">Standart</div><div style="font-size:11px;color:var(--text3);margin-bottom:10px">Desde 5 usuarios</div><div style="font-size:12px;color:var(--text2);text-align:left">Desde 5 usuarios. IA Mia. Integracion Zendesk. Soporte WhatsApp y correo.</div><a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px;margin-top:10px;display:block">Ver precio</a></div>
-<div class="card" style="border-top:3px solid var(--green);text-align:center"><div style="font-size:18px;font-weight:800;margin-bottom:6px">Performance</div><div style="font-size:11px;color:var(--text3);margin-bottom:10px">Desde 10 usuarios</div><div style="font-size:12px;color:var(--text2);text-align:left">Desde 10 usuarios. IA Mia. Customer Success dedicado.</div><a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px;margin-top:10px;display:block">Ver precio</a></div>
-<div class="card" style="border-top:3px solid var(--red);text-align:center"><div style="font-size:18px;font-weight:800;margin-bottom:6px">Enterprise</div><div style="font-size:11px;color:var(--text3);margin-bottom:10px">Usuarios por consulta</div><div style="font-size:12px;color:var(--text2);text-align:left">Usuarios ilimitados. Mia Service. CS full + Onboarding. Soporte 24/7.</div><a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px;margin-top:10px;display:block">Ver precio</a></div>
-</div>
-</div>`;
+  var el=document.getElementById('capacitacionGrid');
+  if(!el)return;
+  var h='';
+  h+='<div style="padding:20px"><p style="color:var(--text2)">Cargando recursos...</p></div>';
+  el.innerHTML=h;
 }
 function showCapTab(idx){
   [0,1,2].forEach(function(i){
     var p=document.getElementById('capPanel'+i);
-    var b=document.getElementById('capTab'+i);
-    if(p)p.style.display=i===idx?'':'none';
-    if(b){b.style.borderBottom=i===idx?'2px solid var(--accent)':'none';b.style.color=i===idx?'var(--accent)':'var(--text2)';}
+    if(p)p.style.display=i===idx?'':\'none';
   });
 }
 function renderGuia() {
