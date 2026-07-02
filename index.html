@@ -1119,7 +1119,7 @@ async function doGistSave() {
     // Notificar a todos los usuarios conectados vía Supabase broadcast
     if (sbClient) {
       try {
-        sbClient.channel('cs-latam-sync-v2').send({
+        (_rtChannel || sbClient.channel('cs-latam-sync-v2')).send({
           type: 'broadcast', event: 'data-updated',
           payload: { userId: user.id, savedAt: now }
         });
@@ -1132,21 +1132,43 @@ async function doGistSave() {
 }
 
 // ── SUPABASE REAL-TIME SYNC ───────────────────────────────────────────────────
+let _rtChannel = null;
 function subscribeToRealtime() {
   if (!sbClient) return;
   try {
-    sbClient.channel('cs-latam-sync-v2')
+    _rtChannel = sbClient.channel('cs-latam-sync-v2')
       .on('broadcast', { event: 'data-updated' }, async (payload) => {
         const user = getActiveUser();
         if (!user) return;
-        if (payload.payload?.userId === user.id) return; // ignorar propios
-        console.log('[Realtime] Update from', payload.payload?.userId, '— recargando...');
+        if (payload.payload?.userId === user.id) return;
+        if (Array.isArray(payload.payload?.inlineActions)) {
+          let ch = false;
+          payload.payload.inlineActions.forEach(remote => {
+            const idx = actions.findIndex(a => a.id === remote.id);
+            if (idx >= 0) { if ((remote.updatedAt||'') >= (actions[idx].updatedAt||'')) { actions[idx] = remote; ch = true; } }
+            else { actions.push(remote); ch = true; }
+          });
+          if (ch) { renderAcciones(); showSyncToast('\u{1F504} ' + (payload.payload.userId||'otro') + ' actualiz\u00F3 acciones'); }
+        }
         const loaded = await loadFromCloud();
         if (loaded) { _appLoaded = false; load(); renderKPIs(); renderOverview(); }
       })
       .subscribe();
     console.log('[Realtime] Subscrito a cs-latam-sync-v2');
   } catch(e) { console.warn('[Realtime] subscribe error:', e); }
+}
+
+function showSyncToast(msg) {
+  let t = document.getElementById('rt-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'rt-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--accent);border-radius:20px;padding:8px 18px;font-size:12px;color:var(--text2);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._tmr);
+  t._tmr = setTimeout(() => { t.style.opacity = '0'; }, 3000);
 }
 
 async function loadFromCloud() {
@@ -2391,6 +2413,7 @@ function saveActions() {
   pushToSupabase(_actionsKeySave, val);
   scheduleGistSave();
 }
+  if (_rtChannel && sbUser) { try { const _u = getActiveUser(); if (_u) { _rtChannel.send({ type: 'broadcast', event: 'data-updated', payload: { userId: _u.id, savedAt: Date.now(), inlineActions: actions.filter(a => _u.clientIds.includes(a.clientId)) } }); } } catch(e) {} }
 function populateSelects() {
   const visIds = getVisibleClientIds();
   const visPort = PORT.filter(p => visIds.includes(p.id));
