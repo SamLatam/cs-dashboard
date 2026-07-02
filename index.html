@@ -4976,111 +4976,158 @@ if (document.readyState === 'loading') {
 ['prioridades','compromisos','riesgos','upsell'].forEach(k=>{const el=document.getElementById('note-'+k);if(el)el.addEventListener('blur',()=>saveNote(k));});
 
 // ── CAPACITACIÓN & VALOR ──────────────────────────────────────────────────────
-function renderCapacitacion() {
-  const w = clients.map(c => c.weekly || {});
-
-  // Detectar patrones desde datos reales
-  const conTickets     = clients.filter(c => (c.weekly||{}).tickets > 0);
-  const conBugs        = clients.filter(c => (c.weekly||{}).bugs > 0);
-  const sinUsePoints   = clients.filter(c => { const wp = c.weekly||{}; return wp.upPlan && (!wp.qtUp || wp.qtUp === 0); });
-  const bajoUsePoints  = clients.filter(c => { const wp = c.weekly||{}; return wp.upPlan && wp.qtUp > 0 && (wp.qtUp/wp.upPlan) < 0.5; });
-  const sinGMV         = clients.filter(c => (c.weekly||{}).gmv === 0);
-  const npsNeg         = clients.filter(c => { const n = (c.weekly||{}).nps; return n !== null && n !== undefined && n < 0; });
-  const sinContacto    = clients.filter(c => { const lc = (c.weekly||{}).lastContact; if (!lc) return true; return Math.floor((Date.now()-new Date(lc))/86400000) > 60; });
-  const centry         = clients.filter(c => (c.weekly||{}).centry);
-
-  // Dolor 1: tickets recurrentes → stock ML (Emma + Forus tienen mismo bug)
-  const stockML = clients.filter(c => { const wr = c.weekly||{}; return (wr.tickets||0)>0 && (wr.causaRaiz||'').toLowerCase().includes('mercado libre'); });
-
-  const card = (emoji, titulo, subtitulo, color, contenido) => `
-    <div class="card" style="border-left:4px solid ${color};margin-bottom:16px;">
-      <div class="card-title" style="font-size:15px;">${emoji} ${titulo} <span>${subtitulo}</span></div>
-      ${contenido}
-    </div>`;
-
-  const pill = (txt, color) => `<span style="background:${color}22;color:${color};border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700;margin-right:4px;">${txt}</span>`;
-  const clientList = arr => arr.length ? arr.map(c=>c.nombre).join(', ') : '—';
-
-  const row = (icono, tipo, accion, beneficio, valor, equipo, clientes, urgencia) => `
-    <tr style="border-bottom:1px solid var(--border);">
-      <td style="padding:12px 10px;font-size:18px;text-align:center;">${icono}</td>
-      <td style="padding:12px 10px;">${pill(tipo, urgencia==='alta'?'#e74c3c':urgencia==='media'?'#f39c12':'#2ecc71')}</td>
-      <td style="padding:12px 10px;font-weight:600;font-size:13px;">${accion}</td>
-      <td style="padding:12px 10px;font-size:12px;color:var(--text2);">${beneficio}</td>
-      <td style="padding:12px 10px;font-size:12px;color:var(--accent2);">${valor}</td>
-      <td style="padding:12px 10px;font-size:12px;">${equipo}</td>
-      <td style="padding:12px 10px;font-size:11px;color:var(--text3);">${clientes}</td>
-    </tr>`;
-
-  const tabla = (filas) => `
-    <div style="overflow-x:auto;">
-    <table style="width:100%;">
-      <thead><tr style="background:var(--surface2);">
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Tipo</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);"></th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Acción</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Beneficio</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Entrega de Valor</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Equipo</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Clientes afectados</th>
-      </tr></thead>
-      <tbody>${filas}</tbody>
-    </table></div>`;
-
-  let html = '';
-
-  // ── BLOQUE 1: DOLORES DETECTADOS ──────────────────────────────────────────
-  html += card('🩺','Dolores Detectados en la Cartera','Patrones recurrentes que requieren acción coordinada','#e74c3c', tabla(
-    (stockML.length >= 2 ? row('🔄','Bug compartido','Agrupar tickets de stock ML en un solo caso','Resuelve el mismo bug para múltiples clientes en paralelo','Reduce tiempo de resolución 50% — menos impacto en GMV de los clientes','Soporte + Producto',clientList(stockML),'alta') : '') +
-    (conBugs.length > 0 ? row('🐛','Micro-video','Video 3 min: "Cómo reportar un bug con toda la información"','El cliente reporta mejor → soporte resuelve más rápido','Menos tickets mal documentados, ciclos de soporte más cortos','CS + Soporte',clientList(conBugs),'media') : '') +
-    (sinUsePoints.length > 0 ? row('💤','Workshop cliente','Taller: "Cómo activar y usar Use Points"','Clientes que no usan lo que pagaron empiezan a ver valor','Reduce riesgo de churn por percepción de bajo valor. Aumenta adopción.','CS',clientList(sinUsePoints),'alta') : '') +
-    (bajoUsePoints.length > 0 ? row('📉','Check-in proactivo','Reunión de adopción: revisar uso de Use Points con el cliente','Identifica por qué no usan el plan contratado','Abre conversación de valor antes de la renovación','CS',clientList(bajoUsePoints),'media') : '') +
-    (npsNeg.length > 0 ? row('😟','Workshop interno','Taller CS: "Gestión de NPS negativo y recuperación de cliente"','El equipo CS sabe cómo actuar ante NPS crítico','Convierte un detractor en promotor con el proceso correcto','CS Team','Coboe Botiga, Forus SA','alta') : '') +
-    (sinGMV.length > 0 ? row('📦','Diagnóstico de operación','Revisar integración activa y pedidos en los últimos 30 días','Detectar si el cliente está operando o si hay un problema técnico','Prevenir churn silencioso por operación caída','CS + Soporte',clientList(sinGMV),'alta') : '')
-  ));
-
-  // ── BLOQUE 2: BASE DE CONOCIMIENTO ────────────────────────────────────────
-  html += card('📚','Potenciación de Base de Conocimiento','Artículos que evitan tickets repetidos y empoderan al cliente','#4f8ef7', tabla(
-    row('📄','KB Article','Guía: "Sincronización de stock AnyMarket → Mercado Libre"','Clientes resuelven dudas antes de abrir ticket','Reduce hasta 30% los tickets de stock en ML. El cliente se autogestiona.','CS + Soporte','Emma Sleep, Forus SA, Lounge','alta') +
-    row('📄','KB Article','Guía: "Publicación de SKUs con imágenes en Falabella"','Evita rechazos de publicación por falta de imágenes','Menos tickets de publicación. Cliente publica más rápido.','CS + Soporte','Forus Colombia','media') +
-    row('📄','KB Article','Guía: "Configuración de integración Shopify + RUT en Chile"','Shopify captura RUT correctamente desde el primer intento','Elimina un ticket recurrente específico de clientes chilenos con Shopify','Soporte','Fashions Park','media') +
-    row('📄','KB Article','Guía: "Qué es Use Points y cómo maximizar el plan contratado"','El cliente entiende su plan y lo usa','Aumenta percepción de valor. Reduce preguntas básicas al CSM.','CS',clientList(sinUsePoints.concat(bajoUsePoints).slice(0,3)),'media') +
-    row('📄','KB Article','Checklist: "Antes de escalar un ticket a soporte"','El cliente pre-diagnostica antes de abrir un ticket','Tickets mejor documentados → resolución más rápida','CS + Soporte','Todos','baja')
-  ));
-
-  // ── BLOQUE 3: MICRO-VIDEOS ────────────────────────────────────────────────
-  html += card('🎬','Micro-Videos de Capacitación','Videos cortos (2-5 min) para empoderar al cliente y reducir fricción','#9b59b6', tabla(
-    row('▶️','Micro-video','Video 2 min: "Cómo revisar el estado de sincronización de stock"','El cliente identifica si hay un problema antes de llamar','Autogestión del cliente → menos urgencias innecesarias al CS','CS',clientList(stockML),'alta') +
-    row('▶️','Micro-video','Video 3 min: "Cómo usar Use Points paso a paso"','Adopción inmediata de la funcionalidad','El cliente ve valor en lo que pagó. Sube el NPS.','CS',clientList(sinUsePoints),'alta') +
-    row('▶️','Micro-video','Video 5 min: "Qué hacer cuando un SKU no se publica en el marketplace"','El cliente diagnostica y corrige errores de publicación solo','Menos tickets de publicación. Operación más ágil para el cliente.','CS + Soporte','Forus Colombia, Gino','media') +
-    row('▶️','Micro-video','Video 3 min: "Cómo leer el panel de pedidos en AnyMarket"','El cliente interpreta correctamente sus datos operativos','Menos consultas básicas. Conversaciones con el CS se vuelven estratégicas.','CS','Todos','baja') +
-    row('▶️','Micro-video','Video 4 min: "Proceso de migración Centry — qué esperar"','Clientes en migración saben qué va a pasar y cuándo','Reduce ansiedad y tickets de seguimiento durante la migración','CS + PM',clientList(centry),'media')
-  ));
-
-  // ── BLOQUE 4: WORKSHOPS ───────────────────────────────────────────────────
-  html += card('🏫','Workshops Continuos','Sesiones formativas periódicas con clientes y equipo interno','#00d4aa', tabla(
-    row('👥','Workshop cliente','Workshop mensual: "Novedades AnyMarket + casos de uso"','El cliente conoce features nuevas y las adopta','Aumenta uso de la plataforma → más difícil de churnar. Upsell natural.','CS','Todos — rotar por grupo de país','alta') +
-    row('👥','Workshop cliente','Workshop trimestral: "Revisión de KPIs y objetivos — EBR"','El cliente ve el valor entregado con datos concretos','Justifica la renovación. Genera confianza en la relación.','CS','Clientes con +6 meses','alta') +
-    row('👥','Workshop interno','Workshop mensual CS: "Análisis de patrones de tickets"','El equipo CS identifica problemas sistémicos antes de que exploten','Intervención proactiva. Menos escalaciones. Mejor experiencia cliente.','CS Team','Interno','alta') +
-    row('👥','Workshop cliente','Workshop onboarding: "Primeros 30 días con AnyMarket"','Clientes nuevos adoptan la plataforma más rápido','Reduce tiempo hasta primer valor (TTV). Baja tasa de churn en primeros 90 días.','CS','Whirlpool, Lacoste (nuevos)','alta') +
-    row('👥','Workshop interno','Workshop CS: "Cómo manejar stakeholders y cambios de contacto"','El equipo CS tiene un protocolo cuando cambia el contacto en el cliente','No se pierde la relación por rotación. Aplica a Tramontina y Colombiana.','CS Team','Interno — Tramontina, Colombiana','media')
-  ));
-
-  // ── RESUMEN IMPACTO ───────────────────────────────────────────────────────
-  html += `<div class="card" style="border-left:4px solid var(--accent2);background:linear-gradient(135deg,var(--surface),var(--surface2));">
-    <div class="card-title">📊 Impacto Estimado si se Ejecuta el Plan</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">
-      <div><div style="font-size:28px;font-weight:700;color:var(--green);">-40%</div><div style="font-size:12px;color:var(--text2);">Tickets repetidos (KB + micro-videos)</div></div>
-      <div><div style="font-size:28px;font-weight:700;color:var(--accent);">+25%</div><div style="font-size:12px;color:var(--text2);">Adopción Use Points (workshops)</div></div>
-      <div><div style="font-size:28px;font-weight:700;color:var(--accent2);">+30 pts</div><div style="font-size:12px;color:var(--text2);">NPS promedio (rescate + EBR)</div></div>
-      <div><div style="font-size:28px;font-weight:700;color:var(--yellow);">3 clientes</div><div style="font-size:12px;color:var(--text2);">Recuperados de riesgo churn</div></div>
-    </div>
-  </div>`;
-
-  document.getElementById('capacitacionGrid').innerHTML = html;
+function renderCapacitacion(){
+  const el=document.getElementById('capacitacionContent');if(!el)return;
+  let h='';
+  h+='<div style="margin-bottom:24px"><h3 style="color:var(--text);margin:0 0 4px">📚 Recursos & Suite AnyTools</h3>';
+  h+='<p style="color:var(--text3);font-size:13px;margin:0">Base de conocimiento, productos del ecosistema y planes disponibles para tus clientes.</p></div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">';
+  h+='<button onclick="showCapTab(0,this)" id="capTab0" class="btn btn-ghost" style="border-bottom:2px solid var(--accent);border-radius:4px 4px 0 0;color:var(--accent)">📖 Base de Conocimiento</button>';
+  h+='<button onclick="showCapTab(1,this)" id="capTab1" class="btn btn-ghost" style="border-radius:4px 4px 0 0">🧰 Suite AnyTools</button>';
+  h+='<button onclick="showCapTab(2,this)" id="capTab2" class="btn btn-ghost" style="border-radius:4px 4px 0 0">💬 Predize - Planes</button>';
+  h+='</div>';
+  h+='<div id="capPanel0">';
+  h+='<div style="margin-bottom:20px"><div style="font-weight:700;color:var(--text);margin-bottom:10px;font-size:14px">📦 Productos</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104824" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text);transition:background .2s"><div style="font-size:13px;font-weight:600">📝 ¿Cómo registrar productos?</div><div style="font-size:11px;color:var(--text3)">Guía paso a paso para crear productos</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104822" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">📊 Registrar productos por planilla</div><div style="font-size:11px;color:var(--text3)">Carga masiva de catálogo</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104834" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🏷️ Registrar características del producto</div><div style="font-size:11px;color:var(--text3)">Atributos y ficha técnica</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104833" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">✏️ Actualizar productos por pantalla</div><div style="font-size:11px;color:var(--text3)">Edición individual de productos</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000122861" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">📦 Registrar producto Combo/KIT</div><div style="font-size:11px;color:var(--text3)">Productos compuestos y kits</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000152447" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🖼️ Template de Imagen [NUEVO]</div><div style="font-size:11px;color:var(--text3)">Enriquecimiento visual de anuncios</div></a>';
+  h+='</div></div>';
+  h+='<div style="margin-bottom:20px"><div style="font-weight:700;color:var(--text);margin-bottom:10px;font-size:14px">📊 Inventario</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104852" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">⚙️ Reglas de Inventario</div><div style="font-size:11px;color:var(--text3)">Configura reglas de stock por canal</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000077640" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🏭 Inventario Virtual</div><div style="font-size:11px;color:var(--text3)">Stock reservado y virtual</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000074834" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">⏱️ Plazo Adicional (Crossdocking)</div><div style="font-size:11px;color:var(--text3)">Configura tiempos de despacho</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000160544" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🔍 Reglas aplicadas en transmisión</div><div style="font-size:11px;color:var(--text3)">Verificar reglas activas por canal</div></a>';
+  h+='</div></div>';
+  h+='<div style="margin-bottom:20px"><div style="font-weight:700;color:var(--text);margin-bottom:10px;font-size:14px">📡 Transmisiones (Publicaciones)</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104884" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">✅ Verificar anuncio en Marketplace</div><div style="font-size:11px;color:var(--text3)">Confirmar que el SKU se publicó</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105083" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🏆 ¿Qué es Buy Box?</div><div style="font-size:11px;color:var(--text3)">Ganar posicionamiento en ML</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104843" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🚫 Finalizar anuncios</div><div style="font-size:11px;color:var(--text3)">Pausar o dar de baja publicaciones</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000125791" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🔄 Verificar precio e inventario</div><div style="font-size:11px;color:var(--text3)">Confirmar sincronización exitosa</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104885" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🔗 Vincular anuncio con producto</div><div style="font-size:11px;color:var(--text3)">Linkear SKU existente en marketplace</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000133393" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">✏️ Actualizar título de publicación</div><div style="font-size:11px;color:var(--text3)">Editar títulos de anuncios activos</div></a>';
+  h+='</div></div>';
+  h+='<div style="margin-bottom:20px"><div style="font-weight:700;color:var(--text);margin-bottom:10px;font-size:14px">🛒 Ventas y Pedidos</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104841" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">👁️ ¿Dónde miro las ventas?</div><div style="font-size:11px;color:var(--text3)">Panel de pedidos en AnyMarket</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104836" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🔄 Actualizar pedido manualmente</div><div style="font-size:11px;color:var(--text3)">Cambiar estado de pedidos</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104842" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">❗ ¡Pedido no importado!</div><div style="font-size:11px;color:var(--text3)">Resolver pedidos sin sincronizar</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000095056" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">📈 Curva ABC</div><div style="font-size:11px;color:var(--text3)">Análisis de productos por volumen de ventas</div></a>';
+  h+='</div></div>';
+  h+='<div style="margin-bottom:20px"><div style="font-weight:700;color:var(--text);margin-bottom:10px;font-size:14px">🛍️ Integraciones Marketplace</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104675" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🟠 Configurar integración Amazon</div><div style="font-size:11px;color:var(--text3)">Setup y credenciales Amazon</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105210" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">👗 Configurar integración Dafiti</div><div style="font-size:11px;color:var(--text3)">Setup y particularidades Dafiti</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/folders/19000157195" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">🟡 Mercado Libre (50 artículos)</div><div style="font-size:11px;color:var(--text3)">Guías completas para ML</div></a>';
+  h+='<a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105916" target="_blank" class="card" style="padding:10px 14px;text-decoration:none;color:var(--text)"><div style="font-size:13px;font-weight:600">➕ Solicitar nuevo Marketplace</div><div style="font-size:11px;color:var(--text3)">Proceso para activar nuevos canales</div></a>';
+  h+='</div></div>';
+  h+='<div style="margin-top:16px"><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions" target="_blank" class="btn btn-ghost" style="font-size:12px">📚 Ver todos los artículos en el Help Center →</a></div>';
+  h+='</div>';
+  h+='<div id="capPanel1" style="display:none">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+  h+='<div class="card" style="border-top:3px solid var(--accent)">';
+  h+='<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">🔵 AnyMarket</div>';
+  h+='<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Hub de integración omnicanal</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">Centraliza catálogo, stock, pedidos y precios de todos los marketplaces en un solo panel. +200 funcionalidades, +150 canales integrados, USD 3.000M de GMV gestionados.</div>';
+  h+='<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Catálogo · Inventario · Pedidos · Transmisiones · Crossdocking · Repricing · Curva ABC</div>';
+  h+='<a href="https://anytools.global/cl/" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver producto →</a>';
+  h+='</div>';
+  h+='<div class="card" style="border-top:3px solid var(--yellow)">';
+  h+='<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">🏆 WinnerBox</div>';
+  h+='<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Pricing dinámico y monitoreo de competidores</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">Optimiza precios automáticamente, monitorea Buy Box, protege margen y aumenta competitividad. ROI comprobado desde la primera venta.</div>';
+  h+='<div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 <b>Resultados:</b></div>';
+  h+='<div style="font-size:11px;color:var(--green);margin-bottom:12px">+30% facturación · -75% esfuerzo en pricing · Monitoreo Buy Box automático</div>';
+  h+='<a href="https://anytools.global/cl/" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver producto →</a>';
+  h+='</div>';
+  h+='<div class="card" style="border-top:3px solid var(--green)">';
+  h+='<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">💬 Predize</div>';
+  h+='<div style="font-size:12px;color:var(--text3);margin-bottom:12px">SAC de marketplaces con IA</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">Centraliza atención pre y post venta de todos los marketplaces + WhatsApp. IA Mia responde 24/7. Integra ML, Amazon y Coppel.</div>';
+  h+='<div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 <b>Resultados:</b></div>';
+  h+='<div style="font-size:11px;color:var(--green);margin-bottom:12px">+70% respuestas con IA · 3x más eficiencia · -40% esfuerzo operativo · +USD 25M en ventas por chat IA</div>';
+  h+='<a href="https://predize.cl" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver producto →</a> ';
+  h+='<a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver planes →</a>';
+  h+='</div>';
+  h+='<div class="card" style="border-top:3px solid #8b5cf6">';
+  h+='<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">💰 Koncili</div>';
+  h+='<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Conciliación financiera automatizada</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">Cruza información financiera de marketplaces, detecta inconsistencias, valida comisiones y elimina trabajo manual de conciliación.</div>';
+  h+='<div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 <b>Resultados:</b></div>';
+  h+='<div style="font-size:11px;color:var(--green);margin-bottom:12px">+14.000M GMV conciliado en 2025 · +32M pedidos · -40% esfuerzo operativo</div>';
+  h+='<a href="https://unikon.koncili.com/es/docs/introducao" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver documentación →</a>';
+  h+='</div>';
+  h+='<div class="card" style="border-top:3px solid #ec4899">';
+  h+='<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">🏅 Marca Seleta</div>';
+  h+='<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Servicio Full Commerce</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">Acompañamos a marcas en estrategia y ejecución en marketplaces: diagnóstico, gestión de catálogo, campañas y operación tercerizada.</div>';
+  h+='<div style="font-size:11px;color:var(--text3);margin-bottom:4px">📊 <b>Resultados:</b></div>';
+  h+='<div style="font-size:11px;color:var(--green);margin-bottom:12px">Hasta 700% crecimiento · -80% esfuerzo del seller · Contacto directo con marketplaces</div>';
+  h+='<a href="https://anytools.global/cl/" target="_blank" class="btn btn-ghost" style="font-size:11px">Ver suite completa →</a>';
+  h+='</div>';
+  h+='</div>';
+  h+='</div>';
+  h+='<div id="capPanel2" style="display:none">';
+  h+='<div style="margin-bottom:16px"><div style="font-weight:700;color:var(--text);font-size:15px">💬 Predize — Planes disponibles</div>';
+  h+='<div style="font-size:12px;color:var(--text3)">Todos los planes incluyen agentes de I.A. Mia 24/7, integraciones con marketplaces y dashboard.</div></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:24px">';
+  h+='<div class="card" style="border-top:3px solid var(--accent);text-align:center">';
+  h+='<div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">Start</div>';
+  h+='<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Equipos pequeños</div>';
+  h+='<div style="font-size:12px;color:var(--text2);text-align:left">';
+  h+='✅ Desde 3 usuarios<br>✅ IA Mia (preventa, posventa, chat)<br>✅ Dashboard e informes<br>✅ Respuestas predefinidas<br>✅ Soporte por correo y chat';
+  h+='</div>';
+  h+='<a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px;margin-top:12px;display:block">Consultar precio →</a>';
+  h+='</div>';
+  h+='<div class="card" style="border-top:3px solid var(--yellow);text-align:center">';
+  h+='<div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">Standart</div>';
+  h+='<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Operaciones medianas</div>';
+  h+='<div style="font-size:12px;color:var(--text2);text-align:left">';
+  h+='✅ Desde 5 usuarios<br>✅ IA Mia (preventa, posventa, chat)<br>✅ Integración Zendesk + email<br>✅ API disponible<br>✅ Soporte WhatsApp, correo y chat';
+  h+='</div>';
+  h+='<a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px;margin-top:12px;display:block">Consultar precio →</a>';
+  h+='</div>';
+  h+='<div class="card" style="border-top:3px solid var(--green);text-align:center">';
+  h+='<div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">Performance</div>';
+  h+='<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Grandes operaciones</div>';
+  h+='<div style="font-size:12px;color:var(--text2);text-align:left">';
+  h+='✅ Desde 10 usuarios<br>✅ IA Mia completa<br>✅ Customer Success dedicado<br>✅ Integración completa<br>✅ Soporte WhatsApp, correo y chat';
+  h+='</div>';
+  h+='<a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px;margin-top:12px;display:block">Consultar precio →</a>';
+  h+='</div>';
+  h+='<div class="card" style="border-top:3px solid var(--red);text-align:center">';
+  h+='<div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">Enterprise</div>';
+  h+='<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Operaciones globales</div>';
+  h+='<div style="font-size:12px;color:var(--text2);text-align:left">';
+  h+='✅ Usuarios según consulta<br>✅ IA Mia + Mia Service (curación)<br>✅ Customer Success + Onboarding Consult<br>✅ Integración full + API<br>✅ Soporte prioritario 24/7';
+  h+='</div>';
+  h+='<a href="https://predize.cl/planes/" target="_blank" class="btn btn-ghost" style="font-size:11px;margin-top:12px;display:block">Consultar precio →</a>';
+  h+='</div>';
+  h+='</div>';
+  h+='<div class="card" style="background:var(--surface2)">';
+  h+='<div style="font-weight:600;color:var(--text);margin-bottom:12px">📊 Predize en números</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;text-align:center">';
+  h+='<div><div style="font-size:24px;font-weight:800;color:var(--green)">+4.000</div><div style="font-size:11px;color:var(--text3)">tiendas integradas</div></div>';
+  h+='<div><div style="font-size:24px;font-weight:800;color:var(--accent)">+30M</div><div style="font-size:11px;color:var(--text3)">mensajes gestionados</div></div>';
+  h+='<div><div style="font-size:24px;font-weight:800;color:var(--yellow)">USD 25M</div><div style="font-size:11px;color:var(--text3)">ventas generadas por IA</div></div>';
+  h+='<div><div style="font-size:24px;font-weight:800;color:var(--text)">75%</div><div style="font-size:11px;color:var(--text3)">más respuestas a tiempo</div></div>';
+  h+='</div></div>';
+  h+='</div>';
+  el.innerHTML=h;
 }
-
-// ── GUIA OPERACIONAL ──────────────────────────────────────────────────────────
+function showCapTab(idx,btn){
+  [0,1,2].forEach(i=>{
+    const p=document.getElementById('capPanel'+i);
+    const b=document.getElementById('capTab'+i);
+    if(p)p.style.display=i===idx?'':'none';
+    if(b){b.style.borderBottom=i===idx?'2px solid var(--accent)':'none';b.style.color=i===idx?'var(--accent)':'var(--text2)';}
+  });
+}
 function renderGuia() {
   const sec = (emoji, titulo, subtitulo, color, body) => `
     <div class="card" style="border-left:4px solid ${color};margin-bottom:20px;">
