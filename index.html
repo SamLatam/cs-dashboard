@@ -3560,7 +3560,6 @@ function renderAcciones() {
         </div>`;
       }).join('');
       return `<div class="kcol ${col.cls}">
-      return `<div class="kcol ${col.cls}">
         <div class="kcol-header"><span class="kcol-title">${col.emoji} ${col.label}</span><span class="kcol-cnt">${items.length}</span></div>
         ${cards||'<div style="color:var(--text3);font-size:12px;text-align:center;padding:16px 0">Sin acciones</div>'}
         <button class="add-col-btn" onclick="event.stopPropagation();openAddAction(null,'${col.key}','${tipo}')">+ Agregar</button>
