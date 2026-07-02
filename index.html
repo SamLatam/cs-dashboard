@@ -336,7 +336,20 @@ svg.donut { transform: rotate(-90deg); }
 .p-alta    { background: var(--orange-bg); color: var(--orange); }
 .p-media   { background: var(--yellow-bg); color: var(--yellow); }
 .p-baja    { background: rgba(79,142,247,.1); color: var(--text3); }
-.bottle-tag { font-size: 10px; background: var(--red-bg); color: var(--red); padding: 2px 6px; border-radius: 6px; font-weight: 700; }
+.bottle-tag { font-size: 10px; background: var(--red-bg); color: var(--red); padding: 2px 6px; border-radius: 6px; font-weight: 700; }.acard-status-bar { display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;border-top:1px solid var(--border);padding-top:8px; }
+.acs-btn { padding:3px 9px;border-radius:10px;font-size:10.5px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text3);transition:all .15s;line-height:1.5; }
+.acs-btn:hover { border-color:var(--accent);color:var(--accent); }
+.acs-ph.acs-on { background:rgba(100,116,139,.15);color:var(--text2);border-color:var(--text2); }
+.acs-ep.acs-on { background:rgba(243,156,18,.18);color:#e6950e;border-color:#e6950e; }
+.acs-bl.acs-on { background:rgba(231,76,60,.13);color:var(--red);border-color:var(--red); }
+.acs-rs.acs-on { background:rgba(34,197,94,.13);color:var(--green);border-color:var(--green); }
+.acs-bottle.acs-on { background:rgba(231,76,60,.13);color:var(--red);border-color:var(--red); }
+.acard-quick-row { display:flex;gap:5px;margin-top:5px;flex-wrap:wrap; }
+.acard-notes-panel { margin-top:8px;display:none; }
+.acard-notes-panel.open { display:block; }
+.acard-notes-panel textarea { width:100%;min-height:64px;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:12px;background:var(--surface);color:var(--text);resize:vertical;box-sizing:border-box;font-family:inherit; }
+.acard-save-row { display:flex;gap:5px;margin-top:5px; }
+
 .due-ok   { font-size: 11px; color: var(--text3); }
 .due-warn { font-size: 11px; color: var(--yellow); font-weight: 600; }
 .due-over { font-size: 11px; color: var(--red);    font-weight: 600; }
@@ -3519,18 +3532,34 @@ function renderAcciones() {
             </table>
           </div>`;
         }
-        return `<div class="acard${a.bottleneck?' bottleneck':''}${a.subtasks?' has-subtasks':''}" onclick="openEditAction('${a.id}')">
-          <div class="acard-client">🏢 ${cn.length>26?cn.slice(0,24)+'…':cn}</div>
-          <div class="acard-title">${a.title}</div>
+                return `<div class="acard${a.bottleneck?' bottleneck':''}${a.subtasks?' has-subtasks':''}" data-aid="${a.id}">
+          <div class="acard-client" onclick="openEditAction('${a.id}')">🏢 ${cn.length>26?cn.slice(0,24)+'…':cn}</div>
+          <div class="acard-title" onclick="openEditAction('${a.id}')">${a.title}</div>
           ${a.bottleneck?'<span class="bottle-tag">🚧 Cuello de botella</span>':''}
-          <div class="acard-meta"><span class="prio-tag p-${a.priority}">${a.priority}</span>${dueHtml}</div>
-          ${a.causa?`<div class="acard-causa">⚠ ${a.causa.length>80?a.causa.slice(0,78)+'…':a.causa}</div>`:''}
+          <div class="acard-meta" onclick="openEditAction('${a.id}')"><span class="prio-tag p-${a.priority}">${a.priority}</span>${dueHtml}</div>
+          ${a.causa?`<div class="acard-causa" onclick="openEditAction('${a.id}')">⚠ ${a.causa.length>80?a.causa.slice(0,78)+'…':a.causa}</div>`:''}
           ${subtasksHtml}
-          <div style="margin-top:10px;text-align:right">
-            <button onclick="event.stopPropagation();openEditAction('${a.id}')" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer">✏️ Editar</button>
+          <div class="acard-status-bar" onclick="event.stopPropagation()">
+            <button class="acs-btn acs-ph${a.status==='por-hacer'?' acs-on':''}" onclick="quickSaveAction('${a.id}','status','por-hacer')">📋 Pendiente</button>
+            <button class="acs-btn acs-ep${a.status==='en-progreso'?' acs-on':''}" onclick="quickSaveAction('${a.id}','status','en-progreso')">⚡ En Progreso</button>
+            <button class="acs-btn acs-bl${a.status==='bloqueado'?' acs-on':''}" onclick="quickSaveAction('${a.id}','status','bloqueado')">🚧 Estancada</button>
+            <button class="acs-btn acs-rs${a.status==='resuelto'?' acs-on':''}" onclick="quickSaveAction('${a.id}','status','resuelto')">✅ Resuelta</button>
+          </div>
+          <div class="acard-quick-row" onclick="event.stopPropagation()">
+            <button class="acs-btn acs-bottle${a.bottleneck?' acs-on':''}" onclick="quickSaveAction('${a.id}','bottleneck',${!a.bottleneck})">${a.bottleneck?'🚧 Bloqueante':'⚪ Sin bloqueo'}</button>
+            <button class="acs-btn" id="notebtn-${a.id}" onclick="toggleActionNotes('${a.id}')">${a.notes?'📝 Ver nota':'📝 + Nota'}</button>
+            <button class="acs-btn" onclick="openEditAction('${a.id}')" style="margin-left:auto">✏️ Detalle</button>
+          </div>
+          <div class="acard-notes-panel${a.notes?' open':''}" id="anp-${a.id}" onclick="event.stopPropagation()">
+            <textarea id="anotes-${a.id}" placeholder="Avance, obstáculos, próximos pasos...">${a.notes||''}</textarea>
+            <div class="acard-save-row">
+              <button onclick="quickSaveNote('${a.id}')" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">💾 Guardar</button>
+              <button onclick="toggleActionNotes('${a.id}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer">✕</button>
+            </div>
           </div>
         </div>`;
       }).join('');
+      return `<div class="kcol ${col.cls}">
       return `<div class="kcol ${col.cls}">
         <div class="kcol-header"><span class="kcol-title">${col.emoji} ${col.label}</span><span class="kcol-cnt">${items.length}</span></div>
         ${cards||'<div style="color:var(--text3);font-size:12px;text-align:center;padding:16px 0">Sin acciones</div>'}
@@ -3583,6 +3612,34 @@ function deleteCurrentAction(){
 }
 function closeAddAction(e){if(e.target===document.getElementById('addActionOverlay'))closeAddActionModal();}
 function closeAddActionModal(){document.getElementById('addActionOverlay').classList.remove('open');}
+function quickSaveAction(id, field, value) {
+  const idx = actions.findIndex(a => a.id === id);
+  if (idx < 0) return;
+  actions[idx] = {...actions[idx], [field]: value, updatedAt: today()};
+  saveActions();
+  scheduleGistSave();
+  renderAcciones();
+}
+function quickSaveNote(id) {
+  const ta = document.getElementById('anotes-' + id);
+  if (!ta) return;
+  const idx = actions.findIndex(a => a.id === id);
+  if (idx < 0) return;
+  actions[idx] = {...actions[idx], notes: ta.value.trim(), updatedAt: today()};
+  saveActions();
+  scheduleGistSave();
+  const btn = document.querySelector(`#anp-${id} button`);
+  if (btn) { const orig = btn.textContent; btn.textContent = '✅ Guardado'; setTimeout(() => { btn.textContent = orig; }, 1500); }
+}
+function toggleActionNotes(id) {
+  const panel = document.getElementById('anp-' + id);
+  const btn   = document.getElementById('notebtn-' + id);
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  if (btn) { const a = actions.find(x => x.id === id); btn.textContent = isOpen ? (a?.notes ? '📝 Ver nota' : '📝 + Nota') : '📝 Cerrar'; }
+}
+
 
 // ── IMPORT ─────────────────────────────────────────────────────────────────────
 function openImport(){document.getElementById('importTA').value='';document.getElementById('importResult').className='import-result';document.getElementById('importOverlay').classList.add('open');}
