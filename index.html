@@ -4975,6 +4975,113 @@ if (document.readyState === 'loading') {
 }
 ['prioridades','compromisos','riesgos','upsell'].forEach(k=>{const el=document.getElementById('note-'+k);if(el)el.addEventListener('blur',()=>saveNote(k));});
 
+// ── AUTOMATIZACIÓN D/E ────────────────────────────────────────────────────────
+function renderAutomatizacion(){
+  var el=document.getElementById('automatizacionGrid');
+  if(!el)return;
+  var ids=getVisibleClientIds();
+  var myC=clients.filter(function(c){return ids.indexOf(c.id)>-1;});
+  var scored=myC.map(function(c){var hs=calcHS(c);return {c:c,hs:hs.score,cl:hs.cl,comps:hs.comps};}).filter(function(x){return x.hs!==null&&x.hs<50;}).sort(function(a,b){return a.hs-b.hs;});
+  var tierE=scored.filter(function(x){return x.hs<30;});
+  var tierD=scored.filter(function(x){return x.hs>=30&&x.hs<50;});
+  var triggers=getAutoTriggers(myC);
+  var badge=document.getElementById('nb-automatizacion');
+  if(badge){badge.textContent=scored.length;badge.style.display=scored.length>0?'inline-flex':'none';}
+  var h='<div style="padding:20px">';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px">';
+  h+='<div style="background:var(--bg2);border-radius:10px;padding:16px;border-left:4px solid #e74c3c"><div style="font-size:28px;font-weight:700;color:#e74c3c">'+tierE.length+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Tier E &mdash; Críticos</div></div>';
+  h+='<div style="background:var(--bg2);border-radius:10px;padding:16px;border-left:4px solid #e67e22"><div style="font-size:28px;font-weight:700;color:#e67e22">'+tierD.length+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Tier D &mdash; En riesgo</div></div>';
+  h+='<div style="background:var(--bg2);border-radius:10px;padding:16px;border-left:4px solid var(--accent)"><div style="font-size:28px;font-weight:700;color:var(--accent)">'+triggers.critical+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Alertas críticas activas</div></div>';
+  h+='<div style="background:var(--bg2);border-radius:10px;padding:16px;border-left:4px solid #9b59b6"><div style="font-size:28px;font-weight:700;color:#9b59b6">'+scored.length+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Total bajo seguimiento IA</div></div>';
+  h+='</div>';
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--text1)">🛡 Red de Seguridad &mdash; Gatillos Automáticos</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">';
+  var tDefs=[{key:'criticalHS',icon:'🔴',label:'Health Score &lt; 20',color:'#e74c3c'},{key:'negNPS',icon:'🔴',label:'NPS &lt; -50',color:'#e74c3c'},{key:'manyTickets',icon:'⚠',label:'5+ tickets abiertos',color:'#e67e22'},{key:'zeroGMV',icon:'⚠',label:'GMV = 0 (sin operación)',color:'#e67e22'},{key:'noContact60',icon:'🔴',label:'60+ días sin contacto',color:'#9b59b6'}];
+  tDefs.forEach(function(td){var count=triggers[td.key]||0;h+='<div style="background:var(--bg1);border-radius:8px;padding:12px;border-left:3px solid '+(count>0?td.color:'#27ae60')+'"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:16px">'+(count>0?td.icon:'✓')+'</span><div><div style="font-size:11px;font-weight:600;color:'+(count>0?td.color:'#27ae60')+'">'+td.label+'</div><div style="font-size:13px;font-weight:700;color:var(--text1)">'+(count>0?count+' clientes':'Todo OK')+'</div></div></div></div>';});
+  h+='</div></div>';
+  if(tierE.length>0){h+='<div style="font-weight:700;font-size:16px;color:#e74c3c;margin-bottom:12px">🔴 Tier E &mdash; Intervención Inmediata</div>';tierE.forEach(function(x){h+=renderAutoCard(x,'E');});}
+  if(tierD.length>0){h+='<div style="font-weight:700;font-size:16px;color:#e67e22;margin:20px 0 12px">🟠 Tier D &mdash; Cadencia Activa</div>';tierD.forEach(function(x){h+=renderAutoCard(x,'D');});}
+  if(scored.length===0){h+='<div style="text-align:center;padding:60px;color:var(--text2)"><div style="font-size:48px;margin-bottom:12px">🎉</div><div style="font-size:18px;font-weight:600;color:var(--text1)">¡Cartera saludable!</div><div style="font-size:13px;margin-top:8px">Todos los clientes están en Tier A, B o C.</div></div>';}
+  h+='</div>';
+  el.innerHTML=h;
+}
+function getAutoTriggers(myC){
+  var t={critical:0,criticalHS:0,negNPS:0,manyTickets:0,zeroGMV:0,noContact60:0};
+  myC.forEach(function(c){var w=c.weekly||{};var hs=calcHS(c);if(hs.score!==null&&hs.score<20){t.criticalHS++;t.critical++;}if(w.nps!==null&&w.nps<-50){t.negNPS++;t.critical++;}if((w.tickets||0)>=5){t.manyTickets++;}if(w.gmv===0){t.zeroGMV++;}if(w.lastContact){var d=daysSince(w.lastContact);if(d>=60)t.noContact60++;}});
+  return t;
+}
+function renderAutoCard(x,tier){
+  var c=x.c;var w=c.weekly||{};var cId=c.id.replace(/[^a-z0-9]/gi,'_');
+  var causes=[];var tips=[];
+  if(w.upPlan&&w.qtUp!==null&&!c.centry){var up=Math.round((w.qtUp/w.upPlan)*100);if(up<50){causes.push('Adopción UP: '+up+'% ('+w.qtUp+'/'+w.upPlan+')');tips.push('adopcion');}}
+  if((w.tickets||0)>2){causes.push((w.tickets||0)+' tickets abiertos');if((w.bugs||0)>0)causes.push((w.bugs||0)+' bug(s) activo(s)');tips.push('soporte');}
+  if(w.nps!==null&&w.nps<0){causes.push('NPS: '+w.nps);tips.push('satisfaccion');}
+  if(w.gmv===0){causes.push('GMV = 0 — sin ventas');tips.push('gmv');}
+  if(w.lastContact){var dc=daysSince(w.lastContact);if(dc>30){causes.push(dc+' días sin contacto');tips.push('cadencia');}}
+  if(c.centry){causes.push('Pendiente migración Centry');tips.push('migracion');}
+  if(causes.length===0)causes.push('Health Score bajo — datos insuficientes');
+  var stage=getCadenceStage(w);var si=getCadenceInfo(stage);var msgs=generateAutoMessages(c,w,tier,tips);
+  var bc=tier==='E'?'#e74c3c':'#e67e22';
+  var h='<div style="background:var(--bg2);border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid '+bc+';border:1px solid var(--border)">';
+  h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">';
+  h+='<div style="display:flex;align-items:center;gap:10px"><div style="background:'+bc+';color:#fff;font-weight:700;font-size:12px;padding:3px 8px;border-radius:6px">Tier '+tier+'</div><div style="font-weight:700;font-size:15px;color:var(--text1)">'+c.name+'</div><div style="font-size:12px;color:var(--text2)">'+c.country+'</div></div>';
+  h+='<div style="display:flex;align-items:center;gap:8px"><div style="background:var(--bg1);border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700;color:'+bc+'">Health: '+x.hs+'</div><div style="background:var(--bg1);border-radius:6px;padding:4px 10px;font-size:12px;color:'+si.color+'">'+si.emoji+' '+si.label+'</div></div>';
+  h+='</div>';
+  h+='<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">🔎 Causa raíz detectada</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  causes.forEach(function(cause){h+='<span style="background:rgba(231,76,60,0.12);color:#e74c3c;font-size:11px;padding:3px 8px;border-radius:4px">'+cause+'</span>';});
+  h+='</div></div>';
+  h+='<div style="border-top:1px solid var(--border);padding-top:12px"><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">💬 Scripts listos para enviar</div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
+  h+='<button onclick="showAutoMsg(\''+cId+'\',0)" id="abtn_'+cId+'_0" style="padding:5px 12px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;font-size:12px;font-weight:600">📱 WhatsApp</button>';
+  h+='<button onclick="showAutoMsg(\''+cId+'\',1)" id="abtn_'+cId+'_1" style="padding:5px 12px;border:2px solid var(--border);border-radius:6px;background:transparent;color:var(--text1);cursor:pointer;font-size:12px">📧 Email</button>';
+  h+='<button onclick="showAutoMsg(\''+cId+'\',2)" id="abtn_'+cId+'_2" style="padding:5px 12px;border:2px solid var(--border);border-radius:6px;background:transparent;color:var(--text1);cursor:pointer;font-size:12px">📚 Recurso</button>';
+  h+='</div>';
+  h+='<div id="amsg_'+cId+'_0" style="display:block"><div style="background:var(--bg1);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--text1);white-space:pre-wrap">'+msgs.wa+'</div><button onclick="copyAutoMsg(\'amsg_'+cId+'_0\')" style="margin-top:6px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;font-size:11px">📋 Copiar</button></div>';
+  h+='<div id="amsg_'+cId+'_1" style="display:none"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600">Asunto: '+msgs.subj+'</div><div style="background:var(--bg1);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--text1);white-space:pre-wrap">'+msgs.email+'</div><button onclick="copyAutoMsg(\'amsg_'+cId+'_1\')" style="margin-top:6px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;font-size:11px">📋 Copiar email</button></div>';
+  h+='<div id="amsg_'+cId+'_2" style="display:none"><div style="background:var(--bg1);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--text1)">'+msgs.rec+'</div></div></div>';
+  h+='<div style="display:flex;gap:8px;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;flex-wrap:wrap">';
+  h+='<button onclick="logAutoContact(\''+c.id+'\')" style="padding:6px 14px;background:#27ae60;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">✓ Marcar contactado</button>';
+  if(stage>=3){h+='<button onclick="showToast(\'📢 Escalonado: '+c.name.replace(/'/g,'')+'\')" style="padding:6px 14px;background:#9b59b6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">📢 Escalar a humano</button>';}
+  h+='<button onclick="selectedClientId=\''+c.id+'\';nav(\'ficha\',document.getElementById(\'nav-ficha\'))" style="padding:6px 14px;background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;font-size:12px">Ver ficha</button>';
+  h+='</div></div>';
+  return h;
+}
+function getCadenceStage(w){if(!w.lastContact)return 3;var d=daysSince(w.lastContact);if(d<=7)return 0;if(d<=14)return 1;if(d<=30)return 2;if(d<=60)return 3;return 4;}
+function getCadenceInfo(s){var st=[{emoji:'🟢',label:'Monitoreo',color:'#27ae60'},{emoji:'💡',label:'Value Touch',color:'#f39c12'},{emoji:'📊',label:'Re-engagement',color:'#e67e22'},{emoji:'🔴',label:'Activación Push',color:'#e74c3c'},{emoji:'📢',label:'Escalar a humano',color:'#9b59b6'}];return st[Math.min(s,4)];}
+function generateAutoMessages(c,w,tier,tips){
+  var nm=c.name.split(' ')[0];var pain=tips[0]||'cadencia';
+  var waMap={
+    adopcion:'Hola '+nm+', buen día! 👋\n\nRevisando tu cuenta en AnyMarket vi que hay funcionalidades que todavía pueden ayudarte a vender más. Quiero compartirte algo concreto que está funcionando muy bien para clientes similares.\n\n¿Tienes 15 minutos esta semana para que te muestre? 📈',
+    soporte:'Hola '+nm+', soy Sami de AnyMarket 👋\n\nSé que tuviste algunos inconvenientes técnicos recientemente. Quiero asegurarme de que todo esté funcionando bien y que no tengas ningún bloqueo operativo.\n\n¿Me cuentas cómo están? Estoy disponible para ayudarte ✓',
+    satisfaccion:'Hola '+nm+', buen día! 👋\n\nQuiero hacer un check-in rápido. Tu opinión sobre AnyMarket nos importa mucho y queremos asegurarnos de que la plataforma responde a tus expectativas.\n\n¿Hay algo que podamos mejorar o en lo que pueda ayudarte hoy? 🎯',
+    gmv:'Hola '+nm+', soy Sami de AnyMarket 👋\n\n¿Está todo bien con la operación? No veo movimiento de ventas en el sistema y quiero asegurarme de que no hay ningún bloqueo.\n\n¿Te cuento qué pueden hacer para activar más canales? 📈',
+    migracion:'Hola '+nm+', buen día! 👋\n\n¿Cómo va avanzando la migración a AnyMarket? Nuestro equipo está listo para acompañarte en cada paso.\n\n¿Te agendo un call esta semana para revisar el estado juntos? 📈',
+    cadencia:'Hola '+nm+', soy Sami de AnyMarket 👋\n\nHacía tiempo que no te escribo. Quiero hacer un check-in rápido y compartirte algunas novedades de la plataforma que pueden ser muy útiles para tu operación.\n\n¿Tienes 15 minutos esta semana? 📈'
+  };
+  var subjMap={adopcion:'[AnyMarket] Cómo '+c.name+' puede multiplicar sus ventas en marketplaces',soporte:'[AnyMarket] Seguimiento de tu cuenta — estamos aquí para ayudarte',satisfaccion:'[AnyMarket] Queremos escucharte — tu opinión importa',gmv:'[AnyMarket] Activemos más canales de venta para '+c.name,migracion:'[AnyMarket] Estado de tu migración — próximos pasos',cadencia:'[AnyMarket] Novedades y oportunidades para tu operación'};
+  var emailMap={
+    adopcion:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nRevisando tu cuenta en AnyMarket, detecto que hay funcionalidades que aún no estás aprovechando al máximo y que tienen impacto directo en tus ventas.\n\nQuiero mostrarte en 15-20 min cómo otros clientes están usando estas funciones para aumentar su GMV.\n\n¿Te parece el miércoles o jueves esta semana?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
+    soporte:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nEstoy revisando tu cuenta y quiero asegurarme de que los temas técnicos recientes estén completamente resueltos.\n\nSi hay algo que sigue activo, dímelo directamente. Mi trabajo es que tu operación funcione sin fricción.\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
+    satisfaccion:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nQuiero hacer un check-in personalizado. Tu satisfacción con AnyMarket es nuestra prioridad.\n\n¿Podemos conectar 20 minutos esta semana?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
+    gmv:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nReviso la operación de '+c.name+' y quiero conectar para entender si hay algún bloqueo o si podemos activar nuevos canales de venta.\n\nTenemos oportunidades en marketplaces no activados que pueden impactar tu facturación.\n\n¿Agendamos 20 minutos esta semana?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
+    migracion:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nQuiero hacer seguimiento del proceso de migración hacia AnyMarket. Nuestro equipo de producto está disponible para acompañarte.\n\n¿Revisamos juntos el estado y los próximos pasos en una llamada breve esta semana?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
+    cadencia:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nHacía tiempo que no nos comunicamos y quiero hacer un check-in para asegurarme de que todo funciona correctamente.\n\n¿Tienes 15-20 minutos esta semana para una llamada rápida?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM'
+  };
+  var recMap={
+    adopcion:'<strong>📚 Recurso recomendado</strong><br><br>✔ <a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions" target="_blank" style="color:var(--accent)">Help Center AnyMarket</a><br>✔ Sesión de capacitación Use Points<br>✔ Checklist de adopción por etapa',
+    soporte:'<strong>📚 Recurso recomendado</strong><br><br>✔ Revisar Zendesk — tickets abiertos activos<br>✔ Escalar bug a Producto si es recurrente<br>✔ Ofrecer sesión de acompañamiento técnico',
+    satisfaccion:'<strong>📚 Recurso recomendado</strong><br><br>✔ Preparar agenda de Business Review<br>✔ Revisar NPS en Tracksale<br>✔ Identificar un quick win antes de la llamada',
+    gmv:'<strong>📚 Recurso recomendado</strong><br><br>✔ Revisar marketplaces no conectados en AnyMarket<br>✔ Proponer Predize para pricing dinámico<br>✔ Revisar publicaciones activas',
+    migracion:'<strong>📚 Recurso recomendado</strong><br><br>✔ Estado de migración Centry → AnyMarket<br>✔ Contactar PM de migración para alinear timeline<br>✔ Preparar checklist de go-live',
+    cadencia:'<strong>📚 Recurso recomendado</strong><br><br>✔ Revisar actividades en HubSpot<br>✔ Preparar 3 temas para la llamada<br>✔ Actualizar lastContact después del contacto'
+  };
+  return {wa:waMap[pain]||waMap.cadencia,subj:subjMap[pain]||subjMap.cadencia,email:emailMap[pain]||emailMap.cadencia,rec:recMap[pain]||recMap.cadencia};
+}
+function showAutoMsg(cId,idx){[0,1,2].forEach(function(i){var p=document.getElementById('amsg_'+cId+'_'+i);var b=document.getElementById('abtn_'+cId+'_'+i);if(p)p.style.display=i===idx?'block':'none';if(b){b.style.background=i===idx?'var(--accent)':'transparent';b.style.color=i===idx?'#fff':'var(--text1)';b.style.border=i===idx?'none':'2px solid var(--border)';}});}
+function copyAutoMsg(panelId){var el=document.getElementById(panelId);if(!el)return;var txt=el.querySelector('div').textContent||'';navigator.clipboard.writeText(txt).then(function(){showToast('Mensaje copiado al portapapeles','green');}).catch(function(){showToast('Selecciona el texto manualmente','orange');});}
+function logAutoContact(clientId){var today=new Date().toISOString().split('T')[0];var c=clients.find(function(x){return x.id===clientId;});if(c){c.weekly=c.weekly||{};c.weekly.lastContact=today;saveData();showToast('Contacto registrado — '+c.name,'green');renderAutomatizacion();}}
+
 // ── CAPACITACIÓN & VALOR ──────────────────────────────────────────────────────
 function renderCapacitacion(){
   var el=document.getElementById('capacitacionGrid');
