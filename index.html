@@ -76,7 +76,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
 .kpi-sub { font-size: 11px; color: var(--text2); margin-top: 5px; }
 
 /* ── GRID 2-col ── */
-.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
@@ -337,7 +336,8 @@ svg.donut { transform: rotate(-90deg); }
 .p-alta    { background: var(--orange-bg); color: var(--orange); }
 .p-media   { background: var(--yellow-bg); color: var(--yellow); }
 .p-baja    { background: rgba(79,142,247,.1); color: var(--text3); }
-.bottle-tag { font-size: 10px; background: var(--red-bg); color: var(--red); padding: 2px 6px; border-radius: 6px; font-weight: 700; }.acard-status-bar { display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;border-top:1px solid var(--border);padding-top:8px; }
+.bottle-tag { font-size: 10px; background: var(--red-bg); color: var(--red); padding: 2px 6px; border-radius: 6px; font-weight: 700; }
+.acard-status-bar { display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;border-top:1px solid var(--border);padding-top:8px; }
 .acs-btn { padding:3px 9px;border-radius:10px;font-size:10.5px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text3);transition:all .15s;line-height:1.5; }
 .acs-btn:hover { border-color:var(--accent);color:var(--accent); }
 .acs-ph.acs-on { background:rgba(100,116,139,.15);color:var(--text2);border-color:var(--text2); }
@@ -350,7 +350,6 @@ svg.donut { transform: rotate(-90deg); }
 .acard-notes-panel.open { display:block; }
 .acard-notes-panel textarea { width:100%;min-height:64px;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:12px;background:var(--surface);color:var(--text);resize:vertical;box-sizing:border-box;font-family:inherit; }
 .acard-save-row { display:flex;gap:5px;margin-top:5px; }
-
 .due-ok   { font-size: 11px; color: var(--text3); }
 .due-warn { font-size: 11px; color: var(--yellow); font-weight: 600; }
 .due-over { font-size: 11px; color: var(--red);    font-weight: 600; }
@@ -537,6 +536,22 @@ textarea.ficha-note:focus { border-color: var(--accent); }
 .lc-playbook .pb-title { font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px; }
 .lc-playbook .pb-item  { font-size:12px;color:var(--text2);padding:3px 0;display:flex;gap:8px; }
 
+/* ── SEGMENTO / PORTE / TENDENCIA BADGES ── */
+.seg-badge { display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.2px;background:rgba(79,142,247,.12);color:#4f8ef7;border:1px solid rgba(79,142,247,.25); }
+.porte-enterprise { background:rgba(155,89,182,.12);color:#9b59b6;border:1px solid rgba(155,89,182,.25); }
+.porte-mid { background:rgba(0,212,170,.12);color:#00d4aa;border:1px solid rgba(0,212,170,.25); }
+.porte-smb { background:rgba(243,156,18,.12);color:#f39c12;border:1px solid rgba(243,156,18,.25); }
+.tendencia-up   { color:var(--green);font-weight:700;font-size:11px; }
+.tendencia-down { color:var(--red);font-weight:700;font-size:11px; }
+.tendencia-flat { color:var(--text3);font-weight:700;font-size:11px; }
+.tipo-bug { background:rgba(231,76,60,.12);color:#e74c3c;border:1px solid rgba(231,76,60,.2); }
+.tipo-rec { background:rgba(243,156,18,.12);color:#f39c12;border:1px solid rgba(243,156,18,.2); }
+.tipo-duda { background:rgba(79,142,247,.12);color:#4f8ef7;border:1px solid rgba(79,142,247,.2); }
+.tipo-fin { background:rgba(46,204,113,.12);color:#2ecc71;border:1px solid rgba(46,204,113,.2); }
+.pres-ok  { background:rgba(46,204,113,.12);color:#2ecc71;border:1px solid rgba(46,204,113,.2); }
+.pres-par { background:rgba(243,156,18,.12);color:#f39c12;border:1px solid rgba(243,156,18,.2); }
+.pres-no  { background:rgba(231,76,60,.12);color:#e74c3c;border:1px solid rgba(231,76,60,.2); }
+
 </style>
 </head>
 <body>
@@ -576,17 +591,16 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     <div class="nav-label">Gestión</div>
     <div class="nav-item"        id="nav-acciones"  onclick="nav('acciones',this)">  <span class="nav-icon">⚡</span> Acciones <span class="nav-badge blue" id="nb-acciones">0</span></div>
     <div class="nav-item"        id="nav-alertas"   onclick="nav('alertas',this)">   <span class="nav-icon">🚨</span> Alertas &amp; Riesgos <span class="nav-badge" id="nb-alertas">0</span></div>
-    
-    <div class="nav-item" id="nav-churned" onclick="nav('churned',this)"><span class="nav-icon">🚪</span> Churneados</div><div class="nav-item"        id="nav-predicciones" onclick="nav('predicciones',this)"> <span class="nav-icon">🔮</span> Predicciones <span class="nav-badge yellow" id="nb-predicciones" style="display:none">0</span></div>
+    <div class="nav-item"        id="nav-predicciones" onclick="nav('predicciones',this)"> <span class="nav-icon">🔮</span> Predicciones <span class="nav-badge yellow" id="nb-predicciones" style="display:none">0</span></div>
     <div class="nav-label">Análisis</div>
     <div class="nav-item"        id="nav-capacitacion" onclick="nav('capacitacion',this)"> <span class="nav-icon">🎓</span> Capacitación & Valor</div>
+    <div class="nav-item"        id="nav-automatizacion" onclick="nav('automatizacion',this)"><span class="nav-icon">🤖</span> Auto D/E <span class="nav-badge" id="nb-automatizacion" style="background:#e74c3c;display:none">0</span></div>
     <div class="nav-item"        id="nav-catalogo"  onclick="nav('catalogo',this)">  <span class="nav-icon">🛒</span> Catálogo &amp; GMV</div>
     <div class="nav-item"        id="nav-metricas"  onclick="nav('metricas',this)">  <span class="nav-icon">📈</span> Métricas</div>
     <div class="nav-item"        id="nav-portfolio-a" onclick="nav('portfolio-a',this)"><span class="nav-icon">🎯</span> Portfolio A <span class="nav-badge blue" id="nb-portfolio-a">0</span></div>
     <div class="nav-item"        id="nav-notas"     onclick="nav('notas',this)">     <span class="nav-icon">📝</span> Notas</div>
     <div class="nav-label">Revenue</div>
     <div class="nav-item"        id="nav-renovaciones" onclick="nav('renovaciones',this)"><span class="nav-icon">💰</span> Renovaciones <span class="nav-badge yellow" id="nb-renovaciones" style="display:none">0</span></div>
-    <div class="nav-item" id="nav-expansion" onclick="nav('expansion',this)"><span class="nav-icon">📈</span> Expansión</div>
     <div class="nav-label">Ayuda</div>
     <div class="nav-item"        id="nav-faq"       onclick="nav('faq',this)">       <span class="nav-icon">💡</span> FAQ CS & AnyTools</div>
     <div class="nav-item"        id="nav-guia"      onclick="nav('guia',this)">      <span class="nav-icon">🧭</span> Guía Operacional</div>
@@ -820,11 +834,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     </div>
 
     <!-- PAGE: PREDICCIONES -->
-    
-    <div class="page" id="page-churned">
-      <div id="churnedContent"></div>
-    </div>
-<div class="page" id="page-predicciones">
+    <div class="page" id="page-predicciones">
       <div id="predGrid"></div>
     </div>
 
@@ -851,16 +861,13 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     <!-- PAGE: RENOVACIONES & REVENUE -->
     <div class="page" id="page-renovaciones">
       <div id="renovacionesContent"></div>
-    <div class="page" id="page-expansion">
-      <div id="expansionContent"></div>
-    </div>
-
     </div>
 
   <div class="page" id="page-equipo">
     </div>
 
     <!-- PAGE: NOTAS -->
+    <div class="page" id="page-automatizacion"><div id="automatizacionGrid"></div></div>
     <div class="page" id="page-faq"></div>
     <div class="page" id="page-portfolio-a"></div>
 
@@ -1130,7 +1137,7 @@ async function doGistSave() {
     // Notificar a todos los usuarios conectados vía Supabase broadcast
     if (sbClient) {
       try {
-        (_rtChannel || sbClient.channel('cs-latam-sync-v2')).send({
+        sbClient.channel('cs-latam-sync-v2').send({
           type: 'broadcast', event: 'data-updated',
           payload: { userId: user.id, savedAt: now }
         });
@@ -1143,43 +1150,21 @@ async function doGistSave() {
 }
 
 // ── SUPABASE REAL-TIME SYNC ───────────────────────────────────────────────────
-let _rtChannel = null;
 function subscribeToRealtime() {
   if (!sbClient) return;
   try {
-    _rtChannel = sbClient.channel('cs-latam-sync-v2')
+    sbClient.channel('cs-latam-sync-v2')
       .on('broadcast', { event: 'data-updated' }, async (payload) => {
         const user = getActiveUser();
         if (!user) return;
-        if (payload.payload?.userId === user.id) return;
-        if (Array.isArray(payload.payload?.inlineActions)) {
-          let ch = false;
-          payload.payload.inlineActions.forEach(remote => {
-            const idx = actions.findIndex(a => a.id === remote.id);
-            if (idx >= 0) { if ((remote.updatedAt||'') >= (actions[idx].updatedAt||'')) { actions[idx] = remote; ch = true; } }
-            else { actions.push(remote); ch = true; }
-          });
-          if (ch) { renderAcciones(); showSyncToast('\u{1F504} ' + (payload.payload.userId||'otro') + ' actualiz\u00F3 acciones'); }
-        }
+        if (payload.payload?.userId === user.id) return; // ignorar propios
+        console.log('[Realtime] Update from', payload.payload?.userId, '— recargando...');
         const loaded = await loadFromCloud();
         if (loaded) { _appLoaded = false; load(); renderKPIs(); renderOverview(); }
       })
       .subscribe();
     console.log('[Realtime] Subscrito a cs-latam-sync-v2');
   } catch(e) { console.warn('[Realtime] subscribe error:', e); }
-}
-
-function showSyncToast(msg) {
-  let t = document.getElementById('rt-toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'rt-toast';
-    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--accent);border-radius:20px;padding:8px 18px;font-size:12px;color:var(--text2);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3)';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg; t.style.opacity = '1';
-  clearTimeout(t._tmr);
-  t._tmr = setTimeout(() => { t.style.opacity = '0'; }, 3000);
 }
 
 async function loadFromCloud() {
@@ -1366,41 +1351,41 @@ async function syncNow() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PORT = [
-  {id:'fashions-park',   name:'FASHIONS PARK',                            country:'CL', centry:false},
-  {id:'coboe-botiga',    name:'COBOE S/A - BOTIGA',                       country:'UY', centry:false},
-  {id:'coboe-farmashop', name:'COBOE S/A - FARMASHOP',                    country:'UY', centry:false},
-  {id:'df-farma',        name:'D&F FARMA',                                country:'CL', centry:false},
-  {id:'divino',          name:'DIVINO S.A',                               country:'CL', centry:false},
-  {id:'dtodoymas',       name:'DTODOYMAS',                                country:'CL', centry:false},
-  {id:'forus-colombia',  name:'FORUS COLOMBIA',                           country:'CO', centry:true},
-  {id:'forus-sa',        name:'FORUS SA',                                 country:'CL', centry:true},
-  {id:'gino',            name:'GINO',                                     country:'CL', centry:true},
-  {id:'malaga',          name:'INVERSIONES MALAGA',                       country:'CL', centry:false},
-  {id:'loi-chile',       name:'LOI CHILE',                                country:'CL', centry:false},
-  {id:'lounge',          name:'LOUNGE S/A',                               country:'CL', centry:false},
-  {id:'maisa',           name:'MAISA',                                    country:'CL', centry:true},  // Centry → migrando a AnyMarket
-  {id:'maui',            name:'MAUI AND SONS',                            country:'CL', centry:false},
-  {id:'pillin',          name:'BEITGROUP S.A. (PILLIN)',                  country:'CL', centry:false},
-  {id:'pointbreak',      name:'POINTBREAK',                               country:'CL', centry:false},
-  {id:'belcorp-col',     name:'BEL STAR S/A - BELCORP Colombia',          country:'CO', centry:false},
-  {id:'colombiana',      name:'COLOMBIANA DE COMERCIO S/A',               country:'CO', centry:false},
-  {id:'emma-sleep',      name:'EMMA SLEEP - CL',                          country:'CL', centry:false},
-  {id:'lacoste',         name:'LACOSTE - CL',                             country:'CL', centry:false},
-  {id:'belcorp-chile',   name:'PROMOTORA DE BELLEZA S/A - BELCORP Chile', country:'CL', centry:false},
-  {id:'transbel',        name:'TRANSBEL S.A. DE C.V. - BELCORP Mexico',   country:'MX', centry:false},
-  {id:'whirlpool',       name:'WHIRLPOOL',                                country:'—',  centry:false},
-  {id:'beitgroup-pe',    name:'BEITGROUP PE',                             country:'PE', centry:false},
-  {id:'rip-curl',        name:'RIP CURL',                                 country:'CL', centry:false},
-  {id:'updown-juegos',   name:'UPDOWN JUEGOS',                            country:'CL', centry:false},
-  {id:'prosurf',         name:'PROSURF',                                  country:'CL', centry:false},
-  {id:'belcorp-mex',     name:'BEL STAR S/A - BELCORP Mexico',            country:'MX', centry:false},
-  {id:'belcorp-peru',    name:'BEL STAR S/A - BELCORP Peru',              country:'PE', centry:false},
-  {id:'emma-sleep-co',   name:'EMMA SLEEP - CO',                          country:'CO', centry:false},
-  {id:'forus-peru',      name:'FORUS PERU',                               country:'PE', centry:false},
-  {id:'kayser',          name:'KAYSER',                                   country:'CL', centry:false},
-  {id:'lacoste-gen',     name:'LACOSTE',                                  country:'CL', centry:false},
-  {id:'tramontina-cl',   name:'TRAMONTINA - CL',                          country:'CL', centry:false},
-  {id:'tramontina-mx',   name:'TRAMONTINA - MX',                          country:'MX', centry:false},
+  {id:'fashions-park',   name:'FASHIONS PARK',                            country:'CL', centry:false, segmento:'Moda',        porte:'Enterprise'},
+  {id:'coboe-botiga',    name:'COBOE S/A - BOTIGA',                       country:'UY', centry:false, segmento:'Farmacia',    porte:'Mid Market'},
+  {id:'coboe-farmashop', name:'COBOE S/A - FARMASHOP',                    country:'UY', centry:false, segmento:'Farmacia',    porte:'Mid Market'},
+  {id:'df-farma',        name:'D&F FARMA',                                country:'CL', centry:false, segmento:'Farma',       porte:'SMB'},
+  {id:'divino',          name:'DIVINO S.A',                               country:'CL', centry:false, segmento:'Moda',        porte:'Mid Market'},
+  {id:'dtodoymas',       name:'DTODOYMAS',                                country:'CL', centry:false, segmento:'Retail',      porte:'Mid Market'},
+  {id:'forus-colombia',  name:'FORUS COLOMBIA',                           country:'CO', centry:true,  segmento:'Calzado',     porte:'Enterprise'},
+  {id:'forus-sa',        name:'FORUS SA',                                 country:'CL', centry:true,  segmento:'Calzado',     porte:'Enterprise'},
+  {id:'gino',            name:'GINO',                                     country:'CL', centry:true,  segmento:'Calzado',     porte:'Mid Market'},
+  {id:'malaga',          name:'INVERSIONES MALAGA',                       country:'CL', centry:false, segmento:'Retail',      porte:'SMB'},
+  {id:'loi-chile',       name:'LOI CHILE',                                country:'CL', centry:false, segmento:'Moda',        porte:'Mid Market'},
+  {id:'lounge',          name:'LOUNGE S/A',                               country:'CL', centry:false, segmento:'Moda',        porte:'Mid Market'},
+  {id:'maisa',           name:'MAISA',                                    country:'CL', centry:true,  segmento:'Retail',      porte:'Mid Market'},
+  {id:'maui',            name:'MAUI AND SONS',                            country:'CL', centry:false, segmento:'Deportes',    porte:'Mid Market'},
+  {id:'pillin',          name:'BEITGROUP S.A. (PILLIN)',                  country:'CL', centry:false, segmento:'Moda',        porte:'Mid Market'},
+  {id:'pointbreak',      name:'POINTBREAK',                               country:'CL', centry:false, segmento:'Deportes',    porte:'SMB'},
+  {id:'belcorp-col',     name:'BEL STAR S/A - BELCORP Colombia',          country:'CO', centry:false, segmento:'Belleza',     porte:'Enterprise'},
+  {id:'colombiana',      name:'COLOMBIANA DE COMERCIO S/A',               country:'CO', centry:false, segmento:'Retail',      porte:'Enterprise'},
+  {id:'emma-sleep',      name:'EMMA SLEEP - CL',                          country:'CL', centry:false, segmento:'Hogar',       porte:'Mid Market'},
+  {id:'lacoste',         name:'LACOSTE - CL',                             country:'CL', centry:false, segmento:'Moda Premium',porte:'Enterprise'},
+  {id:'belcorp-chile',   name:'PROMOTORA DE BELLEZA S/A - BELCORP Chile', country:'CL', centry:false, segmento:'Belleza',     porte:'Enterprise'},
+  {id:'transbel',        name:'TRANSBEL S.A. DE C.V. - BELCORP Mexico',   country:'MX', centry:false, segmento:'Belleza',     porte:'Enterprise'},
+  {id:'whirlpool',       name:'WHIRLPOOL',                                country:'—',  centry:false, segmento:'Electrodomésticos', porte:'Enterprise'},
+  {id:'beitgroup-pe',    name:'BEITGROUP PE',                             country:'PE', centry:false, segmento:'Moda',        porte:'Mid Market'},
+  {id:'rip-curl',        name:'RIP CURL',                                 country:'CL', centry:false, segmento:'Deportes',    porte:'Mid Market'},
+  {id:'updown-juegos',   name:'UPDOWN JUEGOS',                            country:'CL', centry:false, segmento:'Gaming',      porte:'SMB'},
+  {id:'prosurf',         name:'PROSURF',                                  country:'CL', centry:false, segmento:'Deportes',    porte:'SMB'},
+  {id:'belcorp-mex',     name:'BEL STAR S/A - BELCORP Mexico',            country:'MX', centry:false, segmento:'Belleza',     porte:'Enterprise'},
+  {id:'belcorp-peru',    name:'BEL STAR S/A - BELCORP Peru',              country:'PE', centry:false, segmento:'Belleza',     porte:'Enterprise'},
+  {id:'emma-sleep-co',   name:'EMMA SLEEP - CO',                          country:'CO', centry:false, segmento:'Hogar',       porte:'Mid Market'},
+  {id:'forus-peru',      name:'FORUS PERU',                               country:'PE', centry:false, segmento:'Calzado',     porte:'Enterprise'},
+  {id:'kayser',          name:'KAYSER',                                   country:'CL', centry:false, segmento:'Moda',        porte:'Enterprise'},
+  {id:'lacoste-gen',     name:'LACOSTE',                                  country:'CL', centry:false, segmento:'Moda Premium',porte:'Enterprise'},
+  {id:'tramontina-cl',   name:'TRAMONTINA - CL',                          country:'CL', centry:false, segmento:'Hogar',       porte:'Enterprise'},
+  {id:'tramontina-mx',   name:'TRAMONTINA - MX',                          country:'MX', centry:false, segmento:'Hogar',       porte:'Enterprise'},
   // ── SAMI nuevos ────────────────────────────────────────────────────────────
   {id:'maletaschile',             name:'MALETASCHILE.COM',                             country:'CL', centry:false},
   {id:'saideep',                  name:'SAIDEEP',                                      country:'CL', centry:false},
@@ -2111,6 +2096,59 @@ function savePatterns(id) {
   const t = document.getElementById('saved-patterns-' + id);
   if (t) { t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 2000); }
 }
+// Ticket history from saved snapshots
+function getTicketHistory(clientId) {
+  try {
+    const hist = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
+    return hist.filter(h => h.tix && h.tix[clientId] !== undefined)
+               .map(h => ({ date: h.date, tix: h.tix[clientId] }));
+  } catch(e) { return []; }
+}
+// Returns {avg, wksWithTix, total, isRecurring, trend} or null if no data
+function getTicketPattern(clientId) {
+  const hist = getTicketHistory(clientId);
+  if (hist.length < 2) return null;
+  const recent = hist.slice(-8);
+  const wksWithTix = recent.filter(h => h.tix > 0).length;
+  const total = recent.reduce((s,h) => s + h.tix, 0);
+  const avg = Math.round((total / recent.length) * 10) / 10;
+  const isRecurring = wksWithTix >= 3;
+  const last = recent[recent.length-1].tix;
+  const prev = recent[recent.length-2].tix;
+  const trend = last > prev ? 'up' : last < prev ? 'down' : 'flat';
+  return { avg, wksWithTix, total, isRecurring, trend, weeks: recent.length };
+}
+// Mini sparkline bars (HTML) for ticket trend
+function ticketSparkline(clientId) {
+  const hist = getTicketHistory(clientId);
+  if (hist.length < 2) return '<span style="font-size:11px;color:var(--text3)">Sin histórico aún — se acumula con cada importación</span>';
+  const recent = hist.slice(-8);
+  const maxTix = Math.max(...recent.map(h => h.tix), 1);
+  const bars = recent.map(h => {
+    const pct = Math.round((h.tix / maxTix) * 100);
+    const col = h.tix === 0 ? '#27ae60' : h.tix >= 5 ? '#e74c3c' : h.tix >= 3 ? '#e67e22' : '#f39c12';
+    return `<div title="${h.date}: ${h.tix} ticket${h.tix!==1?'s':''}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:default">
+      <div style="width:18px;background:${col};height:${Math.max(pct*0.36,2)}px;border-radius:2px 2px 0 0;opacity:0.85;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.85"></div>
+      <div style="font-size:8px;color:var(--text3);writing-mode:vertical-rl;transform:rotate(180deg);line-height:1">${h.date.slice(5)}</div>
+    </div>`;
+  }).join('');
+  const pat = getTicketPattern(clientId);
+  const badge = pat?.isRecurring
+    ? `<span style="background:rgba(231,76,60,.12);color:#e74c3c;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:8px">🔁 RECURRENTE</span>`
+    : pat ? `<span style="background:rgba(39,174,96,.1);color:#27ae60;font-size:10px;padding:2px 7px;border-radius:4px;margin-left:8px">Sin patrón crítico</span>` : '';
+  const trendArrow = !pat ? '' : pat.trend==='up'?'<span style="color:#e74c3c">↑</span>':pat.trend==='down'?'<span style="color:#27ae60">↓</span>':'<span style="color:var(--text3)">→</span>';
+  return `<div style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;margin-bottom:6px;gap:4px">
+      <span style="font-size:11px;font-weight:600;color:var(--text2)">Tendencia</span>
+      ${trendArrow}
+      ${badge}
+      ${pat?`<span style="font-size:10px;color:var(--text3);margin-left:auto">${pat.wksWithTix}/${pat.weeks} sem. con tickets</span>`:''}
+    </div>
+    <div style="display:flex;align-items:flex-end;gap:4px;padding:8px;background:var(--bg1);border-radius:8px;height:60px">
+      ${bars}
+    </div>
+  </div>`;
+}
 
 // ── RISK ALERTS ────────────────────────────────────────────────────────────────
 function getRiskSignals(c) {
@@ -2424,7 +2462,6 @@ function saveActions() {
   pushToSupabase(_actionsKeySave, val);
   scheduleGistSave();
 }
-  if (_rtChannel && sbUser) { try { const _u = getActiveUser(); if (_u) { _rtChannel.send({ type: 'broadcast', event: 'data-updated', payload: { userId: _u.id, savedAt: Date.now(), inlineActions: actions.filter(a => _u.clientIds.includes(a.clientId)) } }); } } catch(e) {} }
 function populateSelects() {
   const visIds = getVisibleClientIds();
   const visPort = PORT.filter(p => visIds.includes(p.id));
@@ -2441,18 +2478,23 @@ function calcHS(c) {
   if (w.upPlan != null && w.qtUp != null && !c.centry) { const up=Math.min(100,Math.round(w.qtUp/w.upPlan*100)); comps.up={label:'Use Points',weight:.20,score:up,raw:w.qtUp+'/'+w.upPlan+' ('+up+'%)'}; }
   if (w.nps != null) { comps.nps={label:'NPS',weight:.15,score:Math.round((w.nps+100)/2),raw:(w.nps>0?'+':'')+w.nps}; }
   if (w.lastContact) { const d=daysSince(w.lastContact); comps.contact={label:'Último Contacto',weight:.15,score:d<7?100:d<14?80:d<30?60:d<60?40:d<90?20:0,raw:d+'d'}; }
-  const keys = Object.keys(comps); if (keys.length < 2) return {score:null,comps,cl:null};
+  const keys = Object.keys(comps); if (keys.length < 1) return {score:null,comps,cl:null,partial:true};
   const tw = keys.reduce((s,k)=>s+comps[k].weight,0);
   const score = Math.round(keys.reduce((s,k)=>s+comps[k].score*(comps[k].weight/tw),0));
-  const cl = score>=70?'green':score>=50?'yellow':score>=30?'orange':'red';
-  return {score,comps,cl};
+  // Penalizar score parcial: si faltan 3+ componentes, se aplica un cap descendente
+  const missing = 5 - keys.length - (c.centry?1:0); // Centry no tiene UP
+  const penalty = missing >= 3 ? 15 : missing >= 2 ? 5 : 0;
+  const finalScore = Math.max(0, score - penalty);
+  const cl = finalScore>=70?'green':finalScore>=50?'yellow':finalScore>=30?'orange':'red';
+  const partial = keys.length < 3;
+  return {score:finalScore,comps,cl,partial};
 }
 function hpClass(cl) { return cl==='green'?'hp-green':cl==='yellow'?'hp-yellow':cl==='orange'?'hp-orange':'hp-red'; }
 function hpEmoji(cl) { return cl==='green'?'🟢':cl==='yellow'?'🟡':cl==='orange'?'🟠':'🔴'; }
 function hpLabel(cl) { return cl==='green'?'Sano':cl==='yellow'?'Observación':cl==='orange'?'En riesgo':'Crítico'; }
 
 // ── NAVIGATION ─────────────────────────────────────────────────────────────────
-const PAGE_TITLES = {overview:'Vista General de Cartera',portfolio:'Mis Clientes',ficha:'Ficha Cliente',acciones:'Gestión de Acciones',alertas:'Alertas & Riesgos',predicciones:'🔮 Predicciones & Sugerencias',capacitacion:'🎓 Capacitación & Entrega de Valor',catalogo:'Catálogo & GMV',metricas:'Métricas','portfolio-a':'🎯 Aceleración Portfolio A',faq:'💡 FAQ — CS & AnyMarket & AnyTools',notas:'Notas',guia:'Guía Operacional CS',renovaciones:'💰 Renovaciones & Revenue at Risk',expansion:'📈 Expansion Radar',equipo:'👥 Gestión de Equipo',director:'👑 Vista Director — Portfolio Global',churned:'🚪 Clientes Cancelados'};
+const PAGE_TITLES = {overview:'Vista General de Cartera',portfolio:'Mis Clientes',ficha:'Ficha Cliente',acciones:'Gestión de Acciones',alertas:'Alertas & Riesgos',predicciones:'🔮 Predicciones & Sugerencias',capacitacion:'🎓 Capacitación & Entrega de Valor',automatizacion:'🤖 Automatización D/E — Clientes en Riesgo',catalogo:'Catálogo & GMV',metricas:'Métricas','portfolio-a':'🎯 Aceleración Portfolio A',faq:'💡 FAQ — CS & AnyMarket & AnyTools',notas:'Notas',guia:'Guía Operacional CS',renovaciones:'💰 Renovaciones & Revenue at Risk',equipo:'👥 Gestión de Equipo',director:'👑 Vista Director — Portfolio Global'};
 function nav(page, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -2466,16 +2508,15 @@ function nav(page, el) {
   if (page==='alertas')        renderAlerts();
   if (page==='predicciones')   renderPredicciones();
   if (page==='capacitacion')   renderCapacitacion();
+  if (page==='automatizacion') renderAutomatizacion();
   if (page==='catalogo')       renderCatalogo();
   if (page==='metricas')       renderMetrics();
   if (page==='portfolio-a')    renderPortfolioA();
   if (page==='faq')            renderFaq();
   if (page==='guia')           renderGuia();
   if (page==='renovaciones')   renderRenovaciones();
-  if (page==='expansion')      renderExpansion();
   if (page==='equipo')         renderEquipo();
   if (page==='director')       renderDirector();
-  if (page==='churned')        renderChurned();
 }
 
 // ── AUTO-FETCH API ─────────────────────────────────────────────────────────────
@@ -2675,7 +2716,7 @@ function renderCatalogo() {
 
 // ── KPIs ───────────────────────────────────────────────────────────────────────
 function renderKPIs() {
-  const scores = clients.filter(c=>!c.weekly?.churned).map(c=>calcHS(c)).filter(h=>h.score!=null);
+  const scores = clients.map(c=>calcHS(c)).filter(h=>h.score!=null);
   const byClass = (cl) => scores.filter(h=>h.cl===cl).length;
   const avgNPS = (() => { const v=clients.map(c=>c.weekly?.nps).filter(n=>n!=null); return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null; })();
   const tickets = clients.reduce((s,c)=>s+(c.weekly?.tickets||0),0);
@@ -2828,7 +2869,6 @@ function renderTable() {
     }
   }
   let list=_filteredClients.filter(c=>{
-    if(c.weekly?.churned)return false;
     if(q&&!c.name.toLowerCase().includes(q))return false;
     if(activeFilter==='todos')return true;
     if(activeFilter==='centry')return c.centry;
@@ -2860,6 +2900,8 @@ function renderTable() {
     const gmvCell=w.gmv!=null?fmtG(w.gmv):'<span class="no-data">—</span>';
     const tCell=w.tickets==null?'<span class="no-data">—</span>':w.tickets===0?'<span class="badge b-green">0</span>':w.tickets===1?`<span class="badge b-yellow">${w.tickets}</span>`:`<span class="badge b-red">${w.tickets}</span>`;
     const bugBadge=w.bugs?'<span class="badge b-red" style="margin-left:3px">🐛</span>':'';
+    const tipoBadge=tipoChamadoBadge(w.tipoChamado);
+    const presBadge=presenciaReunBadge(w.presenciaReuniones);
     const npsCell=w.nps==null?'<span class="no-data">—</span>':`<span class="${w.nps>=50?'nps-pos':w.nps>=0?'nps-mid':'nps-neg'}">${w.nps>0?'+':''}${w.nps}</span>`;
     const upCell=c.centry?'<span class="tag-centry">CENTRY</span>':w.upPlan&&w.qtUp!=null?`<span class="badge ${Math.min(100,Math.round(w.qtUp/w.upPlan*100))>=70?'b-green':Math.min(100,Math.round(w.qtUp/w.upPlan*100))>=40?'b-yellow':'b-red'}">${Math.min(100,Math.round(w.qtUp/w.upPlan*100))}%</span>`:'<span class="no-data">—</span>';
     const contCell=!w.lastContact?'<span class="no-data">—</span>':(`<span class="${daysSince(w.lastContact)<14?'contact-ok':daysSince(w.lastContact)<30?'contact-warn':daysSince(w.lastContact)<60?'contact-bad':'contact-crit'}">${fmtD(w.lastContact)}</span>`);
@@ -2870,11 +2912,13 @@ function renderTable() {
     // Risk signals for this row
     const sigs = getRiskSignals(c);
     const riskIcons = sigs.length ? `<div style="display:flex;gap:3px;margin-top:3px">${sigs.map(s=>`<span title="${s.label}" style="font-size:11px">${s.icon}</span>`).join('')}</div>` : '';
-    // Mood badge
+    // Mood badge + ticket recurrence badge
     const mood = moodBadge(c.id);
+    const tixPat = getTicketPattern(c.id);
+    const recBadge = tixPat?.isRecurring ? `<span title="Tickets recurrentes en ${tixPat.wksWithTix} de ${tixPat.weeks} semanas" style="font-size:9px;background:rgba(231,76,60,.12);color:#e74c3c;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:700">🔁</span>` : '';
     return `<tr onclick="openFicha('${c.id}')" style="${sigs.some(s=>s.type==='health'&&calcHS(c).cl==='red')?'background:rgba(231,76,60,.04)':''}">
-      <td>${hCell}</td><td><div class="client-name">${c.name}${c.centry?' <span class="tag-centry">CENTRY</span>':''} ${mood}</div><div class="client-sub">${fl} ${c.country}</div>${riskIcons}</td>
-      <td>${fl} ${c.country}</td><td>${gmvCell}</td><td>${tCell}${bugBadge}</td><td>${npsCell}</td><td>${upCell}</td><td>${contCell}</td><td>${actCell}<button class="btn btn-ghost" onclick="event.stopPropagation();churnClient('${c.id}')" style="font-size:10px;padding:2px 6px;margin-left:3px;color:var(--red);opacity:.65" title="Cancelado">🚪</button></td></tr>`;
+      <td>${hCell}</td><td><div class="client-name">${c.name}${c.centry?' <span class="tag-centry">CENTRY</span>':''} ${mood}${recBadge}</div><div class="client-sub">${fl} ${c.country}</div>${segPorteRow(c,w)}${riskIcons}</td>
+      <td>${fl} ${c.country}</td><td>${gmvCell}</td><td>${tCell}${bugBadge}${tipoBadge}</td><td>${npsCell}</td><td>${upCell}</td><td>${contCell}${presBadge}</td><td>${actCell}</td></tr>`;
   }).join('');
 }
 function sortBy(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=k==='name'?1:-1;}document.querySelectorAll('th').forEach(t=>{t.classList.remove('sorted');const i=t.textContent.replace(/[↑↓↕]/g,'').trim();t.textContent=i+' ↕';});const th=document.getElementById('th-'+k);if(th){th.classList.add('sorted');th.textContent=th.textContent.replace('↕',sortDir===1?'↑':'↓');}renderTable();}
@@ -2924,6 +2968,16 @@ function renderFicha() {
 
   cnt.innerHTML = `
     <div class="ficha-grid">
+      ${(c.segmento||c.porte||w.tipoChamado||w.presenciaReuniones)?`<div class="ficha-box" style="grid-column:1/-1;padding:12px 16px;background:rgba(79,142,247,.04);border-color:rgba(79,142,247,.2)">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Perfil:</span>
+          ${segBadge(c.segmento)}${porteBadge(c.porte)}
+          ${w.tipoChamado?'<span style="color:var(--text3);font-size:12px">·</span>'+tipoChamadoBadge(w.tipoChamado):''}
+          ${w.presenciaReuniones?'<span style="color:var(--text3);font-size:12px">·</span>'+presenciaReunBadge(w.presenciaReuniones):''}
+          <span style="color:var(--text3);font-size:12px">·</span>
+          <span style="font-size:11px;font-weight:700;color:var(--text3)">Tendencia US:</span>${tendenciaLabel(id)}
+        </div>
+      </div>`:''}
       <div class="ficha-box">
         <h4>📊 Datos Operativos</h4>
         <div class="ficha-row"><label>GMV del Mes</label><div class="val">${w.gmv!=null?fmtG(w.gmv):'—'}</div></div>
@@ -3000,7 +3054,8 @@ function renderFicha() {
       </div>
       <div class="ficha-box">
         <h4>🔁 Patrones de Tickets</h4>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Problemas recurrentes, áreas de dolor, bugs frecuentes</div>
+        ${ticketSparkline(id)}
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px;margin-top:8px">📝 Notas de patrones manuales</div>
         <textarea class="ficha-note" id="patterns-${id}" placeholder="Ej: Falla en sincronización de stock en ML cada lunes / Imágenes no actualizan en Walmart / RUT cliente no captura desde Shopify...">${getPatterns(id)}</textarea>
         <div style="display:flex;align-items:center;margin-top:8px">
           <button class="btn btn-ghost" onclick="savePatterns('${id}')" style="font-size:12px">💾 Guardar Patrones</button>
@@ -3060,102 +3115,6 @@ function closeMktInline(id) {
   if (!inp || !disp) return;
   inp.style.display  = 'none';
   disp.style.display = 'flex';
-}
-
-// ââ CHURN / CANCELADOS âââââââââââââââââââââââââââââââ
-function churnClient(id){
-  const c=clients.find(x=>x.id===id);if(!c)return;
-  if(!confirm('Marcar '+c.name+' como cancelado?'))return;
-  c.weekly=c.weekly||{};c.weekly.churned=true;c.weekly.churnDate=today();
-  saveData();scheduleGistSave();renderTable();renderKPIs();
-}
-function unchurnClient(id){
-  const c=clients.find(x=>x.id===id);if(!c)return;
-  c.weekly=c.weekly||{};c.weekly.churned=false;c.weekly.churnDate=null;
-  saveData();scheduleGistSave();renderChurned();renderTable();renderKPIs();
-}
-
-// ── EXPANSION RADAR ───────────────────────────────────────────────────────────────────────────────────
-function calcExpansionScore(c){
-  const w=c.weekly||{};let score=0,signals=[],opportunity='';
-  if(w.nps!=null){
-    if(w.nps>=50){score+=30;signals.push({t:'p',l:'Promotor NPS '+w.nps,col:'green'});}
-    else if(w.nps>=0){score+=15;signals.push({t:'n',l:'NPS Neutro '+w.nps,col:'yellow'});}
-    else{signals.push({t:'d',l:'Detractor '+w.nps,col:'red'});}
-  }
-  const hs=calcHS(c);
-  if(hs>=70){score+=25;signals.push({t:'h',l:'Salud '+hs,col:'green'});}
-  else if(hs>=50){score+=12;}
-  if(w.upPlan&&w.qtUp!=null){
-    const pct=w.qtUp/w.upPlan;
-    if(pct<0.5){score+=20;signals.push({t:'u',l:'UP '+Math.round(pct*100)+'% gap',col:'orange'});}
-    else if(pct<0.8){score+=10;}else{score+=5;}
-  }else if(c.centry){score+=10;signals.push({t:'m',l:'Post-migración Centry',col:'blue'});}
-  if(w.gmv>0){score+=15;}
-  if(!w.tickets){score+=10;signals.push({t:'c',l:'Sin tickets',col:'green'});}
-  else if(w.tickets<=2){score+=5;}
-  if(signals.find(s=>s.t==='u'))opportunity='Activar features + AnyTools';
-  else if(signals.find(s=>s.t==='p')&&hs>=70)opportunity='Expansión a nuevos marketplaces';
-  else if(signals.find(s=>s.t==='m'))opportunity='Upsell post-migración → plan AnyMarket completo';
-  else opportunity='Revisión estratégica de adopción';
-  return{score,signals,opportunity};
-}
-function renderExpansion(){
-  const el=document.getElementById('expansionContent');if(!el)return;
-  const user=getActiveUser();
-  const myC=clients.filter(c=>!c.weekly?.churned&&(user?user.clientIds.includes(c.id):true));
-  const scored=myC.map(c=>({c,...calcExpansionScore(c),hs:calcHS(c)})).sort((a,b)=>b.score-a.score);
-  const top=scored.slice(0,10);
-  const flags={Chile:'🇨🇱',Colombia:'🇨🇴',Uruguay:'🇺🇾',Mexico:'🇲🇽',Peru:'🇵🇪'};
-  const hi=scored.filter(s=>s.score>=70).length,mid=scored.filter(s=>s.score>=50&&s.score<70).length;
-  const upG=scored.filter(s=>s.signals.find(sg=>sg.t==='u')).length,pro=scored.filter(s=>s.signals.find(sg=>sg.t==='p')).length;
-  let html='<div style="margin-bottom:20px"><h3 style="color:var(--text);margin:0 0 4px">📈 Expansion Radar</h3>';
-  html+='<p style="color:var(--text3);font-size:13px;margin:0">Score = NPS 30% + Salud 25% + Adopción 20% + GMV 15% + Tickets 10%</p></div>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:24px">';
-  html+='<div class="card" style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--green)">'+hi+'</div><div style="font-size:12px;color:var(--text3)">🔥 Alto potencial</div></div>';
-  html+='<div class="card" style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--yellow)">'+mid+'</div><div style="font-size:12px;color:var(--text3)">⭐ Potencial medio</div></div>';
-  html+='<div class="card" style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--accent)">'+upG+'</div><div style="font-size:12px;color:var(--text3)">📦 UP subutilizados</div></div>';
-  html+='<div class="card" style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--text)">'+pro+'</div><div style="font-size:12px;color:var(--text3)">😍 Promotores NPS</div></div></div>';
-  html+='<div class="card" style="padding:0;overflow:hidden"><div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center"><span style="font-weight:600;color:var(--text)">Top '+top.length+' candidatos de expansión</span><span style="font-size:11px;color:var(--text3);margin-left:auto">ordenado por score</span></div>';
-  top.forEach((item,idx)=>{
-    const sc=item.score>=70?'var(--green)':item.score>=50?'var(--yellow)':'var(--text3)';
-    const medal=idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':(idx+1)+'.';
-    html+='<div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;gap:16px">';
-    html+='<div style="font-size:18px;min-width:32px">'+medal+'</div>';
-    html+='<div style="flex:1">';
-    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
-    html+='<span style="font-weight:700;font-size:14px;color:var(--text)">'+item.c.name+'</span>';
-    html+='<span style="font-size:11px;color:var(--text3)">'+(flags[item.c.country]||'')+' '+(item.c.country||'')+'</span>';
-    html+='<span style="margin-left:auto;font-size:22px;font-weight:800;color:'+sc+'">'+item.score+'</span>';
-    html+='<span style="font-size:10px;color:var(--text3)">pts</span></div>';
-    html+='<div style="font-size:12px;color:var(--accent);margin-bottom:6px">🎯 '+item.opportunity+'</div>';
-    html+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
-    item.signals.forEach(sg=>{
-      const c2=sg.col==='green'?'var(--green)':sg.col==='yellow'?'var(--yellow)':sg.col==='orange'?'#f97316':sg.col==='red'?'var(--red)':'var(--accent)';
-      html+='<span style="font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid '+c2+';color:'+c2+'">'+sg.l+'</span>';
-    });
-    html+='</div></div></div>';
-  });
-  html+='</div>';
-  el.innerHTML=html;
-}
-
-function renderChurned(){
-  const el=document.getElementById('churnedContent');if(!el)return;
-  const churned=clients.filter(c=>c.weekly?.churned);
-  if(!churned.length){el.innerHTML='<div class="empty" style="padding:40px;text-align:center;color:var(--text3)">Sin clientes cancelados ð</div>';return;}
-  const flags={Chile:'ð¨ð±',Colombia:'ð¨ð´',Uruguay:'ðºð¾',Mexico:'ð²ð½',Peru:'ðµðª'};
-  el.innerHTML='<div style="margin-bottom:20px"><h3 style="color:var(--text);margin:0 0 4px">ðª Clientes Cancelados â '+churned.length+'</h3><p style="color:var(--text3);font-size:13px;margin:0">Excluidos de cartera activa, KPIs y alertas.</p></div><div class="grid-2" style="gap:12px">'+
-    churned.map(c=>{
-      const w=c.weekly||{},fl=flags[c.country]||'ð';
-      return '<div class="card" style="border-left:3px solid var(--red)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div>'+
-        '<div style="font-weight:700;font-size:14px">'+c.name+'</div>'+
-        '<div style="font-size:12px;color:var(--text3)">'+fl+' '+c.country+'</div>'+
-        (w.churnDate?'<div style="font-size:11px;color:var(--red);margin-top:4px">ðª Cancelado el '+fmtD(w.churnDate)+'</div>':'')+
-        (w.gmv?'<div style="font-size:11px;color:var(--text3)">GMV: '+fmtG(w.gmv)+'</div>':'')+
-        (w.nps!=null?'<div style="font-size:11px;color:var(--text3)">NPS: '+w.nps+'</div>':'')+
-        '</div><button class="btn btn-ghost" onclick="unchurnClient(\''+c.id+'\')" style="font-size:11px;padding:4px 10px;color:var(--green);border-color:var(--green)">â© Reactivar</button></div></div>';
-    }).join('')+'</div>';
 }
 
 // ── ALERT DETAIL PANEL ─────────────────────────────────────────────────────────
@@ -3319,8 +3278,21 @@ function renderAlerts() {
   const visIds = getVisibleClientIds();
   const today = new Date(); today.setHours(0,0,0,0);
 
+  // ── 0. ALERTAS DE TICKETS RECURRENTES (basado en histórico) ──────────────────
+  clients.filter(c => visIds.includes(c.id)).forEach(c => {
+    const pat = getTicketPattern(c.id);
+    if (pat?.isRecurring) {
+      allAlerts.push({type:'ac-orange', client:c.name, clientId:c.id,
+        title:`🔁 Tickets Recurrentes — Problema Sistémico`,
+        body:`Tickets activos en ${pat.wksWithTix} de las últimas ${pat.weeks} semanas (promedio ${pat.avg}/semana). Puede indicar un problema técnico no resuelto, dependencia de soporte o falla de adopción.`,
+        causa: getPatterns(c.id) || 'Ver sección Patrones de Tickets en la ficha', fecha:null, sev:'alta',
+        extra:`Promedio ${pat.avg} tix/sem · Tendencia ${pat.trend==='up'?'↑ creciente':pat.trend==='down'?'↓ decreciente':'→ estable'}`
+      });
+    }
+  });
+
   // ── 1. ALERTAS DESDE DATOS DEL CLIENTE (tickets, NPS, contacto) ──────────────
-  clients.filter(c => visIds.includes(c.id) && !c.weekly?.churned).forEach(c => {
+  clients.filter(c => visIds.includes(c.id)).forEach(c => {
     const w = c.weekly || {};
     const clientActions = actions.filter(a => a.clientId === c.id);
     const critActions = clientActions.filter(a => a.priority==='critica' && a.status!=='completado');
@@ -3665,7 +3637,7 @@ function renderAcciones() {
             </table>
           </div>`;
         }
-                return `<div class="acard${a.bottleneck?' bottleneck':''}${a.subtasks?' has-subtasks':''}" data-aid="${a.id}">
+        return `<div class="acard${a.bottleneck?' bottleneck':''}${a.subtasks?' has-subtasks':''}" data-aid="${a.id}">
           <div class="acard-client" onclick="openEditAction('${a.id}')">🏢 ${cn.length>26?cn.slice(0,24)+'…':cn}</div>
           <div class="acard-title" onclick="openEditAction('${a.id}')">${a.title}</div>
           ${a.bottleneck?'<span class="bottle-tag">🚧 Cuello de botella</span>':''}
@@ -3744,6 +3716,7 @@ function deleteCurrentAction(){
 }
 function closeAddAction(e){if(e.target===document.getElementById('addActionOverlay'))closeAddActionModal();}
 function closeAddActionModal(){document.getElementById('addActionOverlay').classList.remove('open');}
+
 function quickSaveAction(id, field, value) {
   const idx = actions.findIndex(a => a.id === id);
   if (idx < 0) return;
@@ -3771,7 +3744,6 @@ function toggleActionNotes(id) {
   panel.classList.toggle('open', !isOpen);
   if (btn) { const a = actions.find(x => x.id === id); btn.textContent = isOpen ? (a?.notes ? '📝 Ver nota' : '📝 + Nota') : '📝 Cerrar'; }
 }
-
 
 // ── IMPORT ─────────────────────────────────────────────────────────────────────
 function openImport(){document.getElementById('importTA').value='';document.getElementById('importResult').className='import-result';document.getElementById('importOverlay').classList.add('open');}
@@ -3801,8 +3773,8 @@ function processImport(){
     // Guardar snapshot histórico
     try {
       const hist = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
-      const snap = { date: today(), scores: {} };
-      clients.forEach(c => { const h = calcHS(c); if (h.score != null) snap.scores[c.id] = h.score; });
+      const snap = { date: today(), scores: {}, tix: {} };
+      clients.forEach(c => { const h = calcHS(c); if (h.score != null) snap.scores[c.id] = h.score; if ((c.weekly?.tickets ?? null) !== null) snap.tix[c.id] = c.weekly.tickets; });
       hist.push(snap);
       if (hist.length > 12) hist.splice(0, hist.length - 12);
       localStorage.setItem(LS_HISTORY, JSON.stringify(hist));
@@ -3987,6 +3959,15 @@ function daysSince(d){return Math.round((Date.now()-new Date(d+'T12:00:00'))/864
 function daysUntil(d){if(!d)return null;return Math.round((new Date(d+'T12:00:00')-Date.now())/86400000);}
 function fmtG(n){if(n==null)return'—';if(n>=1e9)return'$'+(n/1e9).toFixed(1)+'B';if(n>=1e6)return'$'+(n/1e6).toFixed(0)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n;}
 function fmtD(d){if(!d)return'—';try{return new Date(d+'T12:00:00').toLocaleDateString('es-CL',{day:'2-digit',month:'short'});}catch(e){return d;}}
+
+// ── SEGMENTO / PORTE / TENDENCIA / TIPO / PRESENCIA HELPERS ─────────────────
+function porteBadge(porte){if(!porte)return'';const cls=porte==='Enterprise'?'porte-enterprise':porte==='Mid Market'?'porte-mid':'porte-smb';return`<span class="seg-badge ${cls}">${porte}</span>`;}
+function segBadge(seg){if(!seg)return'';return`<span class="seg-badge">${seg}</span>`;}
+function tipoChamadoBadge(tipo){if(!tipo)return'';const map={'Bug':['tipo-bug','🐛 Bug'],'Reclamación':['tipo-rec','😤 Reclamación'],'Duda':['tipo-duda','❓ Duda'],'Financiero':['tipo-fin','💰 Financiero']};const[cls,label]=map[tipo]||['seg-badge',tipo];return`<span class="seg-badge ${cls}" style="margin-left:3px">${label}</span>`;}
+function presenciaReunBadge(pres){if(!pres)return'';const map={'Compareceu':['pres-ok','✅ Asistió'],'Parcial':['pres-par','🔶 Parcial'],'Faltou':['pres-no','❌ Faltó']};const[cls,label]=map[pres]||['seg-badge',pres];return`<span class="seg-badge ${cls}" style="margin-left:3px">${label}</span>`;}
+function calcTendencia(clientId){try{const hist=JSON.parse(localStorage.getItem('cs-v3-history')||'[]');if(hist.length<2)return null;const recent=hist[hist.length-1].scores[clientId];const prev=hist[hist.length-2].scores[clientId];if(recent==null||prev==null)return null;const diff=recent-prev;if(diff>3)return'up';if(diff<-3)return'down';return'flat';}catch(e){return null;}}
+function tendenciaLabel(clientId){const t=calcTendencia(clientId);if(!t)return'';if(t==='up')return'<span class="tendencia-up">↑ Creciendo</span>';if(t==='down')return'<span class="tendencia-down">↓ Bajando</span>';return'<span class="tendencia-flat">→ Estable</span>';}
+function segPorteRow(c,w){const parts=[segBadge(c.segmento),porteBadge(c.porte),tipoChamadoBadge(w&&w.tipoChamado),presenciaReunBadge(w&&w.presenciaReuniones)].filter(Boolean);if(!parts.length)return'';return`<div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap">${parts.join('')}</div>`;}
 
 // ── CUSTOMER LIFECYCLE STAGE ──────────────────────────────────────────────────
 // Framework: Mehta / Steinman / Murphy — "Customer Success" (Wiley, 2016)
@@ -4976,282 +4957,339 @@ if (document.readyState === 'loading') {
 ['prioridades','compromisos','riesgos','upsell'].forEach(k=>{const el=document.getElementById('note-'+k);if(el)el.addEventListener('blur',()=>saveNote(k));});
 
 // ── AUTOMATIZACIÓN D/E ────────────────────────────────────────────────────────
+function _churnProb(x){
+  var score=0;var w=x.c.weekly||{};
+  if(w.nps!==null&&w.nps!==undefined){if(w.nps<=-50)score+=40;else if(w.nps<0)score+=25;else if(w.nps<30)score+=10;}
+  if(x.hs<20)score+=30;else if(x.hs<30)score+=20;else if(x.hs<50)score+=10;
+  if((w.tickets||0)>=5)score+=20;else if((w.tickets||0)>=3)score+=10;
+  if((w.bugs||0)>=2)score+=15;else if((w.bugs||0)>=1)score+=5;
+  if(!w.lastContact||daysSince(w.lastContact)>90)score+=20;else if(daysSince(w.lastContact)>60)score+=10;
+  if(w.qtUp===0&&w.upPlan)score+=10;
+  return Math.min(score,95);
+}
+function _priorityScore(x){return Math.round((100-x.hs)*0.6+_churnProb(x)*0.4);}
+function getHSSparkline(clientId){
+  try{
+    var hist=JSON.parse(localStorage.getItem(LS_HISTORY)||'[]');
+    var pts=hist.filter(function(h){return h.scores&&h.scores[clientId]!==undefined;}).slice(-8).map(function(h){return h.scores[clientId];});
+    if(pts.length<2)return '';
+    var mx=Math.max.apply(null,pts);var mn=Math.min.apply(null,pts);
+    var trend=pts[pts.length-1]-pts[pts.length-2];
+    var col=trend>0?'#2ecc71':trend<0?'#e74c3c':'#f39c12';
+    var range=Math.max(mx-mn+10,20);
+    var svgPts=pts.map(function(v,i){var sx=Math.round((i/(pts.length-1))*58);var sy=Math.round(18-((v-(mn-5))/range)*16);return sx+','+sy;}).join(' ');
+    return '<svg viewBox="0 0 60 20" style="width:60px;height:20px;display:inline-block;vertical-align:middle;margin-left:8px"><polyline points="'+svgPts+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+  }catch(e){return '';}
+}
+function _getCCORec(c,w,tier,cp,causes,tips){
+  var pain=tips[0]||'cadencia';
+  if(w.nps!==null&&w.nps!==undefined&&w.nps<=-50)return '1. Llamada de retención en las próximas 48h con el sponsor ejecutivo — no delegues este contacto.<br>2. Identificar la causa raíz del NPS antes de la llamada, documentar todo.<br>3. Presentar plan de acción con compromisos y fechas concretas.<br>4. Registrar riesgo crítico en HubSpot y notificar a tu Director hoy.';
+  if(pain==='soporte')return '1. Revisar todos los tickets abiertos hoy y cerrar los que puedas.<br>2. Escalar bugs a Producto con impacto documentado y cliente identificado.<br>3. Comunicar al cliente un plan de resolución proactivo con fechas.<br>4. Convertir esta crisis de soporte en una demo de excelencia CS.';
+  if(pain==='adopcion')return '1. Sesión de enablement personalizada con las funciones no utilizadas aplicadas a su industria.<br>2. Proponer un objetivo de adopción medible para el próximo mes.<br>3. Conectar mayor adopción con mayor GMV — mostrar el ROI con datos reales.<br>4. Agendar check-in de seguimiento en 2 semanas para medir avance.';
+  if(pain==='migracion')return '1. Alinear con el PM de migración hoy — revisar estado y próximo hito.<br>2. Comunicar al cliente un timeline claro con compromisos firmados.<br>3. Identificar si hay bloqueos técnicos o de decisión que puedas resolver.<br>4. Documentar en HubSpot el riesgo de migración como prioridad alta.';
+  if(pain==='gmv')return '1. Analizar en AnyMarket marketplaces desconectados o con errores.<br>2. Revisar catálogo, stock y publicaciones activas — identificar el bloqueo real.<br>3. Proponer Predize si no tienen repricing activo.<br>4. Establecer un objetivo de GMV conjunto con el cliente para el próximo mes.';
+  if(cp>=70)return '1. Cuenta CRÍTICA — riesgo de churn estimado en ~'+Math.round(cp)+'%.<br>2. Llamada ejecutiva esta semana con sponsor y champion — prepara un Business Review rápido.<br>3. Documenta el valor entregado vs el valor esperado por el cliente.<br>4. Prepara un plan de recuperación con compromisos concretos y medibles.';
+  return '1. Retomar contacto proactivo esta semana — no esperes que el cliente llegue primero.<br>2. Preparar 2–3 insights específicos sobre su operación para la llamada.<br>3. Agendar cadencia regular (quincenal o mensual) y confirmarla.<br>4. Actualizar HubSpot con el estado actual y próximos pasos asignados.';
+}
+function _todayActions(scored){
+  var acts=[];
+  scored.slice(0,5).forEach(function(x){
+    var c=x.c;var w=c.weekly||{};var cp=_churnProb(x);
+    if(w.nps!==null&&w.nps!==undefined&&w.nps<=-50)acts.push({icon:'🚨',text:'Llamada de retención urgente con <strong>'+c.name+'</strong> — NPS '+w.nps,urgencia:'crítica',color:'#e74c3c'});
+    else if((w.tickets||0)>=3)acts.push({icon:'⚠️',text:'Revisar y gestionar tickets críticos de <strong>'+c.name+'</strong> ('+w.tickets+' abiertos)',urgencia:'alta',color:'#e67e22'});
+    else if(!w.lastContact||daysSince(w.lastContact)>60)acts.push({icon:'📞',text:'Retomar contacto con <strong>'+c.name+'</strong> — '+(!w.lastContact?'sin contacto registrado':(daysSince(w.lastContact)+' días sin contacto')),urgencia:'alta',color:'#e67e22'});
+    else if(c.centry)acts.push({icon:'🔄',text:'Seguimiento migración Centry de <strong>'+c.name+'</strong> — coordinar con PM',urgencia:'media',color:'#f39c12'});
+    else acts.push({icon:'📊',text:'Health check <strong>'+c.name+'</strong> — HS '+x.hs+' (~'+Math.round(cp)+'% riesgo churn)',urgencia:'media',color:'#f39c12'});
+  });
+  return acts.slice(0,3);
+}
 function renderAutomatizacion(){
   var el=document.getElementById('automatizacionGrid');
   if(!el)return;
   var ids=getVisibleClientIds();
   var myC=clients.filter(function(c){return ids.indexOf(c.id)>-1;});
-  var scored=myC.map(function(c){var hs=calcHS(c);return {c:c,hs:hs.score,cl:hs.cl,comps:hs.comps};}).filter(function(x){return x.hs!==null&&x.hs<50;}).sort(function(a,b){return a.hs-b.hs;});
-  var tierE=scored.filter(function(x){return x.hs<30;});
-  var tierD=scored.filter(function(x){return x.hs>=30&&x.hs<50;});
+  function _forceRisk(c){
+    var w=c.weekly||{};
+    if(w.nps!==null&&w.nps!==undefined&&w.nps<=-50)return'E';
+    if(w.nps!==null&&w.nps!==undefined&&w.nps<0)return'D';
+    if((w.tickets||0)>=5)return'E';
+    if((w.tickets||0)>=3)return'D';
+    if((w.bugs||0)>=2)return'E';
+    return null;
+  }
+  var scored=myC.map(function(c){
+    var hs=calcHS(c);var forced=_forceRisk(c);
+    var inDE=hs.score!==null&&hs.score<50;var inForced=!!forced;
+    if(!inDE&&!inForced)return null;
+    if(forced==='E'){var s=hs.score!==null?Math.min(hs.score,29):15;return{c:c,hs:s,cl:'red',comps:hs.comps,partial:true,forcedRisk:true};}
+    if(forced==='D'&&!inDE)return{c:c,hs:40,cl:'orange',comps:hs.comps,partial:true,forcedRisk:true};
+    return{c:c,hs:hs.score,cl:hs.cl,comps:hs.comps,partial:hs.partial};
+  }).filter(Boolean).sort(function(a,b){return _priorityScore(b)-_priorityScore(a);});
+  var tierE=scored.filter(function(x){return x.hs<30||x.cl==='red';});
+  var tierD=scored.filter(function(x){return x.hs>=30&&x.cl!=='red';});
   var triggers=getAutoTriggers(myC);
   var badge=document.getElementById('nb-automatizacion');
   if(badge){badge.textContent=scored.length;badge.style.display=scored.length>0?'inline-flex':'none';}
+  var todayActs=_todayActions(scored);
+  var churnAvg=scored.length>0?Math.round(scored.reduce(function(s,x){return s+_churnProb(x);},0)/scored.length):0;
   var h='<div style="padding:20px">';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px">';
-  h+='<div style="background:var(--bg2);border-radius:10px;padding:16px;border-left:4px solid #e74c3c"><div style="font-size:28px;font-weight:700;color:#e74c3c">'+tierE.length+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Tier E &mdash; Críticos</div></div>';
-  h+='<div style="background:var(--bg2);border-radius:10px;padding:16px;border-left:4px solid #e67e22"><div style="font-size:28px;font-weight:700;color:#e67e22">'+tierD.length+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Tier D &mdash; En riesgo</div></div>';
-  h+='<div style="background:var(--bg2);border-radius:10px;padding:16px;border-left:4px solid var(--accent)"><div style="font-size:28px;font-weight:700;color:var(--accent)">'+triggers.critical+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Alertas críticas activas</div></div>';
-  h+='<div style="background:var(--bg2);border-radius:10px;padding:16px;border-left:4px solid #9b59b6"><div style="font-size:28px;font-weight:700;color:#9b59b6">'+scored.length+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Total bajo seguimiento IA</div></div>';
+  // PRIORITY ACTION QUEUE
+  h+='<div style="background:linear-gradient(135deg,rgba(231,76,60,0.12),rgba(155,89,182,0.08));border:1px solid rgba(231,76,60,0.25);border-radius:14px;padding:18px 20px;margin-bottom:20px">';
+  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-size:20px">🎯</span><div><div style="font-weight:800;font-size:14px;color:var(--text);letter-spacing:-.2px">TUS ACCIONES CRÍTICAS HOY</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Ordenadas por impacto en retención y revenue</div></div></div>';
+  if(todayActs.length===0)h+='<div style="color:#2ecc71;font-size:13px;font-weight:600">✅ Sin acciones críticas pendientes — cartera bajo control.</div>';
+  else todayActs.forEach(function(a){h+='<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:rgba(0,0,0,.2);border-radius:10px;margin-bottom:8px;border-left:3px solid '+a.color+'"><span style="font-size:17px;flex-shrink:0;margin-top:1px">'+a.icon+'</span><div style="flex:1;font-size:13px;color:var(--text);line-height:1.5">'+a.text+'</div><span style="font-size:10px;font-weight:700;background:'+a.color+'22;color:'+a.color+';padding:3px 8px;border-radius:6px;white-space:nowrap;align-self:center">'+a.urgencia.toUpperCase()+'</span></div>';});
   h+='</div>';
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid var(--border)">';
-  h+='<div style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--text1)">🛡 Red de Seguridad &mdash; Gatillos Automáticos</div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">';
-  var tDefs=[{key:'criticalHS',icon:'🔴',label:'Health Score &lt; 20',color:'#e74c3c'},{key:'negNPS',icon:'🔴',label:'NPS &lt; -50',color:'#e74c3c'},{key:'manyTickets',icon:'⚠',label:'5+ tickets abiertos',color:'#e67e22'},{key:'zeroGMV',icon:'⚠',label:'GMV = 0 (sin operación)',color:'#e67e22'},{key:'noContact60',icon:'🔴',label:'60+ días sin contacto',color:'#9b59b6'}];
-  tDefs.forEach(function(td){var count=triggers[td.key]||0;h+='<div style="background:var(--bg1);border-radius:8px;padding:12px;border-left:3px solid '+(count>0?td.color:'#27ae60')+'"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:16px">'+(count>0?td.icon:'✓')+'</span><div><div style="font-size:11px;font-weight:600;color:'+(count>0?td.color:'#27ae60')+'">'+td.label+'</div><div style="font-size:13px;font-weight:700;color:var(--text1)">'+(count>0?count+' clientes':'Todo OK')+'</div></div></div></div>';});
+  // KPIs
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-bottom:20px">';
+  h+='<div style="background:var(--surface);border-radius:10px;padding:15px;border-left:4px solid #e74c3c"><div style="font-size:26px;font-weight:800;color:#e74c3c">'+tierE.length+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-top:4px">Tier E — Críticos</div><div style="font-size:10px;color:var(--text3);margin-top:3px">Intervención inmediata</div></div>';
+  h+='<div style="background:var(--surface);border-radius:10px;padding:15px;border-left:4px solid #e67e22"><div style="font-size:26px;font-weight:800;color:#e67e22">'+tierD.length+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-top:4px">Tier D — En riesgo</div><div style="font-size:10px;color:var(--text3);margin-top:3px">Cadencia activa requerida</div></div>';
+  h+='<div style="background:var(--surface);border-radius:10px;padding:15px;border-left:4px solid #9b59b6"><div style="font-size:26px;font-weight:800;color:#9b59b6">'+churnAvg+'%</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-top:4px">Prob. Churn Media</div><div style="font-size:10px;color:var(--text3);margin-top:3px">Estimado IA por señales</div></div>';
+  h+='<div style="background:var(--surface);border-radius:10px;padding:15px;border-left:4px solid var(--accent)"><div style="font-size:26px;font-weight:800;color:var(--accent)">'+triggers.critical+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-top:4px">Alertas Activas</div><div style="font-size:10px;color:var(--text3);margin-top:3px">Gatillos automáticos</div></div>';
+  h+='</div>';
+  // SAFETY NET
+  h+='<div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:22px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:13px;margin-bottom:12px;color:var(--text)">🛡️ Red de Seguridad Automática</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:8px">';
+  var tDefs=[{key:'criticalHS',label:'Health Score < 20',color:'#e74c3c'},{key:'negNPS',label:'NPS detractor (< -50)',color:'#e74c3c'},{key:'manyTickets',label:'5+ tickets abiertos',color:'#e67e22'},{key:'zeroGMV',label:'GMV = 0 (sin operación)',color:'#e67e22'},{key:'noContact60',label:'60+ días sin contacto',color:'#9b59b6'}];
+  tDefs.forEach(function(td){var cnt=triggers[td.key]||0;h+='<div style="background:var(--bg);border-radius:8px;padding:10px 12px;border-left:3px solid '+(cnt>0?td.color:'#2ecc71')+'"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;font-weight:600;color:'+(cnt>0?td.color:'#2ecc71')+'">'+td.label+'</div><div style="font-size:15px;font-weight:800;color:'+(cnt>0?td.color:'#2ecc71')+'">'+(cnt>0?cnt:'✓')+'</div></div></div>';});
   h+='</div></div>';
-  if(tierE.length>0){h+='<div style="font-weight:700;font-size:16px;color:#e74c3c;margin-bottom:12px">🔴 Tier E &mdash; Intervención Inmediata</div>';tierE.forEach(function(x){h+=renderAutoCard(x,'E');});}
-  if(tierD.length>0){h+='<div style="font-weight:700;font-size:16px;color:#e67e22;margin:20px 0 12px">🟠 Tier D &mdash; Cadencia Activa</div>';tierD.forEach(function(x){h+=renderAutoCard(x,'D');});}
-  if(scored.length===0){h+='<div style="text-align:center;padding:60px;color:var(--text2)"><div style="font-size:48px;margin-bottom:12px">🎉</div><div style="font-size:18px;font-weight:600;color:var(--text1)">¡Cartera saludable!</div><div style="font-size:13px;margin-top:8px">Todos los clientes están en Tier A, B o C.</div></div>';}
+  // CLIENTS
+  if(tierE.length>0){h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-size:15px;font-weight:800;color:#e74c3c">🔴 Tier E — Intervención Inmediata</span><span style="background:rgba(231,76,60,.15);color:#e74c3c;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">'+tierE.length+'</span></div>';tierE.forEach(function(x,i){h+=renderAutoCard(x,'E',i+1);});}
+  if(tierD.length>0){h+='<div style="display:flex;align-items:center;gap:10px;margin:'+(tierE.length>0?'24px':'0')+' 0 14px"><span style="font-size:15px;font-weight:800;color:#e67e22">🟠 Tier D — Cadencia Activa</span><span style="background:rgba(230,126,34,.15);color:#e67e22;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">'+tierD.length+'</span></div>';tierD.forEach(function(x,i){h+=renderAutoCard(x,'D',i+1);});}
+  if(scored.length===0)h+='<div style="text-align:center;padding:60px 20px"><div style="font-size:52px;margin-bottom:16px">🎉</div><div style="font-size:20px;font-weight:700;color:var(--text)">¡Cartera saludable!</div><div style="font-size:13px;color:var(--text2);margin-top:8px">Todos los clientes están en Tier A, B o C.</div></div>';
   h+='</div>';
   el.innerHTML=h;
 }
 function getAutoTriggers(myC){
   var t={critical:0,criticalHS:0,negNPS:0,manyTickets:0,zeroGMV:0,noContact60:0};
-  myC.forEach(function(c){var w=c.weekly||{};var hs=calcHS(c);if(hs.score!==null&&hs.score<20){t.criticalHS++;t.critical++;}if(w.nps!==null&&w.nps<-50){t.negNPS++;t.critical++;}if((w.tickets||0)>=5){t.manyTickets++;}if(w.gmv===0){t.zeroGMV++;}if(w.lastContact){var d=daysSince(w.lastContact);if(d>=60)t.noContact60++;}});
+  myC.forEach(function(c){var w=c.weekly||{};var hs=calcHS(c);
+    if(hs.score!==null&&hs.score<20){t.criticalHS++;t.critical++;}
+    if(w.nps!==null&&w.nps!==undefined&&w.nps<-50){t.negNPS++;t.critical++;}
+    if((w.tickets||0)>=5)t.manyTickets++;
+    if(w.gmv===0)t.zeroGMV++;
+    var noC=!w.lastContact||daysSince(w.lastContact)>=60;if(noC)t.noContact60++;
+  });
   return t;
 }
-function renderAutoCard(x,tier){
+function renderAutoCard(x,tier,rank){
   var c=x.c;var w=c.weekly||{};var cId=c.id.replace(/[^a-z0-9]/gi,'_');
-  var causes=[];var tips=[];
-  if(w.upPlan&&w.qtUp!==null&&!c.centry){var up=Math.round((w.qtUp/w.upPlan)*100);if(up<50){causes.push('Adopción UP: '+up+'% ('+w.qtUp+'/'+w.upPlan+')');tips.push('adopcion');}}
-  if((w.tickets||0)>2){causes.push((w.tickets||0)+' tickets abiertos');if((w.bugs||0)>0)causes.push((w.bugs||0)+' bug(s) activo(s)');tips.push('soporte');}
-  if(w.nps!==null&&w.nps<0){causes.push('NPS: '+w.nps);tips.push('satisfaccion');}
-  if(w.gmv===0){causes.push('GMV = 0 — sin ventas');tips.push('gmv');}
-  if(w.lastContact){var dc=daysSince(w.lastContact);if(dc>30){causes.push(dc+' días sin contacto');tips.push('cadencia');}}
-  if(c.centry){causes.push('Pendiente migración Centry');tips.push('migracion');}
-  if(causes.length===0)causes.push('Health Score bajo — datos insuficientes');
-  var stage=getCadenceStage(w);var si=getCadenceInfo(stage);var msgs=generateAutoMessages(c,w,tier,tips);
   var bc=tier==='E'?'#e74c3c':'#e67e22';
-  var h='<div style="background:var(--bg2);border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid '+bc+';border:1px solid var(--border)">';
-  h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">';
-  h+='<div style="display:flex;align-items:center;gap:10px"><div style="background:'+bc+';color:#fff;font-weight:700;font-size:12px;padding:3px 8px;border-radius:6px">Tier '+tier+'</div><div style="font-weight:700;font-size:15px;color:var(--text1)">'+c.name+'</div><div style="font-size:12px;color:var(--text2)">'+c.country+'</div></div>';
-  h+='<div style="display:flex;align-items:center;gap:8px"><div style="background:var(--bg1);border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700;color:'+bc+'">Health: '+x.hs+'</div><div style="background:var(--bg1);border-radius:6px;padding:4px 10px;font-size:12px;color:'+si.color+'">'+si.emoji+' '+si.label+'</div></div>';
+  var cp=_churnProb(x);var cpColor=cp>=70?'#e74c3c':cp>=45?'#e67e22':'#f39c12';
+  var causes=[];var tips=[];
+  if(w.nps!==null&&w.nps!==undefined&&w.nps<0){causes.push('NPS: '+w.nps+' (detractor)');tips.push('satisfaccion');}
+  if((w.tickets||0)>0){causes.push((w.tickets||0)+' ticket(s) abierto(s)'+(w.bugs>0?' — '+w.bugs+' bug(s)':''));tips.push('soporte');}
+  if(w.ticketDetalle){causes.push('🏷️ '+w.ticketDetalle);}
+  if(w.causaRaiz){causes.push('🔍 Causa raíz: '+w.causaRaiz);}
+  if(w.upPlan&&w.qtUp!==null&&!c.centry){var up=Math.round((w.qtUp/w.upPlan)*100);if(up<50){causes.push('Adopción UP: '+up+'% ('+w.qtUp+'/'+w.upPlan+')');tips.push('adopcion');}}
+  if(w.gmv===0){causes.push('GMV = 0 — sin actividad de ventas');tips.push('gmv');}
+  if(c.centry){causes.push('⏳ Migración Centry pendiente');tips.push('migracion');}
+  if(w.lastContact){var dc=daysSince(w.lastContact);if(dc>30){causes.push(dc+' días sin contacto');if(tips.indexOf('cadencia')<0)tips.push('cadencia');}}
+  else if(!w.lastContact&&!c.centry){causes.push('Sin fecha de contacto registrada');if(tips.indexOf('cadencia')<0)tips.push('cadencia');}
+  if(causes.length===0)causes.push('Health Score bajo — datos parciales');
+  if(tips.length===0)tips.push('cadencia');
+  var stage=getCadenceStage(w);var si=getCadenceInfo(stage);
+  var msgs=generateAutoMessages(c,w,tier,tips,causes,x.hs,cp);
+  var spark=getHSSparkline(c.id);
+  var ccoRec=_getCCORec(c,w,tier,cp,causes,tips);
+  var h='<div style="background:var(--surface);border-radius:14px;margin-bottom:18px;border:1px solid rgba('+(tier==='E'?'231,76,60':'230,126,34')+',0.25);overflow:hidden">';
+  // Header
+  h+='<div style="background:rgba('+(tier==='E'?'231,76,60':'230,126,34')+',0.07);padding:14px 18px;border-bottom:1px solid rgba('+(tier==='E'?'231,76,60':'230,126,34')+',0.15);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">';
+  h+='<div style="display:flex;align-items:center;gap:10px">';
+  h+='<div style="background:'+bc+';color:#fff;font-weight:800;font-size:10px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">#'+rank+'</div>';
+  h+='<div style="background:'+bc+'22;color:'+bc+';font-weight:700;font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid '+bc+'44">Tier '+tier+'</div>';
+  h+='<div><div style="font-weight:700;font-size:14px;color:var(--text)">'+c.name+'</div>';
+  if(c.segmento||c.porte){h+='<div style="display:flex;gap:4px;margin-top:3px">'+segBadge(c.segmento)+porteBadge(c.porte)+'</div>';}
   h+='</div>';
-  h+='<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">🔎 Causa raíz detectada</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
-  causes.forEach(function(cause){h+='<span style="background:rgba(231,76,60,0.12);color:#e74c3c;font-size:11px;padding:3px 8px;border-radius:4px">'+cause+'</span>';});
-  h+='</div></div>';
-  h+='<div style="border-top:1px solid var(--border);padding-top:12px"><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">💬 Scripts listos para enviar</div>';
-  h+='<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
-  h+='<button onclick="showAutoMsg(\''+cId+'\',0)" id="abtn_'+cId+'_0" style="padding:5px 12px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;font-size:12px;font-weight:600">📱 WhatsApp</button>';
-  h+='<button onclick="showAutoMsg(\''+cId+'\',1)" id="abtn_'+cId+'_1" style="padding:5px 12px;border:2px solid var(--border);border-radius:6px;background:transparent;color:var(--text1);cursor:pointer;font-size:12px">📧 Email</button>';
-  h+='<button onclick="showAutoMsg(\''+cId+'\',2)" id="abtn_'+cId+'_2" style="padding:5px 12px;border:2px solid var(--border);border-radius:6px;background:transparent;color:var(--text1);cursor:pointer;font-size:12px">📚 Recurso</button>';
+  if(c.country)h+='<div style="font-size:11px;color:var(--text2)">'+c.country+'</div>';
+  if(spark)h+=spark;
   h+='</div>';
-  h+='<div id="amsg_'+cId+'_0" style="display:block"><div style="background:var(--bg1);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--text1);white-space:pre-wrap">'+msgs.wa+'</div><button onclick="copyAutoMsg(\'amsg_'+cId+'_0\')" style="margin-top:6px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;font-size:11px">📋 Copiar</button></div>';
-  h+='<div id="amsg_'+cId+'_1" style="display:none"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600">Asunto: '+msgs.subj+'</div><div style="background:var(--bg1);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--text1);white-space:pre-wrap">'+msgs.email+'</div><button onclick="copyAutoMsg(\'amsg_'+cId+'_1\')" style="margin-top:6px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;font-size:11px">📋 Copiar email</button></div>';
-  h+='<div id="amsg_'+cId+'_2" style="display:none"><div style="background:var(--bg1);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--text1)">'+msgs.rec+'</div></div></div>';
-  h+='<div style="display:flex;gap:8px;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;flex-wrap:wrap">';
-  h+='<button onclick="logAutoContact(\''+c.id+'\')" style="padding:6px 14px;background:#27ae60;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">✓ Marcar contactado</button>';
-  if(stage>=3){h+='<button onclick="showToast(\'📢 Escalonado: '+c.name.replace(/'/g,'')+'\')" style="padding:6px 14px;background:#9b59b6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">📢 Escalar a humano</button>';}
-  h+='<button onclick="selectedClientId=\''+c.id+'\';nav(\'ficha\',document.getElementById(\'nav-ficha\'))" style="padding:6px 14px;background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;font-size:12px">Ver ficha</button>';
+  h+='<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">';
+  h+='<div style="background:'+cpColor+'1a;color:'+cpColor+';border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700">⚠️ Churn ~'+Math.round(cp)+'%</div>';
+  h+='<div style="background:var(--bg);border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700;color:'+bc+'">HS '+x.hs+'</div>';
+  h+='<div style="background:var(--bg);border-radius:7px;padding:4px 9px;font-size:11px;color:'+si.color+'">'+si.emoji+' '+si.label+'</div>';
+  if(x.forcedRisk)h+='<div style="background:rgba(231,76,60,.1);color:#e74c3c;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:600">🚨 Señal directa</div>';
+  if(x.partial)h+='<div style="background:rgba(243,156,18,.1);color:#f39c12;border-radius:5px;padding:3px 7px;font-size:10px;font-weight:600">⚠️ Datos parciales</div>';
   h+='</div></div>';
+  // Body
+  h+='<div style="padding:16px 18px">';
+  h+='<div style="margin-bottom:14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text2);margin-bottom:8px">🔍 Señales de riesgo</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  causes.forEach(function(cause){var isNPS=cause.indexOf('NPS')>-1;var isBug=cause.indexOf('ticket')>-1||cause.indexOf('bug')>-1;var tag=isNPS?'#e74c3c':isBug?'#e67e22':'#f39c12';h+='<span style="background:'+tag+'1a;color:'+tag+';font-size:11px;padding:4px 10px;border-radius:6px;font-weight:500">'+cause+'</span>';});
+  var extraBadges=tipoChamadoBadge(w.tipoChamado)+presenciaReunBadge(w.presenciaReuniones);
+  if(extraBadges)h+=extraBadges;
+  var tnd=tendenciaLabel(c.id);if(tnd)h+='<span style="font-size:11px;padding:4px 8px">'+tnd+'</span>';
+  h+='</div></div>';
+  h+='<div style="background:rgba(79,142,247,.07);border-radius:10px;padding:12px 14px;margin-bottom:14px;border-left:3px solid var(--accent)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--accent);margin-bottom:6px">🎯 Qué haría un CCO esta semana</div><div style="font-size:12px;color:var(--text);line-height:1.7">'+ccoRec+'</div></div>';
+  h+='<div style="border-top:1px solid var(--border);padding-top:14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text2);margin-bottom:10px">💬 Scripts listos para enviar</div>';
+  h+='<div style="display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap">';
+  h+='<button onclick="showAutoMsg(\''+cId+'\',0)" id="abtn_'+cId+'_0" style="padding:5px 12px;border:none;border-radius:7px;background:var(--accent);color:#fff;cursor:pointer;font-size:12px;font-weight:600">📱 WhatsApp</button>';
+  h+='<button onclick="showAutoMsg(\''+cId+'\',1)" id="abtn_'+cId+'_1" style="padding:5px 12px;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--text);cursor:pointer;font-size:12px">📧 Email</button>';
+  h+='<button onclick="showAutoMsg(\''+cId+'\',2)" id="abtn_'+cId+'_2" style="padding:5px 12px;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--text);cursor:pointer;font-size:12px">📋 HubSpot</button>';
+  h+='<button onclick="showAutoMsg(\''+cId+'\',3)" id="abtn_'+cId+'_3" style="padding:5px 12px;border:1px solid var(--border);border-radius:7px;background:transparent;color:var(--text);cursor:pointer;font-size:12px">📚 Recursos</button>';
+  h+='</div>';
+  h+='<div id="amsg_'+cId+'_0" style="display:block"><div style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;line-height:1.65;color:var(--text);white-space:pre-wrap">'+msgs.wa+'</div><button onclick="copyAutoMsg(\'amsg_'+cId+'_0\')" style="margin-top:6px;padding:4px 12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;font-size:11px">📋 Copiar</button></div>';
+  h+='<div id="amsg_'+cId+'_1" style="display:none"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600">Asunto: '+msgs.subj+'</div><div style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;line-height:1.65;color:var(--text);white-space:pre-wrap">'+msgs.email+'</div><button onclick="copyAutoMsg(\'amsg_'+cId+'_1\')" style="margin-top:6px;padding:4px 12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;font-size:11px">📋 Copiar email</button></div>';
+  h+='<div id="amsg_'+cId+'_2" style="display:none"><div style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;line-height:1.65;color:var(--text);white-space:pre-wrap">'+msgs.hubspot+'</div><button onclick="copyAutoMsg(\'amsg_'+cId+'_2\')" style="margin-top:6px;padding:4px 12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;font-size:11px">📋 Copiar nota HubSpot</button></div>';
+  h+='<div id="amsg_'+cId+'_3" style="display:none"><div style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;line-height:1.65;color:var(--text)">'+msgs.rec+'</div></div>';
+  h+='</div>';
+  h+='<div style="display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap">';
+  h+='<button onclick="logAutoContact(\''+c.id+'\')" style="padding:7px 14px;background:#27ae60;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700">✓ Marcar contactado</button>';
+  if(stage>=3||tier==='E')h+='<button onclick="showToast(\'🔔 Escalado: '+c.name.replace(/'/g,'')+'\')" style="padding:7px 14px;background:#9b59b6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">🔔 Escalar</button>';
+  h+='<button onclick="selectedClientId=\''+c.id+'\';nav(\'ficha\',document.getElementById(\'nav-ficha\'))" style="padding:7px 14px;background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:8px;cursor:pointer;font-size:12px">Ver ficha →</button>';
+  h+='</div></div></div>';
   return h;
 }
 function getCadenceStage(w){if(!w.lastContact)return 3;var d=daysSince(w.lastContact);if(d<=7)return 0;if(d<=14)return 1;if(d<=30)return 2;if(d<=60)return 3;return 4;}
-function getCadenceInfo(s){var st=[{emoji:'🟢',label:'Monitoreo',color:'#27ae60'},{emoji:'💡',label:'Value Touch',color:'#f39c12'},{emoji:'📊',label:'Re-engagement',color:'#e67e22'},{emoji:'🔴',label:'Activación Push',color:'#e74c3c'},{emoji:'📢',label:'Escalar a humano',color:'#9b59b6'}];return st[Math.min(s,4)];}
-function generateAutoMessages(c,w,tier,tips){
+function getCadenceInfo(s){var st=[{emoji:'🟢',label:'Monitoreo',color:'#27ae60'},{emoji:'💡',label:'Value Touch',color:'#f39c12'},{emoji:'📊',label:'Re-engagement',color:'#e67e22'},{emoji:'🔴',label:'Activación Push',color:'#e74c3c'},{emoji:'🔔',label:'Escalar',color:'#9b59b6'}];return st[Math.min(s,4)];}
+function generateAutoMessages(c,w,tier,tips,causes,hsScore,cp){
   var nm=c.name.split(' ')[0];var pain=tips[0]||'cadencia';
+  var today=new Date().toISOString().split('T')[0];
+  var cpR=cp!=null?Math.round(cp):null;
   var waMap={
-    adopcion:'Hola '+nm+', buen día! 👋\n\nRevisando tu cuenta en AnyMarket vi que hay funcionalidades que todavía pueden ayudarte a vender más. Quiero compartirte algo concreto que está funcionando muy bien para clientes similares.\n\n¿Tienes 15 minutos esta semana para que te muestre? 📈',
-    soporte:'Hola '+nm+', soy Sami de AnyMarket 👋\n\nSé que tuviste algunos inconvenientes técnicos recientemente. Quiero asegurarme de que todo esté funcionando bien y que no tengas ningún bloqueo operativo.\n\n¿Me cuentas cómo están? Estoy disponible para ayudarte ✓',
-    satisfaccion:'Hola '+nm+', buen día! 👋\n\nQuiero hacer un check-in rápido. Tu opinión sobre AnyMarket nos importa mucho y queremos asegurarnos de que la plataforma responde a tus expectativas.\n\n¿Hay algo que podamos mejorar o en lo que pueda ayudarte hoy? 🎯',
-    gmv:'Hola '+nm+', soy Sami de AnyMarket 👋\n\n¿Está todo bien con la operación? No veo movimiento de ventas en el sistema y quiero asegurarme de que no hay ningún bloqueo.\n\n¿Te cuento qué pueden hacer para activar más canales? 📈',
-    migracion:'Hola '+nm+', buen día! 👋\n\n¿Cómo va avanzando la migración a AnyMarket? Nuestro equipo está listo para acompañarte en cada paso.\n\n¿Te agendo un call esta semana para revisar el estado juntos? 📈',
-    cadencia:'Hola '+nm+', soy Sami de AnyMarket 👋\n\nHacía tiempo que no te escribo. Quiero hacer un check-in rápido y compartirte algunas novedades de la plataforma que pueden ser muy útiles para tu operación.\n\n¿Tienes 15 minutos esta semana? 📈'
+    adopcion:'Hola '+nm+', buen día! 👋\n\nRevisando tu cuenta en AnyMarket vi que hay funcionalidades que aún no estás aprovechando y que pueden impactar directamente tus ventas.\n\n¿Tienes 15 minutos esta semana para que te muestre cómo otros clientes las están usando? 📈',
+    soporte:'Hola '+nm+', soy Sami de AnyMarket 👋\n\nQuiero asegurarme de que todo esté funcionando correctamente y que no tengas ningún bloqueo operativo.\n\n¿Me cuentas cómo está la operación? Estoy aquí para ayudarte ✓',
+    satisfaccion:'Hola '+nm+' 👋\n\nQuiero hacer un check-in rápido. Tu experiencia con AnyMarket es nuestra prioridad, y quiero escucharte directamente.\n\n¿Tienes 15 minutos esta semana para una llamada? 🎯',
+    gmv:'Hola '+nm+', soy Sami de AnyMarket 👋\n\nEstoy revisando la operación y veo una oportunidad para activar más canales de venta.\n\n¿Agendamos una llamada esta semana para verlo juntos? 📈',
+    migracion:'Hola '+nm+' 👋\n\nQuería darte un update sobre el proceso de migración a AnyMarket. El equipo está listo para avanzar.\n\n¿Podemos revisar el estado juntos esta semana? 📅',
+    cadencia:'Hola '+nm+', soy Sami de AnyMarket 👋\n\nHacía tiempo que no nos comunicamos y quiero hacer un check-in rápido — también tengo novedades de la plataforma que te pueden interesar.\n\n¿Tienes 15 minutos esta semana? 📅'
   };
-  var subjMap={adopcion:'[AnyMarket] Cómo '+c.name+' puede multiplicar sus ventas en marketplaces',soporte:'[AnyMarket] Seguimiento de tu cuenta — estamos aquí para ayudarte',satisfaccion:'[AnyMarket] Queremos escucharte — tu opinión importa',gmv:'[AnyMarket] Activemos más canales de venta para '+c.name,migracion:'[AnyMarket] Estado de tu migración — próximos pasos',cadencia:'[AnyMarket] Novedades y oportunidades para tu operación'};
+  var subjMap={
+    adopcion:'[AnyMarket] Oportunidad de crecimiento para '+c.name,
+    soporte:'[AnyMarket] Seguimiento de tu cuenta — aquí para ayudarte',
+    satisfaccion:'[AnyMarket] Quiero escucharte — check-in de satisfacción',
+    gmv:'[AnyMarket] Activemos más ventas para '+c.name,
+    migracion:'[AnyMarket] Update de tu migración — próximos pasos',
+    cadencia:'[AnyMarket] Novedades y check-in para tu operación'
+  };
   var emailMap={
-    adopcion:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nRevisando tu cuenta en AnyMarket, detecto que hay funcionalidades que aún no estás aprovechando al máximo y que tienen impacto directo en tus ventas.\n\nQuiero mostrarte en 15-20 min cómo otros clientes están usando estas funciones para aumentar su GMV.\n\n¿Te parece el miércoles o jueves esta semana?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
-    soporte:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nEstoy revisando tu cuenta y quiero asegurarme de que los temas técnicos recientes estén completamente resueltos.\n\nSi hay algo que sigue activo, dímelo directamente. Mi trabajo es que tu operación funcione sin fricción.\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
-    satisfaccion:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nQuiero hacer un check-in personalizado. Tu satisfacción con AnyMarket es nuestra prioridad.\n\n¿Podemos conectar 20 minutos esta semana?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
-    gmv:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nReviso la operación de '+c.name+' y quiero conectar para entender si hay algún bloqueo o si podemos activar nuevos canales de venta.\n\nTenemos oportunidades en marketplaces no activados que pueden impactar tu facturación.\n\n¿Agendamos 20 minutos esta semana?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
-    migracion:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nQuiero hacer seguimiento del proceso de migración hacia AnyMarket. Nuestro equipo de producto está disponible para acompañarte.\n\n¿Revisamos juntos el estado y los próximos pasos en una llamada breve esta semana?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM',
-    cadencia:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nHacía tiempo que no nos comunicamos y quiero hacer un check-in para asegurarme de que todo funciona correctamente.\n\n¿Tienes 15-20 minutos esta semana para una llamada rápida?\n\nSamiramis Monterola\nCustomer Success Manager — AnyMarket LATAM'
+    adopcion:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nRevisando tu cuenta detecto funcionalidades de AnyMarket que aún no estás aprovechando y que tienen impacto directo en GMV.\n\n¿Te parece si agendamos 20 minutos esta semana? Te muestro cómo clientes similares están generando resultados con ellas.\n\nSamiramis Monterola | Customer Success Manager — AnyMarket LATAM',
+    soporte:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nEstoy revisando tu cuenta y quiero confirmar que los temas técnicos recientes estén completamente resueltos.\n\nSi hay algo que sigue activo, escríbeme directamente — mi objetivo es que tu operación funcione sin fricción.\n\nSamiramis Monterola | Customer Success Manager — AnyMarket LATAM',
+    satisfaccion:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nQuiero hacer un check-in personalizado — tu satisfacción con AnyMarket es nuestra prioridad.\n\n¿Podemos conectar 20 minutos esta semana?\n\nSamiramis Monterola | Customer Success Manager — AnyMarket LATAM',
+    gmv:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nReviso la operación de '+c.name+' y veo oportunidades para activar canales de venta adicionales que pueden impactar tu revenue directamente.\n\n¿Agendamos 20 minutos esta semana?\n\nSamiramis Monterola | Customer Success Manager — AnyMarket LATAM',
+    migracion:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nQuiero dar seguimiento al proceso de migración hacia AnyMarket. El equipo está disponible y listo para avanzar.\n\n¿Revisamos el estado y próximos pasos en una llamada breve esta semana?\n\nSamiramis Monterola | Customer Success Manager — AnyMarket LATAM',
+    cadencia:'Hola '+nm+',\n\nEspero que estés muy bien.\n\nHacía tiempo que no nos comunicamos y quiero asegurarme de que todo esté funcionando correctamente.\n\n¿Tienes 15–20 minutos esta semana para una llamada rápida?\n\nSamiramis Monterola | Customer Success Manager — AnyMarket LATAM'
   };
+  var cleanCauses=(causes||[]).map(function(ca){return '- '+ca.replace(/<[^>]+>/g,'').replace(/[\ud800-\udfff]./g,'').trim();}).join('\n');
+  var hsNote='## Resumen Ejecutivo\n'+c.name+' | Tier '+tier+' | HS: '+(hsScore||'N/A')+(cpR!=null?' | Prob. Churn: ~'+cpR+'%':'')+'\n\n## Señales Detectadas\n'+cleanCauses+'\n\n## Riesgo de Churn\n'+(tier==='E'?'ALTO':'MEDIO')+' — seguimiento activo requerido\n\n## Acciones Inmediatas\n1. Contactar champion/sponsor esta semana\n2. Escalar tickets críticos si aplica\n3. Preparar plan de acción con compromisos y fechas\n\n## Estado\nActivo — Tier '+tier+' | Fecha: '+today;
   var recMap={
-    adopcion:'<strong>📚 Recurso recomendado</strong><br><br>✔ <a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions" target="_blank" style="color:var(--accent)">Help Center AnyMarket</a><br>✔ Sesión de capacitación Use Points<br>✔ Checklist de adopción por etapa',
-    soporte:'<strong>📚 Recurso recomendado</strong><br><br>✔ Revisar Zendesk — tickets abiertos activos<br>✔ Escalar bug a Producto si es recurrente<br>✔ Ofrecer sesión de acompañamiento técnico',
-    satisfaccion:'<strong>📚 Recurso recomendado</strong><br><br>✔ Preparar agenda de Business Review<br>✔ Revisar NPS en Tracksale<br>✔ Identificar un quick win antes de la llamada',
-    gmv:'<strong>📚 Recurso recomendado</strong><br><br>✔ Revisar marketplaces no conectados en AnyMarket<br>✔ Proponer Predize para pricing dinámico<br>✔ Revisar publicaciones activas',
-    migracion:'<strong>📚 Recurso recomendado</strong><br><br>✔ Estado de migración Centry → AnyMarket<br>✔ Contactar PM de migración para alinear timeline<br>✔ Preparar checklist de go-live',
-    cadencia:'<strong>📚 Recurso recomendado</strong><br><br>✔ Revisar actividades en HubSpot<br>✔ Preparar 3 temas para la llamada<br>✔ Actualizar lastContact después del contacto'
+    adopcion:'✅ Help Center AnyMarket\n✅ Sesión de capacitación Use Points personalizada\n✅ Checklist de adopción por etapa\n✅ Benchmark de uso vs clientes similares en su sector',
+    soporte:'✅ Revisar y cerrar tickets abiertos en Zendesk\n✅ Escalar bugs a Producto con impacto documentado\n✅ Ofrecer sesión técnica de acompañamiento\n✅ Documentar causa raíz para Producto',
+    satisfaccion:'✅ Preparar agenda de Business Review personalizada\n✅ Consultar NPS en Tracksale y analizar comentarios\n✅ Identificar un quick win antes de la llamada\n✅ Mapear nuevos stakeholders y validar champion',
+    gmv:'✅ Revisar marketplaces desconectados en AnyMarket\n✅ Analizar publicaciones con errores y stock bajo\n✅ Proponer Predize si no tienen repricing activo\n✅ Definir objetivo de GMV conjunto para el mes',
+    migracion:'✅ Alinear con PM de migración — revisar estado y hitos\n✅ Comunicar timeline claro al cliente con compromisos\n✅ Preparar checklist de go-live con criterios de éxito\n✅ Documentar en HubSpot riesgo y próximos pasos',
+    cadencia:'✅ Revisar historial de actividades en HubSpot\n✅ Preparar 3 temas de valor para la llamada\n✅ Registrar contacto después de la interacción\n✅ Revisar oportunidades de expansión antes de la llamada'
   };
-  return {wa:waMap[pain]||waMap.cadencia,subj:subjMap[pain]||subjMap.cadencia,email:emailMap[pain]||emailMap.cadencia,rec:recMap[pain]||recMap.cadencia};
+  return{wa:waMap[pain]||waMap.cadencia,subj:subjMap[pain]||subjMap.cadencia,email:emailMap[pain]||emailMap.cadencia,hubspot:hsNote,rec:recMap[pain]||recMap.cadencia};
 }
-function showAutoMsg(cId,idx){[0,1,2].forEach(function(i){var p=document.getElementById('amsg_'+cId+'_'+i);var b=document.getElementById('abtn_'+cId+'_'+i);if(p)p.style.display=i===idx?'block':'none';if(b){b.style.background=i===idx?'var(--accent)':'transparent';b.style.color=i===idx?'#fff':'var(--text1)';b.style.border=i===idx?'none':'2px solid var(--border)';}});}
-function copyAutoMsg(panelId){var el=document.getElementById(panelId);if(!el)return;var txt=el.querySelector('div').textContent||'';navigator.clipboard.writeText(txt).then(function(){showToast('Mensaje copiado al portapapeles','green');}).catch(function(){showToast('Selecciona el texto manualmente','orange');});}
-function logAutoContact(clientId){var today=new Date().toISOString().split('T')[0];var c=clients.find(function(x){return x.id===clientId;});if(c){c.weekly=c.weekly||{};c.weekly.lastContact=today;saveData();showToast('Contacto registrado — '+c.name,'green');renderAutomatizacion();}}
+function showAutoMsg(cId,idx){[0,1,2,3].forEach(function(i){var p=document.getElementById('amsg_'+cId+'_'+i);var b=document.getElementById('abtn_'+cId+'_'+i);if(p)p.style.display=i===idx?'block':'none';if(b){b.style.background=i===idx?'var(--accent)':'transparent';b.style.color=i===idx?'#fff':'var(--text)';b.style.border=i===idx?'none':'1px solid var(--border)';}});}
+function copyAutoMsg(panelId){var el=document.getElementById(panelId);if(!el)return;var txt=el.querySelector('div').textContent||'';navigator.clipboard.writeText(txt).then(function(){showToast('📋 Copiado al portapapeles','green');}).catch(function(){showToast('Selecciona el texto manualmente','orange');});}
+function logAutoContact(clientId){var today=new Date().toISOString().split('T')[0];var c=clients.find(function(x){return x.id===clientId;});if(c){c.weekly=c.weekly||{};c.weekly.lastContact=today;saveData();showToast('✓ Contacto registrado — '+c.name,'green');renderAutomatizacion();}}
 
 // ── CAPACITACIÓN & VALOR ──────────────────────────────────────────────────────
-function renderCapacitacion(){
-  var el=document.getElementById('capacitacionGrid');
-  if(!el)return;
-  var h='';
-  h+='<div style="padding:24px">';
-  h+='<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">';
-  h+='<button onclick="showCapTab(0)" id="capBtn0" style="padding:8px 18px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-weight:600;font-size:13px">Suite AnyTools</button>';
-  h+='<button onclick="showCapTab(1)" id="capBtn1" style="padding:8px 18px;border:2px solid var(--border);border-radius:8px;background:transparent;color:var(--text1);cursor:pointer;font-size:13px">Help Center</button>';
-  h+='<button onclick="showCapTab(2)" id="capBtn2" style="padding:8px 18px;border:2px solid var(--border);border-radius:8px;background:transparent;color:var(--text1);cursor:pointer;font-size:13px">Planes Predize</button>';
-  h+='</div>';
+function renderCapacitacion() {
+  const w = clients.map(c => c.weekly || {});
 
-  // Panel 0: Suite AnyTools
-  h+='<div id="capPanel0">';
-  h+='<p style="color:var(--text2);font-size:13px;margin-bottom:16px">Productos complementarios de AnyMarket para maximizar el valor de cada cliente.</p>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">';
+  // Detectar patrones desde datos reales
+  const conTickets     = clients.filter(c => (c.weekly||{}).tickets > 0);
+  const conBugs        = clients.filter(c => (c.weekly||{}).bugs > 0);
+  const sinUsePoints   = clients.filter(c => { const wp = c.weekly||{}; return wp.upPlan && (!wp.qtUp || wp.qtUp === 0); });
+  const bajoUsePoints  = clients.filter(c => { const wp = c.weekly||{}; return wp.upPlan && wp.qtUp > 0 && (wp.qtUp/wp.upPlan) < 0.5; });
+  const sinGMV         = clients.filter(c => (c.weekly||{}).gmv === 0);
+  const npsNeg         = clients.filter(c => { const n = (c.weekly||{}).nps; return n !== null && n !== undefined && n < 0; });
+  const sinContacto    = clients.filter(c => { const lc = (c.weekly||{}).lastContact; if (!lc) return true; return Math.floor((Date.now()-new Date(lc))/86400000) > 60; });
+  const centry         = clients.filter(c => (c.weekly||{}).centry);
 
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
-  h+='<div style="font-size:26px;margin-bottom:8px">&#129302;</div>';
-  h+='<div style="font-weight:700;font-size:15px;color:var(--text1);margin-bottom:4px">Predize &mdash; SAC con IA</div>';
-  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">+4.000 tiendas, +30M mensajes, USD 25M en ventas gestionadas por IA Mia. 75% respuestas a tiempo.</div>';
-  h+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
-  h+='<a href="https://predize.cl/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">Sitio web</a>';
-  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:transparent;color:var(--accent);padding:6px 10px;border-radius:6px;text-decoration:none;font-size:12px;border:1px solid var(--accent)">Ver planes</a>';
-  h+='</div></div>';
+  // Dolor 1: tickets recurrentes → stock ML (Emma + Forus tienen mismo bug)
+  const stockML = clients.filter(c => { const wr = c.weekly||{}; return (wr.tickets||0)>0 && (wr.causaRaiz||'').toLowerCase().includes('mercado libre'); });
 
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
-  h+='<div style="font-size:26px;margin-bottom:8px">&#127942;</div>';
-  h+='<div style="font-weight:700;font-size:15px;color:var(--text1);margin-bottom:4px">WinnerBox &mdash; Repricing</div>';
-  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Pricing din&aacute;mico inteligente. Compite autom&aacute;ticamente en precio en cada marketplace.</div>';
-  h+='<a href="https://winnerbox.com.br/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">Sitio web</a>';
-  h+='</div>';
+  const card = (emoji, titulo, subtitulo, color, contenido) => `
+    <div class="card" style="border-left:4px solid ${color};margin-bottom:16px;">
+      <div class="card-title" style="font-size:15px;">${emoji} ${titulo} <span>${subtitulo}</span></div>
+      ${contenido}
+    </div>`;
 
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
-  h+='<div style="font-size:26px;margin-bottom:8px">&#128200;</div>';
-  h+='<div style="font-weight:700;font-size:15px;color:var(--text1);margin-bottom:4px">Koncili &mdash; Conciliaci&oacute;n</div>';
-  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">+14.000M GMV conciliado, +32M pedidos, -40% esfuerzo operativo.</div>';
-  h+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
-  h+='<a href="https://www.koncili.com/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">Sitio web</a>';
-  h+='<a href="https://unikon.koncili.com/es/docs/introducao" target="_blank" rel="noopener" style="background:transparent;color:var(--accent);padding:6px 10px;border-radius:6px;text-decoration:none;font-size:12px;border:1px solid var(--accent)">Docs</a>';
-  h+='</div></div>';
+  const pill = (txt, color) => `<span style="background:${color}22;color:${color};border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700;margin-right:4px;">${txt}</span>`;
+  const clientList = arr => arr.length ? arr.map(c=>c.nombre).join(', ') : '—';
 
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
-  h+='<div style="font-size:26px;margin-bottom:8px">&#127775;</div>';
-  h+='<div style="font-weight:700;font-size:15px;color:var(--text1);margin-bottom:4px">Marca Seleta &mdash; Full Commerce</div>';
-  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Tecnolog&iacute;a para marcas que quieren crecer online con control total.</div>';
-  h+='<a href="https://marcaseleta.com.br/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">Sitio web</a>';
-  h+='</div>';
+  const row = (icono, tipo, accion, beneficio, valor, equipo, clientes, urgencia) => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:12px 10px;font-size:18px;text-align:center;">${icono}</td>
+      <td style="padding:12px 10px;">${pill(tipo, urgencia==='alta'?'#e74c3c':urgencia==='media'?'#f39c12':'#2ecc71')}</td>
+      <td style="padding:12px 10px;font-weight:600;font-size:13px;">${accion}</td>
+      <td style="padding:12px 10px;font-size:12px;color:var(--text2);">${beneficio}</td>
+      <td style="padding:12px 10px;font-size:12px;color:var(--accent2);">${valor}</td>
+      <td style="padding:12px 10px;font-size:12px;">${equipo}</td>
+      <td style="padding:12px 10px;font-size:11px;color:var(--text3);">${clientes}</td>
+    </tr>`;
 
-  h+='</div></div>';
+  const tabla = (filas) => `
+    <div style="overflow-x:auto;">
+    <table style="width:100%;">
+      <thead><tr style="background:var(--surface2);">
+        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Tipo</th>
+        <th style="padding:8px 10px;font-size:10px;color:var(--text3);"></th>
+        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Acción</th>
+        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Beneficio</th>
+        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Entrega de Valor</th>
+        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Equipo</th>
+        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Clientes afectados</th>
+      </tr></thead>
+      <tbody>${filas}</tbody>
+    </table></div>`;
 
-  // Panel 1: Help Center
-  h+='<div id="capPanel1" style="display:none">';
-  h+='<p style="color:var(--text2);font-size:13px;margin-bottom:16px">Art&iacute;culos clave del Help Center AnyMarket para capacitar a tus clientes.</p>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">';
+  let html = '';
 
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
-  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#128230; Productos</div>';
-  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104824" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Registrar productos</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104822" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Registrar por planilla</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000122861" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Producto Combo/KIT</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000152447" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Template de Imagen</a></li>';
-  h+='</ul></div>';
+  // ── BLOQUE 1: DOLORES DETECTADOS ──────────────────────────────────────────
+  html += card('🩺','Dolores Detectados en la Cartera','Patrones recurrentes que requieren acción coordinada','#e74c3c', tabla(
+    (stockML.length >= 2 ? row('🔄','Bug compartido','Agrupar tickets de stock ML en un solo caso','Resuelve el mismo bug para múltiples clientes en paralelo','Reduce tiempo de resolución 50% — menos impacto en GMV de los clientes','Soporte + Producto',clientList(stockML),'alta') : '') +
+    (conBugs.length > 0 ? row('🐛','Micro-video','Video 3 min: "Cómo reportar un bug con toda la información"','El cliente reporta mejor → soporte resuelve más rápido','Menos tickets mal documentados, ciclos de soporte más cortos','CS + Soporte',clientList(conBugs),'media') : '') +
+    (sinUsePoints.length > 0 ? row('💤','Workshop cliente','Taller: "Cómo activar y usar Use Points"','Clientes que no usan lo que pagaron empiezan a ver valor','Reduce riesgo de churn por percepción de bajo valor. Aumenta adopción.','CS',clientList(sinUsePoints),'alta') : '') +
+    (bajoUsePoints.length > 0 ? row('📉','Check-in proactivo','Reunión de adopción: revisar uso de Use Points con el cliente','Identifica por qué no usan el plan contratado','Abre conversación de valor antes de la renovación','CS',clientList(bajoUsePoints),'media') : '') +
+    (npsNeg.length > 0 ? row('😟','Workshop interno','Taller CS: "Gestión de NPS negativo y recuperación de cliente"','El equipo CS sabe cómo actuar ante NPS crítico','Convierte un detractor en promotor con el proceso correcto','CS Team','Coboe Botiga, Forus SA','alta') : '') +
+    (sinGMV.length > 0 ? row('📦','Diagnóstico de operación','Revisar integración activa y pedidos en los últimos 30 días','Detectar si el cliente está operando o si hay un problema técnico','Prevenir churn silencioso por operación caída','CS + Soporte',clientList(sinGMV),'alta') : '')
+  ));
 
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
-  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#128179; Inventario</div>';
-  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104852" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Reglas de Inventario</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000077640" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Inventario Virtual</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000074834" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Crossdocking / Plazo</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000160544" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Reglas en transmisi&oacute;n</a></li>';
-  h+='</ul></div>';
+  // ── BLOQUE 2: BASE DE CONOCIMIENTO ────────────────────────────────────────
+  html += card('📚','Potenciación de Base de Conocimiento','Artículos que evitan tickets repetidos y empoderan al cliente','#4f8ef7', tabla(
+    row('📄','KB Article','Guía: "Sincronización de stock AnyMarket → Mercado Libre"','Clientes resuelven dudas antes de abrir ticket','Reduce hasta 30% los tickets de stock en ML. El cliente se autogestiona.','CS + Soporte','Emma Sleep, Forus SA, Lounge','alta') +
+    row('📄','KB Article','Guía: "Publicación de SKUs con imágenes en Falabella"','Evita rechazos de publicación por falta de imágenes','Menos tickets de publicación. Cliente publica más rápido.','CS + Soporte','Forus Colombia','media') +
+    row('📄','KB Article','Guía: "Configuración de integración Shopify + RUT en Chile"','Shopify captura RUT correctamente desde el primer intento','Elimina un ticket recurrente específico de clientes chilenos con Shopify','Soporte','Fashions Park','media') +
+    row('📄','KB Article','Guía: "Qué es Use Points y cómo maximizar el plan contratado"','El cliente entiende su plan y lo usa','Aumenta percepción de valor. Reduce preguntas básicas al CSM.','CS',clientList(sinUsePoints.concat(bajoUsePoints).slice(0,3)),'media') +
+    row('📄','KB Article','Checklist: "Antes de escalar un ticket a soporte"','El cliente pre-diagnostica antes de abrir un ticket','Tickets mejor documentados → resolución más rápida','CS + Soporte','Todos','baja')
+  ));
 
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
-  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#128279; Transmisiones</div>';
-  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104884" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Verificar anuncio en MP</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105083" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Qu&eacute; es Buy Box</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104843" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Finalizar anuncios</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000133393" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Actualizar t&iacute;tulo</a></li>';
-  h+='</ul></div>';
+  // ── BLOQUE 3: MICRO-VIDEOS ────────────────────────────────────────────────
+  html += card('🎬','Micro-Videos de Capacitación','Videos cortos (2-5 min) para empoderar al cliente y reducir fricción','#9b59b6', tabla(
+    row('▶️','Micro-video','Video 2 min: "Cómo revisar el estado de sincronización de stock"','El cliente identifica si hay un problema antes de llamar','Autogestión del cliente → menos urgencias innecesarias al CS','CS',clientList(stockML),'alta') +
+    row('▶️','Micro-video','Video 3 min: "Cómo usar Use Points paso a paso"','Adopción inmediata de la funcionalidad','El cliente ve valor en lo que pagó. Sube el NPS.','CS',clientList(sinUsePoints),'alta') +
+    row('▶️','Micro-video','Video 5 min: "Qué hacer cuando un SKU no se publica en el marketplace"','El cliente diagnostica y corrige errores de publicación solo','Menos tickets de publicación. Operación más ágil para el cliente.','CS + Soporte','Forus Colombia, Gino','media') +
+    row('▶️','Micro-video','Video 3 min: "Cómo leer el panel de pedidos en AnyMarket"','El cliente interpreta correctamente sus datos operativos','Menos consultas básicas. Conversaciones con el CS se vuelven estratégicas.','CS','Todos','baja') +
+    row('▶️','Micro-video','Video 4 min: "Proceso de migración Centry — qué esperar"','Clientes en migración saben qué va a pasar y cuándo','Reduce ansiedad y tickets de seguimiento durante la migración','CS + PM',clientList(centry),'media')
+  ));
 
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
-  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#128230; Pedidos</div>';
-  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104841" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">D&oacute;nde veo mis ventas</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104842" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Pedido no importado</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000095056" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Curva ABC</a></li>';
-  h+='</ul></div>';
+  // ── BLOQUE 4: WORKSHOPS ───────────────────────────────────────────────────
+  html += card('🏫','Workshops Continuos','Sesiones formativas periódicas con clientes y equipo interno','#00d4aa', tabla(
+    row('👥','Workshop cliente','Workshop mensual: "Novedades AnyMarket + casos de uso"','El cliente conoce features nuevas y las adopta','Aumenta uso de la plataforma → más difícil de churnar. Upsell natural.','CS','Todos — rotar por grupo de país','alta') +
+    row('👥','Workshop cliente','Workshop trimestral: "Revisión de KPIs y objetivos — EBR"','El cliente ve el valor entregado con datos concretos','Justifica la renovación. Genera confianza en la relación.','CS','Clientes con +6 meses','alta') +
+    row('👥','Workshop interno','Workshop mensual CS: "Análisis de patrones de tickets"','El equipo CS identifica problemas sistémicos antes de que exploten','Intervención proactiva. Menos escalaciones. Mejor experiencia cliente.','CS Team','Interno','alta') +
+    row('👥','Workshop cliente','Workshop onboarding: "Primeros 30 días con AnyMarket"','Clientes nuevos adoptan la plataforma más rápido','Reduce tiempo hasta primer valor (TTV). Baja tasa de churn en primeros 90 días.','CS','Whirlpool, Lacoste (nuevos)','alta') +
+    row('👥','Workshop interno','Workshop CS: "Cómo manejar stakeholders y cambios de contacto"','El equipo CS tiene un protocolo cuando cambia el contacto en el cliente','No se pierde la relación por rotación. Aplica a Tramontina y Colombiana.','CS Team','Interno — Tramontina, Colombiana','media')
+  ));
 
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
-  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#127760; Marketplaces</div>';
-  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104675" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Configurar Amazon</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105210" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Configurar Dafiti</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/folders/19000157195" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Mercado Libre (50 art.)</a></li>';
-  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105916" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Solicitar nuevo MP</a></li>';
-  h+='</ul></div>';
+  // ── RESUMEN IMPACTO ───────────────────────────────────────────────────────
+  html += `<div class="card" style="border-left:4px solid var(--accent2);background:linear-gradient(135deg,var(--surface),var(--surface2));">
+    <div class="card-title">📊 Impacto Estimado si se Ejecuta el Plan</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">
+      <div><div style="font-size:28px;font-weight:700;color:var(--green);">-40%</div><div style="font-size:12px;color:var(--text2);">Tickets repetidos (KB + micro-videos)</div></div>
+      <div><div style="font-size:28px;font-weight:700;color:var(--accent);">+25%</div><div style="font-size:12px;color:var(--text2);">Adopción Use Points (workshops)</div></div>
+      <div><div style="font-size:28px;font-weight:700;color:var(--accent2);">+30 pts</div><div style="font-size:12px;color:var(--text2);">NPS promedio (rescate + EBR)</div></div>
+      <div><div style="font-size:28px;font-weight:700;color:var(--yellow);">3 clientes</div><div style="font-size:12px;color:var(--text2);">Recuperados de riesgo churn</div></div>
+    </div>
+  </div>`;
 
-  h+='</div></div>';
-
-  // Panel 2: Planes Predize
-  h+='<div id="capPanel2" style="display:none">';
-  h+='<p style="color:var(--text2);font-size:13px;margin-bottom:16px">Planes disponibles de Predize para recomendar a tus clientes.</p>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px">';
-
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
-  h+='<div style="font-weight:700;font-size:16px;color:var(--text1);margin-bottom:4px">Start</div>';
-  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">3+ usuarios</div>';
-  h+='<ul style="list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:5px">';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; IA Mia incluida</li>';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; Correo y chat</li>';
-  h+='<li style="font-size:12px;color:#888">&#215; Sin CS dedicado</li>';
-  h+='</ul>';
-  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:7px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;display:inline-block">Ver plan</a>';
-  h+='</div>';
-
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
-  h+='<div style="font-weight:700;font-size:16px;color:var(--text1);margin-bottom:4px">Standart</div>';
-  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">5+ usuarios</div>';
-  h+='<ul style="list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:5px">';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; IA Mia incluida</li>';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; WhatsApp, correo y chat</li>';
-  h+='<li style="font-size:12px;color:#888">&#215; Sin CS dedicado</li>';
-  h+='</ul>';
-  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:7px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;display:inline-block">Ver plan</a>';
-  h+='</div>';
-
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:2px solid var(--accent)">';
-  h+='<div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:1px;margin-bottom:4px">RECOMENDADO</div>';
-  h+='<div style="font-weight:700;font-size:16px;color:var(--text1);margin-bottom:4px">Performance</div>';
-  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">10+ usuarios</div>';
-  h+='<ul style="list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:5px">';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; IA Mia incluida</li>';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; WhatsApp, correo y chat</li>';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; Customer Success dedicado</li>';
-  h+='</ul>';
-  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:7px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;display:inline-block">Ver plan</a>';
-  h+='</div>';
-
-  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
-  h+='<div style="font-weight:700;font-size:16px;color:var(--text1);margin-bottom:4px">Enterprise</div>';
-  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">A consulta</div>';
-  h+='<ul style="list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:5px">';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; Mia + Mia Service</li>';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; CS Full dedicado</li>';
-  h+='<li style="font-size:12px;color:var(--text2)">&#10003; Soporte prioritario 24/7</li>';
-  h+='</ul>';
-  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:7px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;display:inline-block">Consultar</a>';
-  h+='</div>';
-
-  h+='</div></div>';
-
-  h+='</div>';
-  el.innerHTML=h;
-  showCapTab(0);
+  document.getElementById('capacitacionGrid').innerHTML = html;
 }
-function showCapTab(idx){
-  [0,1,2].forEach(function(i){
-    var p=document.getElementById('capPanel'+i);
-    if(p)p.style.display=i===idx?'':'none';
-    var b=document.getElementById('capBtn'+i);
-    if(b){
-      b.style.background=i===idx?'var(--accent)':'transparent';
-      b.style.color=i===idx?'#fff':'var(--text1)';
-      b.style.border=i===idx?'none':'2px solid var(--border)';
-    }
-  });
-}
+
+// ── GUIA OPERACIONAL ──────────────────────────────────────────────────────────
 function renderGuia() {
   const sec = (emoji, titulo, subtitulo, color, body) => `
     <div class="card" style="border-left:4px solid ${color};margin-bottom:20px;">
@@ -5912,535 +5950,4 @@ const FAQ_DATA = [
         <strong>Conversaciones trigger por herramienta:</strong><br>
         • Cliente menciona "gestionamos preguntas de ML/Amazon manualmente" → <strong>Predize</strong><br>
         • Cliente menciona "el cierre financiero nos toma días" → <strong>Koncili</strong><br>
-        • Cliente menciona "perdemos ventas pero no sabemos por qué" → <strong>WinnerBox</strong><br>
-        • Cliente quiere entrar a ML sin empezar desde cero → <strong>Match ML</strong><br>
-        • Cliente quiere subir ticket promedio → <strong>Kits</strong>`
-      }
-    ]
-  },
-    {
-    cat: '🤝 Customer Success — Gestión de cartera',
-    items: [
-      {
-        q: '¿Cuál es la diferencia entre Soporte y Customer Success?',
-        a: `<strong>Soporte</strong> resuelve problemas puntuales que el cliente ya tiene. Es reactivo: el cliente abre un ticket, soporte responde.<br><br>
-        <strong>Customer Success</strong> previene los problemas antes de que ocurran y asegura que el cliente logre sus objetivos de negocio usando la plataforma. Es proactivo.<br><br>
-        <strong>En AnyMarket, el CS se enfoca en:</strong><br>
-        • Que el cliente venda más a través de los marketplaces (GMV creciente)<br>
-        • Que adopte las funcionalidades que más impacto tienen en su operación<br>
-        • Que renueve y expanda su contrato<br>
-        • Que recomiende AnyMarket a otras empresas (NPS promotor)<br><br>
-        La regla: <em>si el cliente solo te llama cuando hay un bug, algo está mal en la relación CS.</em>`
-      },
-      {
-        q: '¿Cómo identificar un cliente en riesgo de churn antes de que lo comunique?',
-        a: `Las <strong>señales de churn temprano</strong> más comunes en AnyMarket:<br><br>
-        🔴 <strong>GMV cayendo 3 meses consecutivos</strong> sin explicación de mercado<br>
-        🔴 <strong>NPS negativo o detractor</strong> sin plan de recuperación activo<br>
-        🔴 <strong>+5 tickets abiertos simultáneos</strong> → frustración acumulada<br>
-        🔴 <strong>Sin contacto hace +45 días</strong> → desconexión de la relación<br>
-        🔴 <strong>Use Points en 0 o muy bajos</strong> → no están usando la plataforma<br>
-        🔴 <strong>Cambio de stakeholder</strong> → el nuevo contacto no tiene contexto ni relación<br>
-        🔴 <strong>Solicitud de descuento inesperada</strong> → puede ser preámbulo a una negociación de salida<br>
-        🔴 <strong>Bug crítico sin resolver +7 días</strong> → daño operativo acumulado<br><br>
-        La acción: no esperar a que lleguen las señales. Revisar estas métricas semanalmente en el dashboard.`
-      },
-      {
-        q: '¿Cómo preparar una reunión ejecutiva (QBR) efectiva con un cliente?',
-        a: `Un buen <strong>QBR (Quarterly Business Review)</strong> tiene esta estructura:<br><br>
-        <strong>1. Antes (preparación):</strong><br>
-        • GMV del trimestre vs período anterior y vs objetivo<br>
-        • Top 3 logros del período (qué funcionó)<br>
-        • Top 3 desafíos (qué no funcionó y por qué)<br>
-        • Estado de tickets críticos y resolución<br>
-        • Adopción de plataforma (Use Points)<br><br>
-        <strong>2. Durante (agenda recomendada):</strong><br>
-        • [5 min] Contexto: objetivos del cliente para el trimestre<br>
-        • [10 min] Resultados: GMV, pedidos, marketplaces activos<br>
-        • [10 min] Desafíos: bugs, blockers, fricción operativa<br>
-        • [10 min] Roadmap: qué viene en AnyMarket, qué oportunidades hay<br>
-        • [10 min] Próximos pasos: compromisos con fechas<br><br>
-        <strong>3. Después:</strong><br>
-        • Acta con compromisos enviada dentro de las 24 horas<br>
-        • Acciones creadas en el dashboard con fecha límite`
-      },
-      {
-        q: '¿Cómo manejar un cliente con NPS negativo?',
-        a: `El NPS negativo es una oportunidad de recuperación, no una sentencia de churn. El protocolo:<br><br>
-        <strong>Semana 1 — Contener:</strong><br>
-        • Llamar (no email) dentro de las 48 horas de recibir el NPS<br>
-        • Escuchar sin interrumpir. Preguntar: "¿Qué tendría que pasar para que tu experiencia mejore?"<br>
-        • No prometer lo que no puedes cumplir<br>
-        • Identificar si hay un bug, un problema de relación o una expectativa no cumplida<br><br>
-        <strong>Semana 2-4 — Actuar:</strong><br>
-        • Crear acciones concretas con fecha y responsable<br>
-        • Comunicar avance cada semana aunque sea pequeño<br>
-        • Involucrar al equipo de Soporte y Producto si hay bug crítico<br><br>
-        <strong>Mes 2 — Verificar:</strong><br>
-        • Reenvisar NPS luego de 30-45 días<br>
-        • Si mejoró: documentar como caso de recuperación exitosa<br>
-        • Si no mejoró: escalar internamente con plan de retención`
-      },
-      {
-        q: '¿Cómo detectar y ejecutar una oportunidad de expansión (upsell)?',
-        a: `Las <strong>señales de expansión</strong> más claras en AnyMarket:<br><br>
-        📈 <strong>GMV creciendo +20% MoM</strong> → el cliente está en momentum, es el mejor momento para proponer<br>
-        💡 <strong>Use Points cercano al 100%</strong> → está usando todo lo contratado, necesita más<br>
-        🛒 <strong>Pocos marketplaces activos vs disponibles</strong> → Falabella disponible pero no conectado<br>
-        🔧 <strong>Problemas manuales repetidos</strong> → candidato a AnyTools (Repricing, Kits)<br>
-        📦 <strong>Catálogo grande con baja adopción</strong> → Match ML puede impactar el 80% del catálogo<br><br>
-        <strong>Cómo proponer:</strong> No vender el producto, vender el resultado.<br>
-        ❌ "Te recomiendo activar Repricing"<br>
-        ✅ "Con el volumen de SKUs que tenés, si activamos Repricing automático evitamos perder la Buy Box en Falabella — el impacto estimado es X% de incremento en conversión"`
-      },
-      {
-        q: '¿Cómo gestionar el cambio de stakeholder en un cliente?',
-        a: `El cambio de contacto es uno de los mayores riesgos de churn en SaaS. El nuevo interlocutor no tiene contexto, no tiene relación y puede cuestionar el valor de la plataforma desde cero.<br><br>
-        <strong>Protocolo inmediato (primeras 72 horas):</strong><br>
-        1. Contactar al nuevo stakeholder para presentarse<br>
-        2. Enviar un resumen ejecutivo del estado de la cuenta (GMV, adopción, logros recientes)<br>
-        3. Agendar una reunión de "onboarding ejecutivo" dentro de los próximos 10 días<br><br>
-        <strong>En la reunión de onboarding:</strong><br>
-        • No asumir que conoce la plataforma — volver a mostrar el valor desde cero<br>
-        • Preguntar: "¿Cuáles son tus objetivos para este año en marketplaces?"<br>
-        • Presentar el roadmap de AnyMarket relevante para su industria<br><br>
-        <strong>Riesgo adicional:</strong> Si el anterior contacto era tu champion y el nuevo no, perder el internal sponsor es una alerta de churn. Mapear quién más en la empresa conoce y defiende AnyMarket.`
-      }
-    ]
-  },
-  {
-    cat: '🏷️ Marketplaces LATAM — Contexto y particularidades',
-    items: [
-      {
-        q: '¿Cuáles son los marketplaces principales por país en LATAM?',
-        a: `<strong>Chile:</strong> Mercado Libre, Falabella, Paris, Ripley, Walmart Chile, Hites<br>
-        <strong>Colombia:</strong> Mercado Libre, Falabella Colombia, Linio<br>
-        <strong>México:</strong> Mercado Libre, Amazon MX, Walmart MX, Coppel, Liverpool<br>
-        <strong>Perú:</strong> Mercado Libre, Falabella Perú, Ripley Perú<br>
-        <strong>Uruguay:</strong> Mercado Libre (dominante)<br><br>
-        <strong>Mercado Libre</strong> es el marketplace más importante en casi todos los países — prioridad #1 para cualquier cliente. Su reputación (thermómetro de ML) impacta directamente las ventas y la visibilidad.`
-      },
-      {
-        q: '¿Qué es la reputación en Mercado Libre y cómo impacta la operación?',
-        a: `La <strong>reputación en ML</strong> es un indicador que ML calcula en base a:<br>
-        • % de pedidos con reclamos<br>
-        • % de entregas a tiempo<br>
-        • % de cancelaciones por parte del vendedor<br><br>
-        <strong>Niveles:</strong> Verde (excelente) → Amarillo (buena) → Naranja (regular) → Rojo (mala)<br><br>
-        <strong>Impacto en ventas:</strong><br>
-        🟢 Verde → máxima visibilidad, elegible para ML Premium<br>
-        🟡 Amarillo → visibilidad reducida, no elegible para algunas categorías<br>
-        🟠 Naranja → penalización fuerte en el ranking, ventas pueden caer -40%<br>
-        🔴 Rojo → cuenta suspendida o con restricciones<br><br>
-        <strong>Caso real en cartera:</strong> COBOE (BOTIGA/FARMASHOP) tuvo un incidente de reputación con origen en AnyMarket. Es el tipo de caso que requiere gestión urgente con Partnerships y ML directamente.`
-      },
-      {
-        q: '¿Qué es GFG (Dafiti) y qué particularidades tiene?',
-        a: `<strong>GFG (Global Fashion Group)</strong> es el operador de <strong>Dafiti</strong> en LATAM (Chile, Colombia, Brasil, Argentina). Es el marketplace de moda más grande de la región.<br><br>
-        <strong>Particularidades:</strong><br>
-        • Solo acepta categorías de moda, calzado y accesorios<br>
-        • Requiere imágenes de alta calidad sobre fondo blanco<br>
-        • Su integración con AnyMarket puede tener limitaciones de mapeo de tallas<br>
-        • El proceso de homologación de catálogo es más estricto que otros marketplaces<br><br>
-        <strong>Clientes en cartera que usan Dafiti:</strong> LACOSTE - CL`
-      },
-      {
-        q: '¿Qué diferencia hay entre VTEX y DBnet como ERP/plataforma base?',
-        a: `<strong>VTEX</strong> es una plataforma de e-commerce enterprise muy usada en Brasil y expandiéndose en LATAM. Tiene integración nativa con varios marketplaces pero usa AnyMarket para centralizar y agregar canales que VTEX no cubre directamente.<br><br>
-        <strong>DBnet</strong> es un ERP más tradicional usado en Chile y la región. La integración DBnet → AnyMarket puede tener limitaciones en el mapeo de ciertos campos (como el caso de TRAMONTINA CL con Falabella).<br><br>
-        <strong>Implicación CS:</strong> Cuando un cliente tiene problemas de integración ERP → AnyMarket, es fundamental entender cuál es su sistema de origen antes de escalar a Soporte. La causa raíz suele estar en el mapeo de campos entre el ERP y AnyMarket.`
-      }
-    ]
-  },
-  {
-    cat: '💬 Conversaciones difíciles — Objeciones y situaciones críticas',
-    items: [
-      {
-        q: 'El cliente pide un descuento. ¿Cómo manejarlo?',
-        a: `El pedido de descuento es rara vez sobre el precio — casi siempre es sobre <strong>valor percibido no cumplido</strong>. Antes de negociar precio, entender por qué:<br><br>
-        <strong>Preguntas a hacer:</strong><br>
-        • "¿Qué te llevó a pedir el descuento en este momento?"<br>
-        • "¿Hay algo en la plataforma que no te está dando el retorno que esperabas?"<br><br>
-        <strong>Si el problema es valor → resolver el problema primero:</strong><br>
-        Activar una funcionalidad que no están usando, resolver un bug crítico, hacer un QBR con resultados concretos.<br><br>
-        <strong>Si la negociación es inevitable:</strong><br>
-        • Nunca dar descuento sin algo a cambio (compromiso de renovación larga, referencia, caso de éxito)<br>
-        • Involucrar a Comercial — no es una decisión unilateral de CS<br>
-        • Documentar el riesgo en HubSpot`
-      },
-      {
-        q: 'El cliente amenaza con irse. ¿Cuál es el protocolo de retención?',
-        a: `<strong>Primeras 24 horas — No reaccionar, escuchar:</strong><br>
-        Llamar (no email). El objetivo de la primera conversación es entender, no retener. "Entiendo que estás evaluando otras opciones. ¿Me podés contar qué está pasando?"<br><br>
-        <strong>Identificar el tipo de churn:</strong><br>
-        • <strong>Churn por problema técnico</strong> → hay un bug, una integración rota, algo sin resolver. Solución: ejecutar y demostrar.<br>
-        • <strong>Churn por precio</strong> → involucrar a Comercial con un plan de retención<br>
-        • <strong>Churn por competidor</strong> → entender qué ofrece el otro y si AnyMarket puede igualarlo o superarlo<br>
-        • <strong>Churn estratégico</strong> → el cliente cambió de modelo de negocio. Difícil de retener.<br><br>
-        <strong>Involucrar a la jefatura si:</strong><br>
-        → El cliente es Enterprise o representa +$5K MRR<br>
-        → El cliente tiene más de 2 años en la plataforma<br>
-        → El churn afecta a otros clientes de la misma industria`
-      },
-      {
-        q: '¿Cómo comunicar un bug o incidente que afecta la operación del cliente?',
-        a: `La comunicación de crisis tiene que ser <strong>rápida, honesta y con plan de acción</strong>. Nunca dejar al cliente sin respuesta esperando que el bug se resuelva solo.<br><br>
-        <strong>Estructura del email/llamada de crisis:</strong><br>
-        1. <strong>Reconocimiento</strong>: "Confirmamos que hay un problema en [X] que está afectando [Y]"<br>
-        2. <strong>Impacto</strong>: "Esto está generando [número de pedidos afectados / monto en riesgo]"<br>
-        3. <strong>Causa</strong>: "El origen es [causa raíz si se conoce]"<br>
-        4. <strong>Acción</strong>: "El equipo de Soporte está trabajando en resolverlo. ETA estimado: [tiempo]"<br>
-        5. <strong>Actualización</strong>: "Te voy a escribir con una actualización en [X horas]"<br><br>
-        <strong>Lo que nunca hacer:</strong><br>
-        ❌ Desaparecer mientras el bug sigue abierto<br>
-        ❌ Prometer tiempos de resolución que no puedes controlar<br>
-        ❌ Culpar al marketplace o al ERP del cliente en la comunicación externa`
-      }
-    ]
-  }
-];
-
-let faqOpen = new Set();
-
-function renderFaq() {
-  const pg = document.getElementById('page-faq');
-  if (!pg) return;
-
-  const cats = FAQ_DATA.map((cat, ci) => {
-    const items = cat.items.map((item, ii) => {
-      const key = `${ci}-${ii}`;
-      const isOpen = faqOpen.has(key);
-      return `<div class="faq-item${isOpen?' open':''}" id="faq-${key}">
-        <div class="faq-q" onclick="toggleFaq('${key}')">
-          <span>${item.q}</span>
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a">${item.a}</div>
-      </div>`;
-    }).join('');
-    return `<div class="faq-cat">
-      <div class="faq-cat-title"><span>${cat.cat}</span></div>
-      ${items}
-    </div>`;
-  }).join('');
-
-  pg.innerHTML = `<div style="max-width:820px">
-    <input class="faq-search" id="faqSearch" placeholder="🔍 Buscar en FAQ… (Repricing, churn, stock, NPS, Kits…)" oninput="filterFaq(this.value)">
-    <div id="faqContent">${cats}</div>
-  </div>`;
-}
-
-function toggleFaq(key) {
-  const el = document.getElementById('faq-' + key);
-  if (!el) return;
-  if (faqOpen.has(key)) { faqOpen.delete(key); el.classList.remove('open'); }
-  else { faqOpen.add(key); el.classList.add('open'); }
-}
-
-function filterFaq(q) {
-  const term = q.toLowerCase().trim();
-  const cont = document.getElementById('faqContent');
-  if (!term) { renderFaq(); document.getElementById('faqSearch').value = q; return; }
-  let html = '';
-  FAQ_DATA.forEach((cat, ci) => {
-    const matched = cat.items.filter(item =>
-      item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term)
-    );
-    if (!matched.length) return;
-    const items = matched.map((item, ii) => `<div class="faq-item open">
-      <div class="faq-q"><span>${item.q}</span><span class="faq-arrow">▼</span></div>
-      <div class="faq-a">${item.a}</div>
-    </div>`).join('');
-    html += `<div class="faq-cat"><div class="faq-cat-title">${cat.cat}</div>${items}</div>`;
-  });
-  cont.innerHTML = html || '<div style="color:var(--text3);padding:32px 0;text-align:center">Sin resultados para "' + q + '"</div>';
-}
-
-// ── PORTFOLIO A — ACELERACIÓN ──────────────────────────────────────────────
-
-const PORTFOLIO_GAP = [
-  // Gap 1 (B→A) — Quick Wins — datos BPG 30/06/2026
-  {id:'fashions-park',       current:'B', gap:1, avgMrr:10840, accion:'Activar AnyTools + Repricing. Proponer Mercado Shops como canal adicional.'},
-  {id:'emma-sleep',          current:'B', gap:1, avgMrr:7013,  accion:'QBR ejecutivo. Proponer Repricing automático CL (Falabella, Paris, Ripley).', grupo:'Emma Sleep'},
-  {id:'inversiones-malaga',  current:'B', gap:1, avgMrr:9518,  accion:'Revisar adopción Use Points. Activar funcionalidades premium pendientes.'},
-  {id:'divino',              current:'B', gap:1, avgMrr:6557,  accion:'Diagnóstico operativo completo. Mapear oportunidades de expansión de canales.'},
-  {id:'lounge',              current:'B', gap:1, avgMrr:9787,  accion:'Acelerar migración Centry → AnyMarket. Cada milestone completado = avance de tier.'},
-  {id:'dtodoymas',           current:'B', gap:1, avgMrr:6949,  accion:'Diagnóstico operativo. Expansión de canales activos.'},
-  {id:'pointbreak',          current:'B', gap:1, avgMrr:7888,  accion:'Diagnóstico operativo. Expansión de canales activos.'},
-  // Gap 2 (C→A) — Push Estratégico
-  {id:'colombiana',          current:'C', gap:2, avgMrr:6207,  accion:'Diagnóstico operativo. Identificar palanca principal de crecimiento.'},
-  {id:'belcorp-col',         current:'C', gap:2, avgMrr:2174,  accion:'BELCORP Corporate Review: una reunión mueve Chile + Colombia + México simultáneamente.', grupo:'Belcorp LATAM'},
-  {id:'belcorp-chile',       current:'C', gap:2, avgMrr:2174,  accion:'BELCORP Corporate Review: coordinar expansión LATAM con ejecutivo regional.', grupo:'Belcorp LATAM'},
-  {id:'transbel',            current:'C', gap:2, avgMrr:4653,  accion:'BELCORP Corporate Review: alinear roadmap de canales a nivel LATAM.', grupo:'Belcorp LATAM'},
-  {id:'kayser',              current:'C', gap:2, avgMrr:4075,  accion:'Activar Repricing en CL (Falabella, Paris, Ripley). Revisión de adopción Use Points.'},
-  {id:'forus-colombia',      current:'C', gap:2, avgMrr:10549, accion:'Prioridad: completar migración Centry → AnyMarket. Cada canal activado = avance de tier.', nota:'En migración activa'},
-  {id:'forus-peru',          current:'C', gap:2, avgMrr:3433,  accion:'Acelerar migración Centry + primeros marketplaces en AnyMarket. Milestone = tier up.'},
-  {id:'emma-sleep-co',       current:'C', gap:2, avgMrr:3261,  accion:'Replicar modelo Chile en CO: agregar Falabella + Ripley + Walmart.', grupo:'Emma Sleep'},
-  {id:'tramontina-mx',       current:'C', gap:2, avgMrr:2548,  accion:'Executive Review. Activar features premium. Usar como benchmark para CL.', grupo:'Tramontina'},
-  // Gap 3 (D→A) — Trabajo profundo
-  {id:'tramontina-cl',       current:'D', gap:3, avgMrr:1533,  accion:'Expansion Talk urgente: agregar Falabella, Ripley, ML, Hites. Presentar TRAMONTINA MX como caso de éxito.', grupo:'Tramontina'},
-  // Gap 4 (E→A) — Recovery total
-  {id:'lacoste',             current:'E', gap:4, avgMrr:280,   accion:'CRÍTICO: Diagnóstico urgente + reunión ejecutiva + Recovery Plan conjunto con Producto y Soporte.'},
-];
-
-const GRUPO_ESTRATEGICO = [
-  {
-    nombre:'Belcorp LATAM', icon:'💄',
-    ids:['belcorp-col','belcorp-chile','transbel'],
-    desc:'Una sola reunión corporativa puede mover 3 cuentas al mismo tiempo. Propone un "BELCORP LATAM Partnership Review" con el ejecutivo regional.'
-  },
-  {
-    nombre:'Emma Sleep', icon:'🛏️',
-    ids:['emma-sleep','emma-sleep-co'],
-    desc:'Replicar el modelo de CL en CO. Lo que funciona en Chile (6 canales, Repricing) se puede implementar en Colombia en 30 días.'
-  },
-  {
-    nombre:'Tramontina', icon:'🍳',
-    ids:['tramontina-cl','tramontina-mx'],
-    desc:'MX tiene 5 canales activos (D→C); CL solo 2 (D). Presenta MX como caso de éxito para acelerar la expansión en Chile.'
-  },
-];
-
-function renderPortfolioA() {
-  const pg = document.getElementById('page-portfolio-a');
-
-  const g1   = PORTFOLIO_GAP.filter(x=>x.gap===1);
-  const g2   = PORTFOLIO_GAP.filter(x=>x.gap===2);
-  const g3g4 = PORTFOLIO_GAP.filter(x=>x.gap>=3);
-
-  const tierColors = {A:'var(--green)',B:'var(--accent)',C:'var(--yellow)',D:'var(--orange)',E:'var(--red)'};
-
-  function tierBadge(t) {
-    const c = tierColors[t]||'var(--text3)';
-    return `<span style="background:${c}20;color:${c};font-size:12px;font-weight:800;padding:3px 10px;border-radius:6px;display:inline-block;min-width:26px;text-align:center">${t}</span>`;
-  }
-
-  function gapDots(gap) {
-    let d='';
-    for(let i=0;i<gap;i++)  d+=`<span style="width:9px;height:9px;border-radius:50%;background:var(--red);opacity:${1-i*0.12};display:inline-block;margin:0 2px"></span>`;
-    for(let i=gap;i<4;i++) d+=`<span style="width:9px;height:9px;border-radius:50%;background:var(--border);display:inline-block;margin:0 2px"></span>`;
-    return `<div style="display:flex;align-items:center">${d}</div>`;
-  }
-
-  function scoreChip(id) {
-    const c = clients.find(x=>x.id===id);
-    const sc = c?.healthScore;
-    if (sc==null) return '<span style="color:var(--text3);font-size:11px">—</span>';
-    const col = sc>=70?'var(--green)':sc>=50?'var(--yellow)':sc>=30?'var(--orange)':'var(--red)';
-    return `<span style="background:${col}20;color:${col};font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px">${sc}</span>`;
-  }
-
-  const rows = PORTFOLIO_GAP.map(p => {
-    const port = PORT.find(x=>x.id===p.id);
-    if (!port) return '';
-    const grupoBadge = p.grupo
-      ? `<span style="background:rgba(79,142,247,.12);color:var(--accent);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap">${p.grupo}</span>`
-      : '';
-    return `<tr onclick="currentClient='${p.id}';nav('ficha',document.getElementById('nav-ficha'))" style="cursor:pointer">
-      <td><strong style="font-size:13px">${port.name}</strong><br><span style="font-size:10px;color:var(--text3)">${port.country}</span></td>
-      <td style="text-align:center">${tierBadge(p.current)}</td>
-      <td style="text-align:center">${tierBadge('A')}</td>
-      <td style="text-align:center">${gapDots(p.gap)}</td>
-      <td style="text-align:right;font-size:12px;color:var(--text2)">${p.avgMrr?'R$'+p.avgMrr.toLocaleString('pt-BR'):'—'}</td>
-      <td style="text-align:right;font-size:12px;color:var(--green);font-weight:600">${p.avgMrr?'+R$'+(28344-p.avgMrr).toLocaleString('pt-BR'):'—'}</td>
-      <td style="text-align:center">${scoreChip(p.id)}</td>
-      <td style="font-size:12px;color:var(--text2);max-width:340px;line-height:1.5">${p.accion}</td>
-      <td>${grupoBadge}</td>
-    </tr>`;
-  }).join('');
-
-  const grupoCards = GRUPO_ESTRATEGICO.map(g => {
-    const names = g.ids.map(id=>PORT.find(x=>x.id===id)?.name||id).join(' · ');
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:18px 20px;flex:1;min-width:240px">
-      <div style="font-size:20px;margin-bottom:6px">${g.icon}</div>
-      <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:3px">${g.nombre}</div>
-      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:10px">${g.ids.length} cuentas · una sola reunión = múltiples upgrades</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5">${g.desc}</div>
-      <div style="font-size:10px;color:var(--text3);font-style:italic">${names}</div>
-    </div>`;
-  }).join('');
-
-  // Update badge
-  const nb = document.getElementById('nb-portfolio-a');
-  if (nb) nb.textContent = g1.length;
-
-  pg.innerHTML = `<div style="padding:0 0 40px">
-    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px">
-      <div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
-        <div style="font-size:30px;font-weight:800;color:var(--green)">${g1.length}</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">⚡ Quick Wins</div>
-        <div style="font-size:11px;color:var(--text3)">Gap 1 · B→A esta semana</div>
-      </div>
-      <div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
-        <div style="font-size:30px;font-weight:800;color:var(--yellow)">${g2.length}</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">🔥 Push Estratégico</div>
-        <div style="font-size:11px;color:var(--text3)">Gap 2 · C→A en 30-60 días</div>
-      </div>
-      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
-        <div style="font-size:30px;font-weight:800;color:var(--red)">${g3g4.length}</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">🏗️ Recovery</div>
-        <div style="font-size:11px;color:var(--text3)">Gap 3-4 · plan 60-90 días</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
-        <div style="font-size:30px;font-weight:800;color:var(--accent)">${PORTFOLIO_GAP.length}</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">📊 Total</div>
-        <div style="font-size:11px;color:var(--text3)">clientes con potencial A</div>
-      </div>
-      <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
-        <div style="font-size:22px;font-weight:800;color:var(--green)">+R$${(PORTFOLIO_GAP.filter(p=>p.avgMrr).reduce((s,p)=>s+(28344-p.avgMrr),0)/1000).toFixed(0)}k</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">💰 Upside Total</div>
-        <div style="font-size:11px;color:var(--text3)">si todos llegan a tier A · BPG 30/06</div>
-      </div>
-    </div>
-
-    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">⚡ Grupos Multiplicadores — Una reunión, múltiples upgrades</div>
-    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px">${grupoCards}</div>
-
-    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">📋 Plan de Acción — Ordenado por prioridad (Gap 1 = acción inmediata)</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-      <table>
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th style="text-align:center;width:72px">Actual</th>
-            <th style="text-align:center;width:72px">Meta</th>
-            <th style="text-align:center;width:80px">Gap</th>
-            <th style="text-align:center;width:90px">MRR Actual</th>
-            <th style="text-align:center;width:90px">Upside →A</th>
-            <th style="text-align:center;width:72px">Health</th>
-            <th>Acción Clave CS</th>
-            <th style="width:110px">Grupo</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  </div>`;
-}
-</script>
-
-<!-- ── CLOUD SYNC SETUP MODAL ─────────────────────────────────────────── -->
-<div id="cloud-setup-overlay" class="overlay" style="display:none" onclick="if(event.target===this)closeCloudSetup()">
-  <div class="modal" style="max-width:520px">
-    <button class="modal-close" onclick="closeCloudSetup()">✕</button>
-    <h3 style="margin-bottom:8px">☁️ Sincronización entre dispositivos</h3>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px">
-      Tus datos se guardarán en un Gist privado de GitHub y estarán disponibles en cualquier dispositivo donde uses el dashboard.
-    </p>
-    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Token de GitHub (classic)</label>
-    <input id="cloud-token-input" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-      style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg-card);color:var(--text);margin-bottom:4px">
-    <p style="font-size:11px;color:var(--text-muted);margin-bottom:14px">
-      Crear en <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" style="color:var(--blue)">github.com/settings/tokens</a> — scope requerido: <code>gist</code>
-    </p>
-    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">ID del Gist (opcional — dejar vacío para crear uno nuevo)</label>
-    <input id="cloud-gist-input" type="text" placeholder="e.g. a1b2c3d4e5f6..."
-      style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg-card);color:var(--text);margin-bottom:20px">
-    <!-- Sección de Código de Equipo (se muestra solo si hay configuración activa) -->
-    <div id="team-code-section" style="display:none;margin-bottom:16px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
-      <label style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:6px">📋 Código de Equipo</label>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Comparte este código con tu equipo para que conecten al mismo Gist.</p>
-      <textarea id="team-code-display" rows="2" readonly style="width:100%;background:var(--bg-card);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:11px;font-family:monospace;resize:none;box-sizing:border-box;margin-bottom:8px"></textarea>
-      <button id="copy-team-code-btn" class="btn btn-ghost btn-sm" onclick="copyTeamCode()" style="font-size:12px">📋 Copiar código de equipo</button>
-    </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn btn-ghost" onclick="closeCloudSetup()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveCloudConfig()">Guardar y sincronizar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── IMPORT MODAL ────────────────────────────────────────────────────── -->
-<div id="addActionOverlay" class="overlay" onclick="closeAddAction(event)">
-  <div class="modal wide">
-    <button class="modal-close" onclick="closeAddActionModal()">✕</button>
-    <h2 id="addActionTitle">Nueva Acción</h2>
-    <input type="hidden" id="editActionId">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Tipo</label>
-        <select id="fa-tipo" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
-          <option value="soporte">🎫 Soporte</option>
-          <option value="cs">🤝 CS</option>
-          <option value="pm">📋 PM</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Cliente</label>
-        <select id="fa-client" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none"></select>
-      </div>
-    </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Título *</label>
-      <input id="fa-title" type="text" placeholder="Título de la acción" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
-    </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Descripción</label>
-      <textarea id="fa-desc" rows="3" placeholder="Detalle de la acción..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
-    </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Causa Raíz</label>
-      <textarea id="fa-causa" rows="2" placeholder="¿Por qué es necesaria esta acción?" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Estado</label>
-        <select id="fa-status" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
-          <option value="por-hacer">📌 Por hacer</option>
-          <option value="en-progreso">⚡ En progreso</option>
-          <option value="bloqueado">🔴 Bloqueado</option>
-          <option value="completado">✅ Completado</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Prioridad</label>
-        <select id="fa-priority" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
-          <option value="alta">🔥 Alta</option>
-          <option value="media">⭐ Media</option>
-          <option value="baja">➖ Baja</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Fecha límite</label>
-        <input id="fa-due" type="date" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-      <input id="fa-bottleneck" type="checkbox" style="width:16px;height:16px;accent-color:var(--red)">
-      <label for="fa-bottleneck" style="font-size:13px;color:var(--text);cursor:pointer">🔴 Bottleneck — está bloqueando al cliente</label>
-    </div>
-    <div style="margin-bottom:16px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Notas internas</label>
-      <textarea id="fa-notes" rows="2" placeholder="Notas adicionales para el equipo..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
-    </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn btn-danger btn-sm" onclick="deleteCurrentAction()" id="deleteActionBtn" style="margin-right:auto;display:none">Eliminar</button>
-      <button class="btn btn-ghost" onclick="closeAddActionModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveAction()">Guardar acción</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── IMPORT MODAL ─────────────────────────────────────────────────────── -->
-<div id="importOverlay" class="overlay" onclick="closeImport(event)" style="display:none">
-  <div class="modal" style="max-width:600px">
-    <button class="modal-close" onclick="closeImportModal()">✕</button>
-    <h3 style="margin-bottom:8px">📥 Importar datos</h3>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Pega el JSON de actualización semanal. Debe ser un array de clientes o un objeto con claves <code>"clientes"</code> y <code>"acciones"</code>.</p>
-    <textarea id="importTA" rows="10" placeholder='[{"nombre":"CLIENTE","tickets":0,...}]' style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:12px;font-family:monospace;outline:none;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
-    <div id="importResult" class="import-result"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
-      <button class="btn btn-ghost" onclick="closeImportModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="processImport()">Importar</button>
-    </div>
-  </div>
-</div>
-
-
-<div class="alert-detail-overlay" id="adpOverlay" onclick="closeAlertDetail(event)"></div>
-<div class="alert-detail-panel" id="adpPanel" style="display:none">
-  <button class="adp-close-btn" onclick="closeAlertDetailPanel()">&#x2715;</button>
-  <div id="adpContent"></div>
-</div>
-</body>
-</html>
+        • Cliente menciona "perdemos ventas pero no sabemos por qué" → <strong>Winne
