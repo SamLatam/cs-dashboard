@@ -4980,13 +4980,169 @@ function renderCapacitacion(){
   var el=document.getElementById('capacitacionGrid');
   if(!el)return;
   var h='';
-  h+='<div style="padding:20px"><p style="color:var(--text2)">Cargando recursos...</p></div>';
+  h+='<div style="padding:24px">';
+  h+='<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">';
+  h+='<button onclick="showCapTab(0)" id="capBtn0" style="padding:8px 18px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-weight:600;font-size:13px">Suite AnyTools</button>';
+  h+='<button onclick="showCapTab(1)" id="capBtn1" style="padding:8px 18px;border:2px solid var(--border);border-radius:8px;background:transparent;color:var(--text1);cursor:pointer;font-size:13px">Help Center</button>';
+  h+='<button onclick="showCapTab(2)" id="capBtn2" style="padding:8px 18px;border:2px solid var(--border);border-radius:8px;background:transparent;color:var(--text1);cursor:pointer;font-size:13px">Planes Predize</button>';
+  h+='</div>';
+
+  // Panel 0: Suite AnyTools
+  h+='<div id="capPanel0">';
+  h+='<p style="color:var(--text2);font-size:13px;margin-bottom:16px">Productos complementarios de AnyMarket para maximizar el valor de cada cliente.</p>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
+  h+='<div style="font-size:26px;margin-bottom:8px">&#129302;</div>';
+  h+='<div style="font-weight:700;font-size:15px;color:var(--text1);margin-bottom:4px">Predize &mdash; SAC con IA</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">+4.000 tiendas, +30M mensajes, USD 25M en ventas gestionadas por IA Mia. 75% respuestas a tiempo.</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  h+='<a href="https://predize.cl/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">Sitio web</a>';
+  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:transparent;color:var(--accent);padding:6px 10px;border-radius:6px;text-decoration:none;font-size:12px;border:1px solid var(--accent)">Ver planes</a>';
+  h+='</div></div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
+  h+='<div style="font-size:26px;margin-bottom:8px">&#127942;</div>';
+  h+='<div style="font-weight:700;font-size:15px;color:var(--text1);margin-bottom:4px">WinnerBox &mdash; Repricing</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Pricing din&aacute;mico inteligente. Compite autom&aacute;ticamente en precio en cada marketplace.</div>';
+  h+='<a href="https://winnerbox.com.br/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">Sitio web</a>';
+  h+='</div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
+  h+='<div style="font-size:26px;margin-bottom:8px">&#128200;</div>';
+  h+='<div style="font-weight:700;font-size:15px;color:var(--text1);margin-bottom:4px">Koncili &mdash; Conciliaci&oacute;n</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">+14.000M GMV conciliado, +32M pedidos, -40% esfuerzo operativo.</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  h+='<a href="https://www.koncili.com/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">Sitio web</a>';
+  h+='<a href="https://unikon.koncili.com/es/docs/introducao" target="_blank" rel="noopener" style="background:transparent;color:var(--accent);padding:6px 10px;border-radius:6px;text-decoration:none;font-size:12px;border:1px solid var(--accent)">Docs</a>';
+  h+='</div></div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
+  h+='<div style="font-size:26px;margin-bottom:8px">&#127775;</div>';
+  h+='<div style="font-weight:700;font-size:15px;color:var(--text1);margin-bottom:4px">Marca Seleta &mdash; Full Commerce</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Tecnolog&iacute;a para marcas que quieren crecer online con control total.</div>';
+  h+='<a href="https://marcaseleta.com.br/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">Sitio web</a>';
+  h+='</div>';
+
+  h+='</div></div>';
+
+  // Panel 1: Help Center
+  h+='<div id="capPanel1" style="display:none">';
+  h+='<p style="color:var(--text2);font-size:13px;margin-bottom:16px">Art&iacute;culos clave del Help Center AnyMarket para capacitar a tus clientes.</p>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#128230; Productos</div>';
+  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104824" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Registrar productos</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104822" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Registrar por planilla</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000122861" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Producto Combo/KIT</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000152447" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Template de Imagen</a></li>';
+  h+='</ul></div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#128179; Inventario</div>';
+  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104852" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Reglas de Inventario</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000077640" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Inventario Virtual</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000074834" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Crossdocking / Plazo</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000160544" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Reglas en transmisi&oacute;n</a></li>';
+  h+='</ul></div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#128279; Transmisiones</div>';
+  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104884" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Verificar anuncio en MP</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105083" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Qu&eacute; es Buy Box</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104843" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Finalizar anuncios</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000133393" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Actualizar t&iacute;tulo</a></li>';
+  h+='</ul></div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#128230; Pedidos</div>';
+  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104841" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">D&oacute;nde veo mis ventas</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104842" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Pedido no importado</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000095056" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Curva ABC</a></li>';
+  h+='</ul></div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:14px;color:var(--text1);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#127760; Marketplaces</div>';
+  h+='<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px">';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000104675" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Configurar Amazon</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105210" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Configurar Dafiti</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/folders/19000157195" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Mercado Libre (50 art.)</a></li>';
+  h+='<li><a href="https://suporteanymarket.freshdesk.com/es-LA/support/solutions/articles/19000105916" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">Solicitar nuevo MP</a></li>';
+  h+='</ul></div>';
+
+  h+='</div></div>';
+
+  // Panel 2: Planes Predize
+  h+='<div id="capPanel2" style="display:none">';
+  h+='<p style="color:var(--text2);font-size:13px;margin-bottom:16px">Planes disponibles de Predize para recomendar a tus clientes.</p>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px">';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:16px;color:var(--text1);margin-bottom:4px">Start</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">3+ usuarios</div>';
+  h+='<ul style="list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:5px">';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; IA Mia incluida</li>';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; Correo y chat</li>';
+  h+='<li style="font-size:12px;color:#888">&#215; Sin CS dedicado</li>';
+  h+='</ul>';
+  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:7px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;display:inline-block">Ver plan</a>';
+  h+='</div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:16px;color:var(--text1);margin-bottom:4px">Standart</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">5+ usuarios</div>';
+  h+='<ul style="list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:5px">';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; IA Mia incluida</li>';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; WhatsApp, correo y chat</li>';
+  h+='<li style="font-size:12px;color:#888">&#215; Sin CS dedicado</li>';
+  h+='</ul>';
+  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:7px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;display:inline-block">Ver plan</a>';
+  h+='</div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:2px solid var(--accent)">';
+  h+='<div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:1px;margin-bottom:4px">RECOMENDADO</div>';
+  h+='<div style="font-weight:700;font-size:16px;color:var(--text1);margin-bottom:4px">Performance</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">10+ usuarios</div>';
+  h+='<ul style="list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:5px">';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; IA Mia incluida</li>';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; WhatsApp, correo y chat</li>';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; Customer Success dedicado</li>';
+  h+='</ul>';
+  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:7px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;display:inline-block">Ver plan</a>';
+  h+='</div>';
+
+  h+='<div style="background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)">';
+  h+='<div style="font-weight:700;font-size:16px;color:var(--text1);margin-bottom:4px">Enterprise</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:12px">A consulta</div>';
+  h+='<ul style="list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:5px">';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; Mia + Mia Service</li>';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; CS Full dedicado</li>';
+  h+='<li style="font-size:12px;color:var(--text2)">&#10003; Soporte prioritario 24/7</li>';
+  h+='</ul>';
+  h+='<a href="https://predize.cl/planes/" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;padding:7px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;display:inline-block">Consultar</a>';
+  h+='</div>';
+
+  h+='</div></div>';
+
+  h+='</div>';
   el.innerHTML=h;
+  showCapTab(0);
 }
 function showCapTab(idx){
   [0,1,2].forEach(function(i){
     var p=document.getElementById('capPanel'+i);
     if(p)p.style.display=i===idx?'':'none';
+    var b=document.getElementById('capBtn'+i);
+    if(b){
+      b.style.background=i===idx?'var(--accent)':'transparent';
+      b.style.color=i===idx?'#fff':'var(--text1)';
+      b.style.border=i===idx?'none':'2px solid var(--border)';
+    }
   });
 }
 function renderGuia() {
