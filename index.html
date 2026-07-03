@@ -2452,7 +2452,7 @@ function hpEmoji(cl) { return cl==='green'?'🟢':cl==='yellow'?'🟡':cl==='ora
 function hpLabel(cl) { return cl==='green'?'Sano':cl==='yellow'?'Observación':cl==='orange'?'En riesgo':'Crítico'; }
 
 // ── NAVIGATION ─────────────────────────────────────────────────────────────────
-const PAGE_TITLES = {overview:'Vista General de Cartera',portfolio:'Mis Clientes',ficha:'Ficha Cliente',acciones:'Gestión de Acciones',alertas:'Alertas & Riesgos',predicciones:'🔮 Predicciones & Sugerencias',capacitacion:'🎓 Capacitación & Entrega de Valor',catalogo:'Catálogo & GMV',metricas:'Métricas','portfolio-a':'🎯 Aceleración Portfolio A',faq:'💡 FAQ — CS & AnyMarket & AnyTools',notas:'Notas',guia:'Guía Operacional CS',renovaciones:'💰 Renovaciones & Revenue at Risk,expansion:'📈 Expansion Radar'',equipo:'👥 Gestión de Equipo',director:'👑 Vista Director — Portfolio Global',churned:'🚪 Clientes Cancelados'};
+const PAGE_TITLES = {overview:'Vista General de Cartera',portfolio:'Mis Clientes',ficha:'Ficha Cliente',acciones:'Gestión de Acciones',alertas:'Alertas & Riesgos',predicciones:'🔮 Predicciones & Sugerencias',capacitacion:'🎓 Capacitación & Entrega de Valor',catalogo:'Catálogo & GMV',metricas:'Métricas','portfolio-a':'🎯 Aceleración Portfolio A',faq:'💡 FAQ — CS & AnyMarket & AnyTools',notas:'Notas',guia:'Guía Operacional CS',renovaciones:'💰 Renovaciones & Revenue at Risk',expansion:'📈 Expansion Radar',equipo:'👥 Gestión de Equipo',director:'👑 Vista Director — Portfolio Global',churned:'🚪 Clientes Cancelados'};
 function nav(page, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -4986,7 +4986,7 @@ function renderCapacitacion(){
 function showCapTab(idx){
   [0,1,2].forEach(function(i){
     var p=document.getElementById('capPanel'+i);
-    if(p)p.style.display=i===idx?'':\'none';
+    if(p)p.style.display=i===idx?'':'none';
   });
 }
 function renderGuia() {
