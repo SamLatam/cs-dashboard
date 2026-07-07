@@ -634,6 +634,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     </div>
     <div class="topbar-actions">
       <button id="cloud-sync-btn" class="btn btn-ghost" onclick="syncNow()" title="Configurar sincronización">🔌 Sync</button>
+      <button id="zd-sync-btn" class="btn btn-ghost" onclick="openZdSetup()" title="Zendesk Auto-Sync">🎫 Zendesk</button>
       <button class="btn btn-ghost" onclick="exportarJSON()">↓ Exportar JSON</button>
       <button class="btn btn-ghost hide-if-readonly" onclick="openImport()">↑ Importar JSON</button>
       <button class="btn btn-primary hide-if-readonly" onclick="nav('acciones',document.getElementById('nav-acciones'));openAddAction(null)">+ Nueva Acción</button>
@@ -1355,6 +1356,154 @@ async function syncNow() {
 }
 // ── END GITHUB GIST SYNC v2 ───────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ── ZENDESK AUTO-SYNC ────────────────────────────────────────────────────────
+const ZD_EMAIL_KEY = 'zd-email';
+const ZD_TOKEN_KEY = 'zd-token';
+const ZD_LAST_SYNC_KEY = 'zd-last-sync';
+const ZD_BASE = 'https://db1globalsoftwaresupport.zendesk.com';
+
+function openZdSetup() {
+  const overlay = document.getElementById('zd-setup-overlay');
+  if (!overlay) return;
+  document.getElementById('zd-email-input').value = localStorage.getItem(ZD_EMAIL_KEY) || '';
+  document.getElementById('zd-token-input').value = localStorage.getItem(ZD_TOKEN_KEY) || '';
+  const last = localStorage.getItem(ZD_LAST_SYNC_KEY);
+  const lastEl = document.getElementById('zd-last-sync-label');
+  if (lastEl) lastEl.textContent = last ? 'Última sync: ' + last : 'Nunca sincronizado';
+  overlay.style.display = 'flex';
+}
+
+function closeZdSetup() {
+  const overlay = document.getElementById('zd-setup-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+async function saveZdCredsAndSync() {
+  const email = document.getElementById('zd-email-input').value.trim();
+  const token = document.getElementById('zd-token-input').value.trim();
+  if (!email || !token) { alert('Ingresá email y API token'); return; }
+  localStorage.setItem(ZD_EMAIL_KEY, email);
+  localStorage.setItem(ZD_TOKEN_KEY, token);
+  closeZdSetup();
+  await syncZendesk(true);
+}
+
+function zdNorm(s) {
+  return (s || '').toUpperCase()
+    .replace(/\s+(S\.?A\.?C?\.?|LTDA\.?|SPA\.?|S\/A|DE\s+C\.V\.?|S\.A\.S\.?|INC\.?|CORP\.?)\b/g, '')
+    .replace(/[^A-Z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function matchZdOrg(zdOrgName) {
+  const zn = zdNorm(zdOrgName);
+  if (!zn) return [];
+  const candidates = [];
+  for (const c of PORT) {
+    const cn = zdNorm(c.name);
+    if (cn === zn || cn.includes(zn) || zn.includes(cn)) {
+      candidates.push(c.id);
+    }
+  }
+  return candidates;
+}
+
+async function syncZendesk(showFeedback) {
+  const email = localStorage.getItem(ZD_EMAIL_KEY);
+  const token = localStorage.getItem(ZD_TOKEN_KEY);
+  if (!email || !token) return;
+
+  const btn = document.getElementById('zd-sync-btn');
+  if (btn) { btn.textContent = '🔄 Sincronizando...'; btn.disabled = true; }
+
+  try {
+    const auth = btoa(email + '/token:' + token);
+    const headers = { 'Authorization': 'Basic ' + auth };
+
+    // 1. Fetch open tickets (max 200)
+    let allTickets = [];
+    let url = ZD_BASE + '/api/v2/search.json?query=status%3Aopen%20type%3Aticket&per_page=100';
+    for (let page = 0; page < 2 && url; page++) {
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error('Zendesk HTTP ' + res.status + ' — verificá email y API token');
+      const data = await res.json();
+      allTickets = allTickets.concat(data.results || []);
+      url = data.next_page || null;
+    }
+
+    // 2. Fetch organizations
+    const orgRes = await fetch(ZD_BASE + '/api/v2/organizations.json?page[size]=100', { headers });
+    const orgData = await orgRes.json();
+    const orgMap = {};
+    (orgData.organizations || []).forEach(function(o) { orgMap[o.id] = o.name; });
+
+    // 3. Group tickets by org
+    const ticketsByOrg = {};
+    allTickets.forEach(function(t) {
+      const oid = t.organization_id;
+      if (!ticketsByOrg[oid]) ticketsByOrg[oid] = [];
+      ticketsByOrg[oid].push(t);
+    });
+
+    // 4. Update clients
+    let updatedCount = 0;
+    clients = clients.map(function(c) {
+      const matchedOrgIds = Object.keys(ticketsByOrg).filter(function(oid) {
+        const orgName = orgMap[oid] || '';
+        return matchZdOrg(orgName).includes(c.id);
+      });
+      if (!matchedOrgIds.length) return c;
+
+      const clientTickets = matchedOrgIds.reduce(function(acc, oid) {
+        return acc.concat(ticketsByOrg[oid] || []);
+      }, []);
+
+      const open = clientTickets.length;
+      const bugs = clientTickets.filter(function(t) {
+        return (t.tags || []).some(function(tag) { return ['bug','incident','incidente','error'].includes(tag); }) ||
+          t.type === 'problem' ||
+          /\b(bug|error|falla|caída|crash)\b/i.test(t.subject || '');
+      }).length;
+      const pending = clientTickets.filter(function(t) { return t.status === 'pending'; }).length;
+
+      const sorted = clientTickets.slice().sort(function(a,b) {
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+      const topDetail = sorted.slice(0, 2).map(function(t) {
+        return '#' + t.id + ' - ' + (t.subject || '').slice(0, 55);
+      }).join(' | ');
+
+      updatedCount++;
+      return Object.assign({}, c, {
+        weekly: Object.assign({}, c.weekly, {
+          tickets: open,
+          bugs: bugs,
+          ticketsPendientes: pending,
+          ticketDetalle: topDetail || null
+        })
+      });
+    });
+
+    const now = new Date().toLocaleString('es-CL', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+    localStorage.setItem(ZD_LAST_SYNC_KEY, now);
+    save();
+    renderKPIs();
+    try { renderTable(); } catch(e) {}
+    try { renderOverviewRisk(); } catch(e) {}
+
+    if (btn) { btn.textContent = '✅ ZD ' + now.slice(0,5); btn.disabled = false; }
+    if (showFeedback) {
+      alert('✅ Zendesk sincronizado\n' + allTickets.length + ' tickets encontrados\n' + updatedCount + ' clientes actualizados\nÚltima sync: ' + now);
+    }
+  } catch(e) {
+    if (btn) { btn.textContent = '❌ ZD Error'; btn.disabled = false; }
+    if (showFeedback) alert('Error Zendesk: ' + e.message);
+    console.error('Zendesk sync error:', e);
+  }
+}
+// ── END ZENDESK AUTO-SYNC ─────────────────────────────────────────────────────
 
 const PORT = [
   {id:'fashions-park',   name:'FASHIONS PARK',                            country:'CL', centry:false, segmento:'Moda',        porte:'Enterprise'},
@@ -2395,6 +2544,10 @@ function load() {
   });
   loadNotes();
   populateSelects();
+  // Auto-sync Zendesk si hay credenciales configuradas
+  if (localStorage.getItem(ZD_EMAIL_KEY) && localStorage.getItem(ZD_TOKEN_KEY)) {
+    setTimeout(function() { syncZendesk(false); }, 1500);
+  }
 }
 function fromSeed() {
   return PORT.map(p => { const w = SEED.find(s => norm(s.nombre) === norm(p.name)) || {}; return {...p, weekly: {...w}}; });
@@ -6793,6 +6946,34 @@ function renderPortfolioA() {
 <div class="alert-detail-panel" id="adpPanel" style="display:none">
   <button class="adp-close-btn" onclick="closeAlertDetailPanel()">✕ Cerrar</button>
   <div id="adpContent"></div>
+</div>
+
+<!-- ZENDESK SETUP MODAL -->
+<div id="zd-setup-overlay" class="overlay" onclick="closeZdSetup(event)" style="display:none">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <button class="modal-close" onclick="closeZdSetup()">✕</button>
+    <h2 style="margin-bottom:6px">🎫 Zendesk Auto-Sync</h2>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:18px">Configurá una vez — el dashboard sincronizará tickets automáticamente cada vez que lo abrís.</p>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Email de Zendesk</label>
+      <input id="zd-email-input" type="email" placeholder="tu@email.com"
+        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">API Token</label>
+      <input id="zd-token-input" type="password" placeholder="Pegar token de Zendesk"
+        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
+    </div>
+    <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text3);margin-bottom:16px;line-height:1.6">
+      📍 <strong style="color:var(--text2)">Cómo obtener el token:</strong><br>
+      Zendesk → Admin Center → Apps e integraciones → API → Zendesk API → Agregar token de API
+    </div>
+    <div id="zd-last-sync-label" style="font-size:11px;color:var(--text3);margin-bottom:14px"></div>
+    <div style="display:flex;gap:10px">
+      <button onclick="saveZdCredsAndSync()" class="btn btn-primary" style="flex:1">💾 Guardar y Sincronizar</button>
+      <button onclick="closeZdSetup()" class="btn btn-ghost">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <!-- PROFILE PICKER MODAL -->
