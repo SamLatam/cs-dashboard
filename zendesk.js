@@ -12,10 +12,20 @@ export default async function handler(req, res) {
 
   let url;
   if (next_page) {
-    // Paginar usando la URL completa devuelta por Zendesk
     url = next_page;
-  } else {
+  } else if (path === '/api/v2/search.json') {
     url = `https://db1globalsoftwaresupport.zendesk.com${path}?query=${encodeURIComponent(q)}&per_page=${per_page}`;
+  } else if (path.includes('?')) {
+    // Path already has query params
+    url = `https://db1globalsoftwaresupport.zendesk.com${path}`;
+  } else {
+    // Non-search paths (users/me, organizations, etc.)
+    url = `https://db1globalsoftwaresupport.zendesk.com${path}${per_page !== '100' ? '' : '?per_page=' + per_page}`;
+  }
+
+  // Special case: users/me doesn't need per_page
+  if (path === '/api/v2/users/me.json') {
+    url = `https://db1globalsoftwaresupport.zendesk.com${path}`;
   }
 
   try {

@@ -609,34 +609,6 @@ textarea.ficha-note:focus { border-color: var(--accent); }
 </div>
 
 <!-- ── ZENDESK SETUP MODAL ── -->
-<div id="zd-setup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
-  <div class="modal" style="max-width:520px">
-    <button class="modal-close" onclick="closeZdSetup()">✕</button>
-    <h2>🎫 Zendesk Auto-Sync</h2>
-    <p class="modal-sub">Conectá Zendesk para ver tickets en tiempo real en el dashboard.</p>
-    <div style="margin-bottom:14px">
-      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Email de Zendesk</label>
-      <input id="zd-email-input" type="email" placeholder="samiramis.monterola@db1.com.br"
-        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
-    </div>
-    <div style="margin-bottom:6px">
-      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">API Token <span style="font-weight:400;color:var(--text3)">(distinto de tu contraseña)</span></label>
-      <input id="zd-token-input" type="password" placeholder="API Token de Zendesk"
-        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
-    </div>
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6">
-      <strong style="color:var(--yellow)">⚠️ ¿No tenés un API Token?</strong><br>
-      El API Token es diferente a tu contraseña. Lo genera un admin en:<br>
-      <strong>Admin Center → Canales → API → Token de API → Agregar token</strong>
-    </div>
-    <div id="zd-last-sync-label" style="font-size:11px;color:var(--text3);margin-bottom:12px"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="saveZdCredsAndSync()">🔄 Guardar y sincronizar</button>
-      <button class="btn btn-ghost" onclick="closeZdSetup()">Cancelar</button>
-    </div>
-  </div>
-</div>
-
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -1441,7 +1413,7 @@ function closeZdSetup() {
 async function saveZdCredsAndSync() {
   const email = document.getElementById('zd-email-input').value.trim();
   const token = document.getElementById('zd-token-input').value.trim();
-  if (!email || !token) { alert('Ingresá email y API token'); return; }
+  if (!email || !token) { alert('Ingresá tu email y contraseña de Zendesk'); return; }
   localStorage.setItem(ZD_EMAIL_KEY, email);
   localStorage.setItem(ZD_TOKEN_KEY, token);
   closeZdSetup();
@@ -1469,6 +1441,65 @@ function matchZdOrg(zdOrgName) {
   return candidates;
 }
 
+async function testZendeskConnection() {
+  const email = document.getElementById('zd-email-input').value.trim();
+  const pwd   = document.getElementById('zd-token-input').value.trim();
+  const res_el = document.getElementById('zd-test-result');
+  if (!res_el) return;
+  if (!email || !pwd) {
+    res_el.style.display = 'block';
+    res_el.style.background = 'rgba(231,76,60,.12)';
+    res_el.style.border = '1px solid rgba(231,76,60,.3)';
+    res_el.style.color = 'var(--red)';
+    res_el.textContent = '⚠️ Ingresá email y contraseña primero';
+    return;
+  }
+  res_el.style.display = 'block';
+  res_el.style.background = 'rgba(99,102,241,.1)';
+  res_el.style.border = '1px solid rgba(99,102,241,.25)';
+  res_el.style.color = 'var(--text2)';
+  res_el.textContent = '⏳ Probando conexión…';
+  try {
+    const auth = btoa(email + ':' + pwd);
+    const r = await fetch('/api/zendesk?path=/api/v2/users/me.json', {
+      headers: { 'x-zd-auth': auth }
+    });
+    if (r.ok) {
+      const data = await r.json();
+      const name = data.user?.name || email;
+      res_el.style.background = 'rgba(46,204,113,.12)';
+      res_el.style.border = '1px solid rgba(46,204,113,.3)';
+      res_el.style.color = 'var(--green)';
+      res_el.textContent = '✅ Conexión exitosa — ' + name + ' · Todo listo para sincronizar';
+    } else if (r.status === 401) {
+      res_el.style.background = 'rgba(231,76,60,.12)';
+      res_el.style.border = '1px solid rgba(231,76,60,.3)';
+      res_el.style.color = 'var(--red)';
+      res_el.textContent = '❌ Email o contraseña incorrectos (401)';
+    } else if (r.status === 403) {
+      res_el.style.background = 'rgba(243,156,18,.1)';
+      res_el.style.border = '1px solid rgba(243,156,18,.3)';
+      res_el.style.color = 'var(--yellow)';
+      res_el.textContent = '⚠️ Conectado pero sin permiso API (403). Consultá a IT para habilitar acceso API en tu rol.';
+    } else if (r.status === 404) {
+      res_el.style.background = 'rgba(231,76,60,.12)';
+      res_el.style.border = '1px solid rgba(231,76,60,.3)';
+      res_el.style.color = 'var(--red)';
+      res_el.textContent = '❌ Error 404 — cuenta no encontrada. Si tu Zendesk usa SSO/Azure AD, la contraseña puede ser distinta. Pedí a IT un API Token.';
+    } else {
+      res_el.style.background = 'rgba(231,76,60,.12)';
+      res_el.style.border = '1px solid rgba(231,76,60,.3)';
+      res_el.style.color = 'var(--red)';
+      res_el.textContent = '❌ Error HTTP ' + r.status + ' — intentá de nuevo';
+    }
+  } catch(e) {
+    res_el.style.background = 'rgba(231,76,60,.12)';
+    res_el.style.border = '1px solid rgba(231,76,60,.3)';
+    res_el.style.color = 'var(--red)';
+    res_el.textContent = '❌ ' + e.message;
+  }
+}
+
 async function syncZendesk(showFeedback) {
   const email = localStorage.getItem(ZD_EMAIL_KEY);
   const token = localStorage.getItem(ZD_TOKEN_KEY);
@@ -1491,9 +1522,9 @@ async function syncZendesk(showFeedback) {
         : proxy + '?q=status%3Aopen%20type%3Aticket&per_page=100';
       const res = await fetch(url, { headers: proxyHeaders });
       if (!res.ok) {
-        if (res.status === 401) throw new Error('Credenciales incorrectas (401). Verificá email y API Token.');
-        if (res.status === 403) throw new Error('Sin permiso (403). Tu rol puede no tener acceso API. Pedí a IT un API Token.');
-        if (res.status === 404) throw new Error('Error 404 — El API Token es incorrecto. Abrí el modal Zendesk y usá un API Token (no tu contraseña) generado en Admin Center → Canales → API.');
+        if (res.status === 401) throw new Error('Credenciales incorrectas (401). Verificá tu email y contraseña en el ícono 🎫.');
+        if (res.status === 403) throw new Error('Sin permiso (403). Tu rol Agente Light puede no tener acceso API. Consultá a IT.');
+        if (res.status === 404) throw new Error('Error 404 — Credenciales no reconocidas. Si tu cuenta usa SSO/Azure AD, la contraseña de Zendesk puede diferir. Contactá a IT para generar un API Token.');
         throw new Error('Zendesk HTTP ' + res.status);
       }
       const data = await res.json();
@@ -4938,9 +4969,64 @@ function renderDirector() {
       <div>
         <div style="font-size:14px;font-weight:800;color:${semTxt}">${semMsg}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">Portfolio global: ${greens} sanos · ${yellows} observación · ${oranges} riesgo · ${reds} críticos</div>
+        <span data-dir-total="${totalAll}" data-dir-green="${greens}" data-dir-yellow="${yellows}" data-dir-orange="${oranges}" data-dir-red="${reds}" style="display:none"></span>
       </div>
     </div>
 
+    <!-- ══ PRO: INTELLIGENCE STRIP ══ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+
+      <!-- Health Distribution Donut (SVG) -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;align-items:center;gap:18px">
+        <div style="position:relative;flex-shrink:0">
+          <svg id="dir-donut" width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" stroke-width="10"/>
+            <circle id="dir-donut-green"  cx="40" cy="40" r="32" fill="none" stroke="var(--green)"  stroke-width="10" stroke-dasharray="0 201" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+            <circle id="dir-donut-yellow" cx="40" cy="40" r="32" fill="none" stroke="var(--yellow)" stroke-width="10" stroke-dasharray="0 201" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+            <circle id="dir-donut-orange" cx="40" cy="40" r="32" fill="none" stroke="var(--orange)" stroke-width="10" stroke-dasharray="0 201" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+            <circle id="dir-donut-red"    cx="40" cy="40" r="32" fill="none" stroke="var(--red)"    stroke-width="10" stroke-dasharray="0 201" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+            <text x="40" y="44" text-anchor="middle" font-size="14" font-weight="800" fill="var(--text)" id="dir-donut-label">—</text>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Health Portfolio</div>
+          <div style="font-size:11px;line-height:2;color:var(--text2)" id="dir-donut-legend">
+            <span style="color:var(--green)">🟢</span> — sanos<br>
+            <span style="color:var(--yellow)">🟡</span> — observación<br>
+            <span style="color:var(--orange)">🟠</span> — riesgo<br>
+            <span style="color:var(--red)">🔴</span> — críticos
+          </div>
+        </div>
+      </div>
+
+      <!-- GMV Top Clients Bar Chart -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Top GMV — Mes Actual</div>
+        <div id="dir-gmv-bars" style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11px;color:var(--text3)">Sin datos GMV disponibles</div>
+        </div>
+      </div>
+
+      <!-- Contact Coverage Ring -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Cobertura Cadencia</div>
+        <div id="dir-cov-ring-wrap" style="display:flex;align-items:center;gap:14px">
+          <svg width="72" height="72" viewBox="0 0 72 72" style="flex-shrink:0">
+            <circle cx="36" cy="36" r="28" fill="none" stroke="var(--border)" stroke-width="9"/>
+            <circle id="dir-cov-arc" cx="36" cy="36" r="28" fill="none" stroke="var(--green)" stroke-width="9"
+              stroke-dasharray="0 176" stroke-linecap="round" transform="rotate(-90 36 36)"/>
+            <text x="36" y="40" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)" id="dir-cov-pct">—</text>
+          </svg>
+          <div style="flex:1">
+            <div style="font-size:11px;color:var(--text2);line-height:1.8" id="dir-cov-detail">
+              <div>≤30d: <strong id="dir-cov-30">—</strong></div>
+              <div>31–60d: <strong id="dir-cov-60">—</strong></div>
+              <div>&gt;90d/sin dato: <strong id="dir-cov-stale" style="color:var(--red)">—</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- KPIs GLOBALES -->
     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px">
       <div class="kpi-card kpi-blue"><div class="kpi-label">Clientes</div><div class="kpi-value">${totalAll}</div><div class="kpi-sub">${allUsers.length} CSMs activos</div></div>
@@ -5042,6 +5128,72 @@ function renderDirector() {
       </div>
     </div>`:''}
   `;
+
+  // ─── Post-render: charts ───────────────────────────────────────────────────
+  setTimeout(function() {
+    // Health donut
+    try {
+      const tot2 = totalAll || 1;
+      const circ2 = 2*Math.PI*32;
+      let off = 0;
+      function setArc2(id, count) {
+        const el = document.getElementById(id); if(!el) return;
+        const dash = circ2 * count / tot2;
+        const rot = (-90) + 360 * off / circ2;
+        el.setAttribute('stroke-dasharray', dash + ' ' + (circ2 - dash));
+        el.setAttribute('transform', 'rotate(' + rot + ' 40 40)');
+        off += dash;
+      }
+      setArc2('dir-donut-green', greens);
+      setArc2('dir-donut-yellow', yellows);
+      setArc2('dir-donut-orange', oranges);
+      setArc2('dir-donut-red', reds);
+      const lbl = document.getElementById('dir-donut-label');
+      if(lbl) lbl.textContent = totalAll > 0 ? Math.round(greens/totalAll*100)+'%' : '—';
+      const leg = document.getElementById('dir-donut-legend');
+      if(leg) leg.innerHTML = '<span style="color:var(--green)">🟢</span> '+greens+' sanos<br><span style="color:var(--yellow)">🟡</span> '+yellows+' obs.<br><span style="color:var(--orange)">🟠</span> '+oranges+' riesgo<br><span style="color:var(--red)">🔴</span> '+reds+' críticos';
+    } catch(e) {}
+
+    // GMV bars
+    const gmvBars = document.getElementById('dir-gmv-bars');
+    if (gmvBars) {
+      const top5 = allClients.filter(c=>c.weekly?.gmv>0).sort((a,b)=>b.weekly.gmv-a.weekly.gmv).slice(0,5);
+      if (top5.length) {
+        const maxG = top5[0].weekly.gmv;
+        gmvBars.innerHTML = top5.map(c=>{
+          const pct = Math.round(c.weekly.gmv/maxG*100);
+          const col = pct>=80?'var(--green)':pct>=50?'var(--yellow)':'var(--accent)';
+          return `<div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:2px">
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px">${c.name.split(' ')[0]}</span>
+              <span style="color:var(--text)">${fmtGMV(c.weekly.gmv)}</span>
+            </div>
+            <div style="height:5px;border-radius:3px;background:var(--border);overflow:hidden">
+              <div style="height:100%;width:${pct}%;background:${col};border-radius:3px;transition:width .4s ease"></div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // Cadencia ring
+    const today2 = new Date(); today2.setHours(0,0,0,0);
+    const c30 = allClients.filter(c=>{if(!c.weekly?.lastContact)return false;const d=new Date(c.weekly.lastContact);d.setHours(0,0,0,0);return(today2-d)/86400000<=30;}).length;
+    const c60 = allClients.filter(c=>{if(!c.weekly?.lastContact)return false;const d=new Date(c.weekly.lastContact);d.setHours(0,0,0,0);const dd=(today2-d)/86400000;return dd>30&&dd<=60;}).length;
+    const stale = allClients.filter(c=>{if(!c.weekly?.lastContact)return true;const d=new Date(c.weekly.lastContact);d.setHours(0,0,0,0);return(today2-d)/86400000>90;}).length;
+    const pct30 = totalAll?Math.round(c30/totalAll*100):0;
+    const arcEl = document.getElementById('dir-cov-arc');
+    const pctEl = document.getElementById('dir-cov-pct');
+    if(arcEl){
+      const circ2=2*Math.PI*28;
+      arcEl.setAttribute('stroke-dasharray',circ2*pct30/100+' '+(circ2*(1-pct30/100)));
+      arcEl.setAttribute('stroke',pct30>=80?'var(--green)':pct30>=60?'var(--yellow)':'var(--red)');
+    }
+    if(pctEl) pctEl.textContent=pct30+'%';
+    const el30=document.getElementById('dir-cov-30'); if(el30) el30.textContent=c30+'/'+totalAll;
+    const el60=document.getElementById('dir-cov-60'); if(el60) el60.textContent=c60;
+    const elst=document.getElementById('dir-cov-stale'); if(elst) elst.textContent=stale;
+  }, 150);
 }
 
 function renderEquipo() {
@@ -7037,27 +7189,30 @@ function renderPortfolioA() {
 
 <!-- ZENDESK SETUP MODAL -->
 <div id="zd-setup-overlay" class="overlay" onclick="closeZdSetup(event)" style="display:none">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:480px">
     <button class="modal-close" onclick="closeZdSetup()">✕</button>
-    <h2 style="margin-bottom:6px">🎫 Zendesk Auto-Sync</h2>
-    <p style="font-size:12px;color:var(--text3);margin-bottom:18px">Configurá una vez — el dashboard sincronizará tickets automáticamente cada vez que lo abrís.</p>
+    <h2 style="margin-bottom:4px">🎫 Conectar Zendesk</h2>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:18px">Sincronización automática de tickets — configurá una vez.</p>
+    <!-- Test result banner -->
+    <div id="zd-test-result" style="display:none;border-radius:8px;padding:10px 14px;font-size:12px;font-weight:600;margin-bottom:14px;line-height:1.5"></div>
     <div style="margin-bottom:14px">
-      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Email de Zendesk</label>
-      <input id="zd-email-input" type="email" placeholder="tu@email.com"
+      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Email</label>
+      <input id="zd-email-input" type="email" placeholder="tu@db1.com.br"
         style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
     </div>
     <div style="margin-bottom:14px">
-      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Contraseña de Zendesk</label>
+      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Contraseña <span style="font-weight:400;color:var(--text3)">— la misma que usás para entrar a Zendesk</span></label>
       <input id="zd-token-input" type="password" placeholder="Tu contraseña de Zendesk"
         style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
     </div>
     <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text3);margin-bottom:16px;line-height:1.6">
-      🔒 Tu contraseña se guarda solo en tu navegador (localStorage) y nunca sale de tu dispositivo. Podés borrarla cuando quieras desde el mismo botón.
+      🔒 Guardada solo en tu navegador — nunca sale de tu dispositivo.
     </div>
     <div id="zd-last-sync-label" style="font-size:11px;color:var(--text3);margin-bottom:14px"></div>
     <div style="display:flex;gap:10px">
+      <button onclick="testZendeskConnection()" class="btn btn-ghost" style="white-space:nowrap">🔍 Probar</button>
       <button onclick="saveZdCredsAndSync()" class="btn btn-primary" style="flex:1">💾 Guardar y Sincronizar</button>
-      <button onclick="closeZdSetup()" class="btn btn-ghost">Cancelar</button>
+      <button onclick="closeZdSetup()" class="btn btn-ghost">✕</button>
     </div>
   </div>
 </div>
