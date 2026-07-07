@@ -1399,6 +1399,8 @@ function openZdSetup() {
   if (!overlay) return;
   document.getElementById('zd-email-input').value = localStorage.getItem(ZD_EMAIL_KEY) || '';
   document.getElementById('zd-token-input').value = localStorage.getItem(ZD_TOKEN_KEY) || '';
+  const savedMode = localStorage.getItem('cs-zd-mode') || 'token';
+  zdSetMode(savedMode);
   const last = localStorage.getItem(ZD_LAST_SYNC_KEY);
   const lastEl = document.getElementById('zd-last-sync-label');
   if (lastEl) lastEl.textContent = last ? 'Última sync: ' + last : 'Nunca sincronizado';
@@ -1413,9 +1415,10 @@ function closeZdSetup() {
 async function saveZdCredsAndSync() {
   const email = document.getElementById('zd-email-input').value.trim();
   const token = document.getElementById('zd-token-input').value.trim();
-  if (!email || !token) { alert('Ingresá tu email y contraseña de Zendesk'); return; }
+  if (!email || !token) { alert('Ingresá tu email y ' + (_zdMode==='token'?'API Token':'contraseña')); return; }
   localStorage.setItem(ZD_EMAIL_KEY, email);
   localStorage.setItem(ZD_TOKEN_KEY, token);
+  localStorage.setItem('cs-zd-mode', _zdMode);
   closeZdSetup();
   await syncZendesk(true);
 }
@@ -1441,62 +1444,75 @@ function matchZdOrg(zdOrgName) {
   return candidates;
 }
 
+// Zendesk auth mode: 'token' (API Token, default) or 'pwd' (native password)
+let _zdMode = 'token';
+
+function zdSetMode(mode) {
+  _zdMode = mode;
+  const tokBtn = document.getElementById('zd-mode-token');
+  const pwdBtn = document.getElementById('zd-mode-pwd');
+  const lbl    = document.getElementById('zd-pwd-label');
+  const inp    = document.getElementById('zd-token-input');
+  if (mode === 'token') {
+    if(tokBtn){ tokBtn.style.borderColor='var(--accent)'; tokBtn.style.background='rgba(99,102,241,.12)'; tokBtn.style.color='var(--accent)'; }
+    if(pwdBtn){ pwdBtn.style.borderColor='var(--border)'; pwdBtn.style.background='var(--surface2)'; pwdBtn.style.color='var(--text3)'; }
+    if(lbl)   lbl.innerHTML = 'API Token <span style="font-weight:400;color:var(--text3)">— generado por un admin de Zendesk</span>';
+    if(inp)   inp.placeholder = 'Pegá el API Token aquí';
+  } else {
+    if(pwdBtn){ pwdBtn.style.borderColor='var(--accent)'; pwdBtn.style.background='rgba(99,102,241,.12)'; pwdBtn.style.color='var(--accent)'; }
+    if(tokBtn){ tokBtn.style.borderColor='var(--border)'; tokBtn.style.background='var(--surface2)'; tokBtn.style.color='var(--text3)'; }
+    if(lbl)   lbl.innerHTML = 'Contraseña <span style="font-weight:400;color:var(--text3)">— contraseña nativa de Zendesk (no SSO)</span>';
+    if(inp)   inp.placeholder = 'Tu contraseña de Zendesk';
+  }
+}
+
+function buildZdAuth(email, secret) {
+  if (_zdMode === 'token') {
+    return btoa(email + '/token:' + secret);
+  }
+  return btoa(email + ':' + secret);
+}
+
 async function testZendeskConnection() {
-  const email = document.getElementById('zd-email-input').value.trim();
-  const pwd   = document.getElementById('zd-token-input').value.trim();
+  const email  = document.getElementById('zd-email-input').value.trim();
+  const secret = document.getElementById('zd-token-input').value.trim();
   const res_el = document.getElementById('zd-test-result');
   if (!res_el) return;
-  if (!email || !pwd) {
+
+  function showResult(type, msg) {
     res_el.style.display = 'block';
-    res_el.style.background = 'rgba(231,76,60,.12)';
-    res_el.style.border = '1px solid rgba(231,76,60,.3)';
-    res_el.style.color = 'var(--red)';
-    res_el.textContent = '⚠️ Ingresá email y contraseña primero';
-    return;
+    const colors = {
+      loading: ['rgba(99,102,241,.1)','rgba(99,102,241,.25)','var(--text2)'],
+      ok:      ['rgba(46,204,113,.12)','rgba(46,204,113,.3)','var(--green)'],
+      warn:    ['rgba(243,156,18,.1)','rgba(243,156,18,.3)','var(--yellow)'],
+      err:     ['rgba(231,76,60,.12)','rgba(231,76,60,.3)','var(--red)'],
+    };
+    const [bg,bd,col] = colors[type] || colors.err;
+    res_el.style.background = bg;
+    res_el.style.border = '1px solid ' + bd;
+    res_el.style.color = col;
+    res_el.textContent = msg;
   }
-  res_el.style.display = 'block';
-  res_el.style.background = 'rgba(99,102,241,.1)';
-  res_el.style.border = '1px solid rgba(99,102,241,.25)';
-  res_el.style.color = 'var(--text2)';
-  res_el.textContent = '⏳ Probando conexión…';
+
+  if (!email || !secret) { showResult('err', '⚠️ Ingresá email y ' + (_zdMode==='token'?'API Token':'contraseña') + ' primero'); return; }
+  showResult('loading', '⏳ Probando conexión…');
   try {
-    const auth = btoa(email + ':' + pwd);
-    const r = await fetch('/api/zendesk?path=/api/v2/users/me.json', {
-      headers: { 'x-zd-auth': auth }
-    });
+    const auth = buildZdAuth(email, secret);
+    const r = await fetch('/api/zendesk?path=/api/v2/users/me.json', { headers: { 'x-zd-auth': auth } });
     if (r.ok) {
       const data = await r.json();
-      const name = data.user?.name || email;
-      res_el.style.background = 'rgba(46,204,113,.12)';
-      res_el.style.border = '1px solid rgba(46,204,113,.3)';
-      res_el.style.color = 'var(--green)';
-      res_el.textContent = '✅ Conexión exitosa — ' + name + ' · Todo listo para sincronizar';
+      showResult('ok', '✅ Conexión exitosa — ' + (data.user?.name || email) + ' · Listo para sincronizar');
     } else if (r.status === 401) {
-      res_el.style.background = 'rgba(231,76,60,.12)';
-      res_el.style.border = '1px solid rgba(231,76,60,.3)';
-      res_el.style.color = 'var(--red)';
-      res_el.textContent = '❌ Email o contraseña incorrectos (401)';
+      showResult('err', '❌ Credenciales incorrectas (401). ' + (_zdMode==='token' ? 'Verificá que el API Token sea correcto.' : 'Verificá tu contraseña nativa de Zendesk.'));
     } else if (r.status === 403) {
-      res_el.style.background = 'rgba(243,156,18,.1)';
-      res_el.style.border = '1px solid rgba(243,156,18,.3)';
-      res_el.style.color = 'var(--yellow)';
-      res_el.textContent = '⚠️ Conectado pero sin permiso API (403). Consultá a IT para habilitar acceso API en tu rol.';
+      showResult('warn', '⚠️ Autenticado pero sin permiso API (403). Tu rol Agente Light puede necesitar permisos adicionales — consultá a IT.');
     } else if (r.status === 404) {
-      res_el.style.background = 'rgba(231,76,60,.12)';
-      res_el.style.border = '1px solid rgba(231,76,60,.3)';
-      res_el.style.color = 'var(--red)';
-      res_el.textContent = '❌ Error 404 — cuenta no encontrada. Si tu Zendesk usa SSO/Azure AD, la contraseña puede ser distinta. Pedí a IT un API Token.';
+      showResult('err', '❌ Error 404 — ' + (_zdMode==='token' ? 'API Token inválido o cuenta no encontrada. Verificá que el token esté activo en Admin Center.' : 'Cuenta no encontrada. Tu cuenta DB1 usa SSO — usá el modo API Token.'));
     } else {
-      res_el.style.background = 'rgba(231,76,60,.12)';
-      res_el.style.border = '1px solid rgba(231,76,60,.3)';
-      res_el.style.color = 'var(--red)';
-      res_el.textContent = '❌ Error HTTP ' + r.status + ' — intentá de nuevo';
+      showResult('err', '❌ Error HTTP ' + r.status + ' — intentá de nuevo');
     }
   } catch(e) {
-    res_el.style.background = 'rgba(231,76,60,.12)';
-    res_el.style.border = '1px solid rgba(231,76,60,.3)';
-    res_el.style.color = 'var(--red)';
-    res_el.textContent = '❌ ' + e.message;
+    showResult('err', '❌ ' + e.message);
   }
 }
 
@@ -1509,7 +1525,7 @@ async function syncZendesk(showFeedback) {
   if (btn) { btn.textContent = '🔄 Sincronizando...'; btn.disabled = true; }
 
   try {
-    const auth = btoa(email + ':' + token);
+    const auth = buildZdAuth(email, token);
     const proxy = '/api/zendesk';
     const proxyHeaders = { 'x-zd-auth': auth };
 
@@ -7189,24 +7205,47 @@ function renderPortfolioA() {
 
 <!-- ZENDESK SETUP MODAL -->
 <div id="zd-setup-overlay" class="overlay" onclick="closeZdSetup(event)" style="display:none">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:480px">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:500px">
     <button class="modal-close" onclick="closeZdSetup()">✕</button>
     <h2 style="margin-bottom:4px">🎫 Conectar Zendesk</h2>
-    <p style="font-size:12px;color:var(--text3);margin-bottom:18px">Sincronización automática de tickets — configurá una vez.</p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:14px">Sincronización automática de tickets — configurá una vez.</p>
+
+    <!-- SSO notice -->
+    <div style="background:rgba(243,156,18,.1);border:1px solid rgba(243,156,18,.3);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--yellow);line-height:1.6">
+      <strong>⚠️ Tu cuenta DB1 usa SSO (Azure AD)</strong><br>
+      La contraseña de Windows/DB1 <strong>no funciona</strong> en la API de Zendesk. Necesitás un <strong>API Token</strong> generado por un admin.<br>
+      <span style="color:var(--text3);font-size:11px">Pedílo a IT o al admin de Zendesk: Admin Center → Canales → API → Token de API → Agregar token</span>
+    </div>
+
     <!-- Test result banner -->
     <div id="zd-test-result" style="display:none;border-radius:8px;padding:10px 14px;font-size:12px;font-weight:600;margin-bottom:14px;line-height:1.5"></div>
-    <div style="margin-bottom:14px">
+
+    <div style="margin-bottom:12px">
       <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Email</label>
-      <input id="zd-email-input" type="email" placeholder="tu@db1.com.br"
+      <input id="zd-email-input" type="email" placeholder="samiramis.monterola@db1.com.br"
         style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
     </div>
+
+    <!-- Mode toggle -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button id="zd-mode-pwd" onclick="zdSetMode('pwd')"
+        style="flex:1;padding:7px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid var(--border);background:var(--surface2);color:var(--text3);transition:all .2s">
+        🔑 Contraseña
+      </button>
+      <button id="zd-mode-token" onclick="zdSetMode('token')"
+        style="flex:1;padding:7px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid var(--accent);background:rgba(99,102,241,.12);color:var(--accent);transition:all .2s">
+        🎟️ API Token <span style="font-size:10px;font-weight:400">(recomendado)</span>
+      </button>
+    </div>
+
     <div style="margin-bottom:14px">
-      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Contraseña <span style="font-weight:400;color:var(--text3)">— la misma que usás para entrar a Zendesk</span></label>
-      <input id="zd-token-input" type="password" placeholder="Tu contraseña de Zendesk"
+      <label id="zd-pwd-label" style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">API Token <span style="font-weight:400;color:var(--text3)">— generado por un admin de Zendesk</span></label>
+      <input id="zd-token-input" type="password" placeholder="Pegá el API Token aquí"
         style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
     </div>
-    <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text3);margin-bottom:16px;line-height:1.6">
-      🔒 Guardada solo en tu navegador — nunca sale de tu dispositivo.
+
+    <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.6">
+      🔒 Guardado solo en tu navegador — nunca sale de tu dispositivo.
     </div>
     <div id="zd-last-sync-label" style="font-size:11px;color:var(--text3);margin-bottom:14px"></div>
     <div style="display:flex;gap:10px">
