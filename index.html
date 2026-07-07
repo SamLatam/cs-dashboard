@@ -1419,7 +1419,7 @@ async function syncZendesk(showFeedback) {
   if (btn) { btn.textContent = '🔄 Sincronizando...'; btn.disabled = true; }
 
   try {
-    const auth = btoa(email + '/token:' + token);
+    const auth = btoa(email + ':' + token);
     const headers = { 'Authorization': 'Basic ' + auth };
 
     // 1. Fetch open tickets (max 200)
@@ -6960,13 +6960,12 @@ function renderPortfolioA() {
         style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
     </div>
     <div style="margin-bottom:14px">
-      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">API Token</label>
-      <input id="zd-token-input" type="password" placeholder="Pegar token de Zendesk"
+      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Contraseña de Zendesk</label>
+      <input id="zd-token-input" type="password" placeholder="Tu contraseña de Zendesk"
         style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
     </div>
     <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text3);margin-bottom:16px;line-height:1.6">
-      📍 <strong style="color:var(--text2)">Cómo obtener el token:</strong><br>
-      Zendesk → Admin Center → Apps e integraciones → API → Zendesk API → Agregar token de API
+      🔒 Tu contraseña se guarda solo en tu navegador (localStorage) y nunca sale de tu dispositivo. Podés borrarla cuando quieras desde el mismo botón.
     </div>
     <div id="zd-last-sync-label" style="font-size:11px;color:var(--text3);margin-bottom:14px"></div>
     <div style="display:flex;gap:10px">
