@@ -577,6 +577,66 @@ textarea.ficha-note:focus { border-color: var(--accent); }
   <div style="font-size:11px; color:#4a5578; margin-top:8px;">© DB1 Global Software · Customer Success</div>
 </div>
 
+<!-- ── CLOUD SYNC SETUP MODAL ── -->
+<div id="cloud-setup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div class="modal" style="max-width:500px">
+    <button class="modal-close" onclick="closeCloudSetup()">✕</button>
+    <h2>☁️ Sincronización en la Nube</h2>
+    <p class="modal-sub">Guardá tus datos en un GitHub Gist para acceder desde cualquier dispositivo.</p>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">GitHub Personal Access Token (ghp_...)</label>
+      <input id="cloud-token-input" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Settings → Developer settings → Personal access tokens → gist scope</div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Gist ID (opcional — se crea automáticamente)</label>
+      <input id="cloud-gist-input" type="text" placeholder="53e9fe55c5ab776cf63b4f0e5ad412af"
+        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
+    </div>
+    <div id="team-code-section" style="display:none;margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Código de equipo (para compartir)</label>
+      <input id="team-code-display" type="text" readonly
+        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text3);font-size:12px;box-sizing:border-box;cursor:text"
+        onclick="this.select()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveCloudConfig()">💾 Guardar y sincronizar</button>
+      <button class="btn btn-ghost" onclick="closeCloudSetup()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ZENDESK SETUP MODAL ── -->
+<div id="zd-setup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeZdSetup()">✕</button>
+    <h2>🎫 Zendesk Auto-Sync</h2>
+    <p class="modal-sub">Conectá Zendesk para ver tickets en tiempo real en el dashboard.</p>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Email de Zendesk</label>
+      <input id="zd-email-input" type="email" placeholder="samiramis.monterola@db1.com.br"
+        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:6px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">API Token <span style="font-weight:400;color:var(--text3)">(distinto de tu contraseña)</span></label>
+      <input id="zd-token-input" type="password" placeholder="API Token de Zendesk"
+        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6">
+      <strong style="color:var(--yellow)">⚠️ ¿No tenés un API Token?</strong><br>
+      El API Token es diferente a tu contraseña de Zendesk. Lo genera un administrador en:<br>
+      <strong>Admin Center → Canales → API → Token de API → Agregar token</strong><br>
+      <span style="color:var(--text3)">Pedíselo a tu admin de Zendesk (IT/soporte interno). Si tenés acceso a Admin, podés crearlo vos misma.</span>
+    </div>
+    <div id="zd-last-sync-label" style="font-size:11px;color:var(--text3);margin-bottom:12px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveZdCredsAndSync()">🔄 Guardar y sincronizar</button>
+      <button class="btn btn-ghost" onclick="closeZdSetup()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
   <div class="sidebar-brand">
@@ -1430,7 +1490,12 @@ async function syncZendesk(showFeedback) {
         ? proxy + '?next_page=' + encodeURIComponent(nextPage)
         : proxy + '?q=status%3Aopen%20type%3Aticket&per_page=100';
       const res = await fetch(url, { headers: proxyHeaders });
-      if (!res.ok) throw new Error('Zendesk HTTP ' + res.status + ' — verificá email y contraseña');
+      if (!res.ok) {
+        if (res.status === 401) throw new Error('Credenciales incorrectas (401). Verificá tu email y API Token.');
+        if (res.status === 403) throw new Error('Sin permiso (403). Tu rol "Agente Light" puede no tener acceso a la API. Pedí a IT un API Token con permisos de lectura.');
+        if (res.status === 404) throw new Error('Error 404 — El API Token es incorrecto o no existe. Abrí el modal de Zendesk y reemplazá la contraseña por un API Token generado en Admin Center → Canales → API.');
+        throw new Error('Zendesk HTTP ' + res.status);
+      }
       const data = await res.json();
       if (data.error) throw new Error(data.error + (data.description ? ': ' + data.description : ''));
       allTickets = allTickets.concat(data.results || []);
