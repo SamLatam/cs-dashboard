@@ -1420,21 +1420,27 @@ async function syncZendesk(showFeedback) {
 
   try {
     const auth = btoa(email + ':' + token);
-    const headers = { 'Authorization': 'Basic ' + auth };
+    const proxy = '/api/zendesk';
+    const proxyHeaders = { 'x-zd-auth': auth };
 
-    // 1. Fetch open tickets (max 200)
+    // 1. Fetch open tickets via proxy (evita CORS)
     let allTickets = [];
-    let url = ZD_BASE + '/api/v2/search.json?query=status%3Aopen%20type%3Aticket&per_page=100';
-    for (let page = 0; page < 2 && url; page++) {
-      const res = await fetch(url, { headers });
-      if (!res.ok) throw new Error('Zendesk HTTP ' + res.status + ' — verificá email y API token');
+    let nextPage = null;
+    for (let page = 0; page < 2; page++) {
+      const url = nextPage
+        ? proxy + '?next_page=' + encodeURIComponent(nextPage)
+        : proxy + '?q=status%3Aopen%20type%3Aticket&per_page=100';
+      const res = await fetch(url, { headers: proxyHeaders });
+      if (!res.ok) throw new Error('Zendesk HTTP ' + res.status + ' — verificá email y contraseña');
       const data = await res.json();
+      if (data.error) throw new Error(data.error + (data.description ? ': ' + data.description : ''));
       allTickets = allTickets.concat(data.results || []);
-      url = data.next_page || null;
+      nextPage = data.next_page || null;
+      if (!nextPage) break;
     }
 
-    // 2. Fetch organizations
-    const orgRes = await fetch(ZD_BASE + '/api/v2/organizations.json?page[size]=100', { headers });
+    // 2. Fetch organizations via proxy
+    const orgRes = await fetch(proxy + '?path=/api/v2/organizations.json&per_page=100', { headers: proxyHeaders });
     const orgData = await orgRes.json();
     const orgMap = {};
     (orgData.organizations || []).forEach(function(o) { orgMap[o.id] = o.name; });
