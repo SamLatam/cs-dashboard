@@ -577,6 +577,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
   <div style="font-size:11px; color:#4a5578; margin-top:8px;">© DB1 Global Software · Customer Success</div>
 </div>
 
+
 <!-- ── CLOUD SYNC SETUP MODAL ── -->
 <div id="cloud-setup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div class="modal" style="max-width:500px">
@@ -595,7 +596,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
         style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
     </div>
     <div id="team-code-section" style="display:none;margin-bottom:14px">
-      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Código de equipo (para compartir)</label>
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Código de equipo</label>
       <input id="team-code-display" type="text" readonly
         style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text3);font-size:12px;box-sizing:border-box;cursor:text"
         onclick="this.select()">
@@ -625,9 +626,8 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     </div>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6">
       <strong style="color:var(--yellow)">⚠️ ¿No tenés un API Token?</strong><br>
-      El API Token es diferente a tu contraseña de Zendesk. Lo genera un administrador en:<br>
-      <strong>Admin Center → Canales → API → Token de API → Agregar token</strong><br>
-      <span style="color:var(--text3)">Pedíselo a tu admin de Zendesk (IT/soporte interno). Si tenés acceso a Admin, podés crearlo vos misma.</span>
+      El API Token es diferente a tu contraseña. Lo genera un admin en:<br>
+      <strong>Admin Center → Canales → API → Token de API → Agregar token</strong>
     </div>
     <div id="zd-last-sync-label" style="font-size:11px;color:var(--text3);margin-bottom:12px"></div>
     <div class="modal-actions">
@@ -654,7 +654,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     <div class="nav-item"        id="nav-predicciones" onclick="nav('predicciones',this)"> <span class="nav-icon">🔮</span> Predicciones <span class="nav-badge yellow" id="nb-predicciones" style="display:none">0</span></div>
     <div class="nav-label">Análisis</div>
     <div class="nav-item"        id="nav-review"       onclick="nav('review',this)">      <span class="nav-icon">🔄</span> Revisión Portafolio</div>
-    <div class="nav-item"        id="nav-capacitacion" onclick="nav('capacitacion',this)"> <span class="nav-icon">⭐</span> Expansión & Valor</div>
+    <div class="nav-item"        id="nav-capacitacion" onclick="nav('capacitacion',this)"> <span class="nav-icon">🎓</span> Capacitación & Valor</div>
     <div class="nav-item"        id="nav-automatizacion" onclick="nav('automatizacion',this)"><span class="nav-icon">🤖</span> Auto D/E <span class="nav-badge" id="nb-automatizacion" style="background:#e74c3c;display:none">0</span></div>
     <div class="nav-item"        id="nav-catalogo"  onclick="nav('catalogo',this)">  <span class="nav-icon">🛒</span> Catálogo &amp; GMV</div>
     <div class="nav-item"        id="nav-metricas"  onclick="nav('metricas',this)">  <span class="nav-icon">📈</span> Métricas</div>
@@ -1491,9 +1491,9 @@ async function syncZendesk(showFeedback) {
         : proxy + '?q=status%3Aopen%20type%3Aticket&per_page=100';
       const res = await fetch(url, { headers: proxyHeaders });
       if (!res.ok) {
-        if (res.status === 401) throw new Error('Credenciales incorrectas (401). Verificá tu email y API Token.');
-        if (res.status === 403) throw new Error('Sin permiso (403). Tu rol "Agente Light" puede no tener acceso a la API. Pedí a IT un API Token con permisos de lectura.');
-        if (res.status === 404) throw new Error('Error 404 — El API Token es incorrecto o no existe. Abrí el modal de Zendesk y reemplazá la contraseña por un API Token generado en Admin Center → Canales → API.');
+        if (res.status === 401) throw new Error('Credenciales incorrectas (401). Verificá email y API Token.');
+        if (res.status === 403) throw new Error('Sin permiso (403). Tu rol puede no tener acceso API. Pedí a IT un API Token.');
+        if (res.status === 404) throw new Error('Error 404 — El API Token es incorrecto. Abrí el modal Zendesk y usá un API Token (no tu contraseña) generado en Admin Center → Canales → API.');
         throw new Error('Zendesk HTTP ' + res.status);
       }
       const data = await res.json();
@@ -5741,33 +5741,30 @@ function renderCapacitacion() {
   const pg = document.getElementById('page-capacitacion');
   if (!pg) return;
 
-  // ── Datos desde PORTFOLIO_GAP ──────────────────────────────────────────────
   const quickWins   = PORTFOLIO_GAP.filter(x => x.gap === 1);
   const pushStrat   = PORTFOLIO_GAP.filter(x => x.gap === 2);
   const recovery    = PORTFOLIO_GAP.filter(x => x.gap >= 3);
   const grupos      = GRUPO_ESTRATEGICO || [];
 
-  // Radar de expansión: detectar productos mencionados en acciones
-  const productos = [
-    { nombre:'Repricing Automático', icon:'⚡', keywords:['repricing','precio automático'] },
-    { nombre:'AnyTools',             icon:'🧰', keywords:['anytools','anytools'] },
-    { nombre:'Predize',              icon:'🤝', keywords:['predize'] },
-    { nombre:'TikTok Shop',          icon:'🎵', keywords:['tiktok'] },
-    { nombre:'Kits',                 icon:'📦', keywords:['kits','kit'] },
-    { nombre:'Marca Seleta',         icon:'🏷️', keywords:['marca seleta','marca selecta','brand'] },
-    { nombre:'QBR / EBR',            icon:'📋', keywords:['qbr','ebr','executive review'] },
-    { nombre:'Migración AnyMarket',  icon:'🚀', keywords:['migración','centry','migrate'] }
+  const produtos = [
+    { nome:'Repricing Automático', icon:'⚡', keywords:['repricing','precio automático'] },
+    { nome:'AnyTools',             icon:'🧰', keywords:['anytools'] },
+    { nome:'Predize',              icon:'🤝', keywords:['predize'] },
+    { nome:'TikTok Shop',          icon:'🎵', keywords:['tiktok'] },
+    { nome:'Kits',                 icon:'📦', keywords:['kits','kit'] },
+    { nome:'Marca Seleta',         icon:'🏷️', keywords:['marca seleta','marca selecta','brand'] },
+    { nome:'QBR / EBR',            icon:'📋', keywords:['qbr','ebr','executive review'] },
+    { nome:'Migración AnyMarket',  icon:'🚀', keywords:['migración','centry','migrate'] }
   ];
 
-  const radarData = productos.map(function(p) {
+  const radarData = produtos.map(function(p) {
     const count = PORTFOLIO_GAP.filter(function(x) {
       const ac = (x.accion || '').toLowerCase();
       return p.keywords.some(function(k) { return ac.includes(k); });
     }).length;
-    return { nombre: p.nombre, icon: p.icon, count: count };
+    return { nome: p.nome, icon: p.icon, count: count };
   }).filter(function(p) { return p.count > 0; }).sort(function(a,b) { return b.count - a.count; });
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   function kpi(valor, label, sub, color) {
     return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;flex:1;min-width:120px;border-top:3px solid ' + color + '">' +
       '<div style="font-size:28px;font-weight:800;color:' + color + '">' + valor + '</div>' +
@@ -5789,7 +5786,7 @@ function renderCapacitacion() {
     const pct = Math.round((p.count / PORTFOLIO_GAP.length) * 100);
     return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">' +
       '<span style="font-size:16px;width:22px;text-align:center">' + p.icon + '</span>' +
-      '<span style="font-size:13px;font-weight:600;flex:1">' + p.nombre + '</span>' +
+      '<span style="font-size:13px;font-weight:600;flex:1">' + p.nome + '</span>' +
       '<div style="width:120px;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">' +
         '<div style="height:100%;width:' + pct + '%;background:var(--accent);border-radius:4px"></div></div>' +
       '<span style="font-size:12px;font-weight:700;color:var(--accent);min-width:28px;text-align:right">' + p.count + '</span></div>';
@@ -5800,7 +5797,7 @@ function renderCapacitacion() {
     if (!port) return '';
     const gapColor = x.gap===1?'var(--green)':x.gap===2?'var(--yellow)':'var(--orange)';
     const gapLabel = x.gap===1?'⚡ Quick Win':x.gap===2?'🔥 30-60d':'🏗️ 60-90d';
-    return '<tr onclick="currentClient=\'' + x.id + '\';nav(\'ficha\',document.getElementById(\'nav-ficha\'))" style="cursor:pointer">' +
+    return '<tr onclick="currentClient=\''+x.id+'\';nav(\'ficha\',document.getElementById(\'nav-ficha\'))" style="cursor:pointer">' +
       '<td style="padding:10px 12px"><strong style="font-size:13px">' + port.name + '</strong>' +
         '<span style="font-size:10px;color:var(--text3);margin-left:6px">' + port.country + '</span></td>' +
       '<td><span style="background:' + gapColor + '20;color:' + gapColor + ';font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px">' + gapLabel + '</span></td>' +
@@ -5808,7 +5805,6 @@ function renderCapacitacion() {
       '<td style="font-size:11px;color:var(--text3)">' + (x.grupo||'') + '</td></tr>';
   }
 
-  // ── Build HTML ────────────────────────────────────────────────────────────
   const kpiRow = '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">' +
     kpi(quickWins.length,  '⚡ Quick Wins',         'B→A esta semana',     'var(--green)') +
     kpi(pushStrat.length,  '🔥 Push Estratégico',  'C→A en 30-60 días',   'var(--yellow)') +
@@ -5834,12 +5830,11 @@ function renderCapacitacion() {
     '<table><thead><tr><th>Cliente</th><th style="width:120px">Prioridad</th><th>Acción CS</th><th style="width:110px">Grupo</th></tr></thead>' +
     '<tbody>' + actionRows + '</tbody></table></div>';
 
-  // Reference section (FAQ + Guía) — collapsed
   const refSection =
     '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">' +
     '<div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'" ' +
       'style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:13px">' +
-      '<span>📚 Referencia Rápida — FAQ & Guía Operacional</span>' +
+      '<span>📚 Referencia Rápida — FAQ &amp; Guía Operacional</span>' +
       '<span style="font-size:11px;color:var(--text3);font-weight:400">Clic para expandir ▼</span></div>' +
     '<div style="display:none;padding:0 20px 20px">' +
       '<input placeholder="🔍 Buscar en FAQ…" oninput="filterFaq(this.value)" ' +
@@ -5849,14 +5844,12 @@ function renderCapacitacion() {
 
   pg.innerHTML = '<div style="padding:0 0 40px">' + kpiRow + gruposSection + radarSection + tableSection + refSection + '</div>';
 
-  // Render FAQ inside the embed container
   try {
     var faqEl = document.getElementById('faqContentEmbed');
     if (faqEl && typeof FAQ_DATA !== 'undefined') {
       faqEl.innerHTML = FAQ_DATA.map(function(cat, ci) {
         return '<div style="margin-bottom:8px"><div style="font-weight:700;font-size:12px;color:var(--text3);text-transform:uppercase;padding:8px 0;letter-spacing:.5px">' + cat.cat + '</div>' +
           cat.items.map(function(item, ii) {
-            var key = 'emb-' + ci + '-' + ii;
             return '<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden">' +
               '<div onclick="var b=this.nextSibling;b.style.display=b.style.display===\'none\'?\'block\':\'none\'" style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600">' + item.q + ' <span style="float:right;color:var(--text3)">▼</span></div>' +
               '<div style="display:none;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6;border-top:1px solid var(--border)">' + item.a + '</div></div>';
@@ -5865,8 +5858,6 @@ function renderCapacitacion() {
     }
   } catch(e) {}
 }
-
-
 // ── GUIA OPERACIONAL ──────────────────────────────────────────────────────────
 function renderGuia() {
   const sec = (emoji, titulo, subtitulo, color, body) => `
@@ -6841,4 +6832,246 @@ function renderPortfolioA() {
     const c = clients.find(x=>x.id===id);
     const sc = c?.healthScore;
     if (sc==null) return '<span style="color:var(--text3);font-size:11px">—</span>';
-    const col = sc>=70?'var(--green)':sc
+    const col = sc>=70?'var(--green)':sc>=50?'var(--yellow)':sc>=30?'var(--orange)':'var(--red)';
+    return `<span style="background:${col}20;color:${col};font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px">${sc}</span>`;
+  }
+
+  const rows = PORTFOLIO_GAP.map(p => {
+    const port = PORT.find(x=>x.id===p.id);
+    if (!port) return '';
+    const grupoBadge = p.grupo
+      ? `<span style="background:rgba(79,142,247,.12);color:var(--accent);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap">${p.grupo}</span>`
+      : '';
+    return `<tr onclick="currentClient='${p.id}';nav('ficha',document.getElementById('nav-ficha'))" style="cursor:pointer">
+      <td><strong style="font-size:13px">${port.name}</strong><br><span style="font-size:10px;color:var(--text3)">${port.country}</span></td>
+      <td style="text-align:center">${tierBadge(p.current)}</td>
+      <td style="text-align:center">${tierBadge('A')}</td>
+      <td style="text-align:center">${gapDots(p.gap)}</td>
+      <td style="text-align:center">${scoreChip(p.id)}</td>
+      <td style="font-size:12px;color:var(--text2);max-width:340px;line-height:1.5">${p.accion}</td>
+      <td>${grupoBadge}</td>
+    </tr>`;
+  }).join('');
+
+  const grupoCards = GRUPO_ESTRATEGICO.map(g => {
+    const names = g.ids.map(id=>PORT.find(x=>x.id===id)?.name||id).join(' · ');
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:18px 20px;flex:1;min-width:240px">
+      <div style="font-size:20px;margin-bottom:6px">${g.icon}</div>
+      <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:3px">${g.nombre}</div>
+      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:10px">${g.ids.length} cuentas · una sola reunión = múltiples upgrades</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5">${g.desc}</div>
+      <div style="font-size:10px;color:var(--text3);font-style:italic">${names}</div>
+    </div>`;
+  }).join('');
+
+  // Update badge
+  const nb = document.getElementById('nb-portfolio-a');
+  if (nb) nb.textContent = g1.length;
+
+  pg.innerHTML = `<div style="padding:0 0 40px">
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px">
+      <div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
+        <div style="font-size:30px;font-weight:800;color:var(--green)">${g1.length}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text)">⚡ Quick Wins</div>
+        <div style="font-size:11px;color:var(--text3)">Gap 1 · B→A esta semana</div>
+      </div>
+      <div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
+        <div style="font-size:30px;font-weight:800;color:var(--yellow)">${g2.length}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text)">🔥 Push Estratégico</div>
+        <div style="font-size:11px;color:var(--text3)">Gap 2 · C→A en 30-60 días</div>
+      </div>
+      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
+        <div style="font-size:30px;font-weight:800;color:var(--red)">${g3g4.length}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text)">🏗️ Recovery</div>
+        <div style="font-size:11px;color:var(--text3)">Gap 3-4 · plan 60-90 días</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
+        <div style="font-size:30px;font-weight:800;color:var(--accent)">${PORTFOLIO_GAP.length}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text)">📊 Total</div>
+        <div style="font-size:11px;color:var(--text3)">clientes con potencial A</div>
+      </div>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">⚡ Grupos Multiplicadores — Una reunión, múltiples upgrades</div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px">${grupoCards}</div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">📋 Plan de Acción — Ordenado por prioridad (Gap 1 = acción inmediata)</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th style="text-align:center;width:72px">Actual</th>
+            <th style="text-align:center;width:72px">Meta</th>
+            <th style="text-align:center;width:80px">Gap</th>
+            <th style="text-align:center;width:72px">Health</th>
+            <th>Acción Clave CS</th>
+            <th style="width:110px">Grupo</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+</script>
+
+<!-- ── IMPORT MODAL ────────────────────────────────────────────────────── -->
+<div id="addActionOverlay" class="overlay" onclick="closeAddAction(event)">
+  <div class="modal wide">
+    <button class="modal-close" onclick="closeAddActionModal()">✕</button>
+    <h2 id="addActionTitle">Nueva Acción</h2>
+    <input type="hidden" id="editActionId">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Tipo</label>
+        <select id="fa-tipo" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
+          <option value="soporte">🎫 Soporte</option>
+          <option value="cs">🤝 CS</option>
+          <option value="pm">📋 PM</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Cliente</label>
+        <select id="fa-client" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none"></select>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Título *</label>
+      <input id="fa-title" type="text" placeholder="Título de la acción" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Descripción</label>
+      <textarea id="fa-desc" rows="3" placeholder="Detalle de la acción..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Causa Raíz</label>
+      <textarea id="fa-causa" rows="2" placeholder="¿Por qué es necesaria esta acción?" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Estado</label>
+        <select id="fa-status" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
+          <option value="por-hacer">📌 Por Hacer</option>
+          <option value="en-progreso">⚡ En Progreso</option>
+          <option value="bloqueado">🚧 Bloqueado</option>
+          <option value="resuelto">✅ Resuelto</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Prioridad</label>
+        <select id="fa-priority" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
+          <option value="critica">🔴 Crítica</option>
+          <option value="alta">🟠 Alta</option>
+          <option value="media">🟡 Media</option>
+          <option value="baja">🟢 Baja</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Fecha límite</label>
+        <input id="fa-due" type="date" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Notas</label>
+      <textarea id="fa-notes" rows="2" placeholder="Notas adicionales, responsable, contexto..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <input id="fa-bottleneck" type="checkbox" style="width:16px;height:16px;accent-color:var(--accent)">
+      <label for="fa-bottleneck" style="font-size:13px;color:var(--text2);cursor:pointer">🚧 Marcar como cuello de botella</label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveAction()">💾 Guardar</button>
+      <button class="btn btn-ghost" onclick="closeAddActionModal()">Cancelar</button>
+      <button id="deleteActionBtn" class="btn btn-ghost" style="margin-left:auto;color:var(--red);display:none" onclick="deleteCurrentAction()">🗑 Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div id="importOverlay" class="overlay" onclick="closeImport(event)">
+  <div class="modal wide">
+    <button class="modal-close" onclick="closeImportModal()">✕</button>
+    <h2>↑ Importar datos semanales</h2>
+    <p class="modal-sub">Pegá el contenido del archivo JSON generado esta semana y hacé clic en Importar.</p>
+    <textarea id="importTA" style="width:100%;height:240px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:monospace;font-size:12px;resize:vertical;box-sizing:border-box;" placeholder='{ "clientes": [...], "acciones": [] }'></textarea>
+    <div id="importResult" class="import-result"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="processImport()">Importar</button>
+      <button class="btn btn-ghost" onclick="closeImportModal()">Cancelar</button>
+      <button class="btn btn-ghost" style="margin-left:auto;color:var(--red)" onclick="clearAllData()">🗑 Resetear todo</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── SUPABASE LOGIN SCREEN ──────────────────────────────────────────── -->
+
+<!-- ── SUPABASE LOGIN SCREEN ──────────────────────────────────────────── -->
+
+<!-- ── SUPABASE LOGIN SCREEN ──────────────────────────────────────────── -->
+<div id="sb-login-screen" style="display:none; position:fixed; inset:0; background:var(--bg); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:48px 40px; max-width:440px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.5);">
+    <div style="font-size:40px; margin-bottom:12px;">🚀</div>
+    <h2 style="color:var(--text); font-size:22px; font-weight:700; margin-bottom:6px;">CS Command Center</h2>
+    <p style="color:var(--text2); font-size:13px; margin-bottom:32px;">AnyMarket LATAM · Ingresá con tu email @db1.com.br</p>
+    <input id="sb-email-input" type="email" placeholder="tu.nombre@db1.com.br"
+      style="width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:12px 16px; border-radius:10px; font-size:14px; outline:none; box-sizing:border-box; margin-bottom:12px; transition:border-color .15s;"
+      onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+      onkeydown="if(event.key==='Enter') sendMagicLink()">
+    <button id="sb-login-btn" onclick="sendMagicLink()"
+      style="width:100%; background:var(--accent); color:#fff; border:none; padding:13px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:16px; transition:opacity .2s;"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      ✨ Ingresar con link mágico
+    </button>
+    <p id="sb-login-msg" style="font-size:13px; color:var(--text2); line-height:1.6; min-height:20px;"></p>
+    <p style="color:var(--text3); font-size:11px; margin-top:28px;">Te enviamos un enlace al email — sin contraseña necesaria.<br>Solo @db1.com.br tiene acceso.</p>
+  </div>
+</div>
+
+<!-- ── ALERT DETAIL PANEL ──────────────────────────────────────────────── -->
+<div class="alert-detail-overlay" id="adpOverlay" onclick="closeAlertDetail(event)"></div>
+<div class="alert-detail-panel" id="adpPanel" style="display:none">
+  <button class="adp-close-btn" onclick="closeAlertDetailPanel()">✕ Cerrar</button>
+  <div id="adpContent"></div>
+</div>
+
+<!-- ZENDESK SETUP MODAL -->
+<div id="zd-setup-overlay" class="overlay" onclick="closeZdSetup(event)" style="display:none">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <button class="modal-close" onclick="closeZdSetup()">✕</button>
+    <h2 style="margin-bottom:6px">🎫 Zendesk Auto-Sync</h2>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:18px">Configurá una vez — el dashboard sincronizará tickets automáticamente cada vez que lo abrís.</p>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Email de Zendesk</label>
+      <input id="zd-email-input" type="email" placeholder="tu@email.com"
+        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Contraseña de Zendesk</label>
+      <input id="zd-token-input" type="password" placeholder="Tu contraseña de Zendesk"
+        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
+    </div>
+    <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text3);margin-bottom:16px;line-height:1.6">
+      🔒 Tu contraseña se guarda solo en tu navegador (localStorage) y nunca sale de tu dispositivo. Podés borrarla cuando quieras desde el mismo botón.
+    </div>
+    <div id="zd-last-sync-label" style="font-size:11px;color:var(--text3);margin-bottom:14px"></div>
+    <div style="display:flex;gap:10px">
+      <button onclick="saveZdCredsAndSync()" class="btn btn-primary" style="flex:1">💾 Guardar y Sincronizar</button>
+      <button onclick="closeZdSetup()" class="btn btn-ghost">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE PICKER MODAL -->
+<div id="profile-picker" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
+  <div style="background:#1a1d2e; border:1px solid #2e3250; border-radius:16px; padding:40px; max-width:600px; width:90%; text-align:center;">
+    <div style="font-size:28px; margin-bottom:8px;">&#128075;</div>
+    <h2 style="color:#e8eaf6; font-size:20px; margin-bottom:4px;">CS Command Center</h2>
+    <p style="color:#8892b0; font-size:13px; margin-bottom:32px;">Selecciona tu perfil para continuar</p>
+    <div id="profile-cards" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;"></div>
+    <p style="color:#4a5578; font-size:11px; margin-top:24px;">Links compartidos ingresan en modo vista general</p>
+  </div>
+</div>
+
+</body>
+</html>
