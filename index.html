@@ -594,7 +594,7 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     <div class="nav-item"        id="nav-predicciones" onclick="nav('predicciones',this)"> <span class="nav-icon">🔮</span> Predicciones <span class="nav-badge yellow" id="nb-predicciones" style="display:none">0</span></div>
     <div class="nav-label">Análisis</div>
     <div class="nav-item"        id="nav-review"       onclick="nav('review',this)">      <span class="nav-icon">🔄</span> Revisión Portafolio</div>
-    <div class="nav-item"        id="nav-capacitacion" onclick="nav('capacitacion',this)"> <span class="nav-icon">🎓</span> Capacitación & Valor</div>
+    <div class="nav-item"        id="nav-capacitacion" onclick="nav('capacitacion',this)"> <span class="nav-icon">⭐</span> Expansión & Valor</div>
     <div class="nav-item"        id="nav-automatizacion" onclick="nav('automatizacion',this)"><span class="nav-icon">🤖</span> Auto D/E <span class="nav-badge" id="nb-automatizacion" style="background:#e74c3c;display:none">0</span></div>
     <div class="nav-item"        id="nav-catalogo"  onclick="nav('catalogo',this)">  <span class="nav-icon">🛒</span> Catálogo &amp; GMV</div>
     <div class="nav-item"        id="nav-metricas"  onclick="nav('metricas',this)">  <span class="nav-icon">📈</span> Métricas</div>
@@ -602,9 +602,8 @@ textarea.ficha-note:focus { border-color: var(--accent); }
     <div class="nav-item"        id="nav-notas"     onclick="nav('notas',this)">     <span class="nav-icon">📝</span> Notas</div>
     <div class="nav-label">Revenue</div>
     <div class="nav-item"        id="nav-renovaciones" onclick="nav('renovaciones',this)"><span class="nav-icon">💰</span> Renovaciones <span class="nav-badge yellow" id="nb-renovaciones" style="display:none">0</span></div>
-    <div class="nav-label">Ayuda</div>
-    <div class="nav-item"        id="nav-faq"       onclick="nav('faq',this)">       <span class="nav-icon">💡</span> FAQ CS & AnyTools</div>
-    <div class="nav-item"        id="nav-guia"      onclick="nav('guia',this)">      <span class="nav-icon">🧭</span> Guía Operacional</div>
+    <div id="nav-faq"  style="display:none"></div>
+    <div id="nav-guia" style="display:none"></div>
     <div class="nav-label">Equipo</div>
     <div class="nav-item"        id="nav-equipo"    onclick="nav('equipo',this)">    <span class="nav-icon">👥</span> Equipo</div>
     <div class="nav-item"        id="nav-director"  onclick="nav('director',this)"  style="display:none"><span class="nav-icon">👑</span> Vista Director <span class="nav-badge" id="nb-director" style="background:#9b59b6">0</span></div>
@@ -5674,108 +5673,134 @@ function renderPortfolioReview() {
 
 // ── CAPACITACIÓN & VALOR ──────────────────────────────────────────────────────
 function renderCapacitacion() {
-  const w = clients.map(c => c.weekly || {});
+  const pg = document.getElementById('page-capacitacion');
+  if (!pg) return;
 
-  // Detectar patrones desde datos reales
-  const conTickets     = clients.filter(c => (c.weekly||{}).tickets > 0);
-  const conBugs        = clients.filter(c => (c.weekly||{}).bugs > 0);
-  const sinUsePoints   = clients.filter(c => { const wp = c.weekly||{}; return wp.upPlan && (!wp.qtUp || wp.qtUp === 0); });
-  const bajoUsePoints  = clients.filter(c => { const wp = c.weekly||{}; return wp.upPlan && wp.qtUp > 0 && (wp.qtUp/wp.upPlan) < 0.5; });
-  const sinGMV         = clients.filter(c => (c.weekly||{}).gmv === 0);
-  const npsNeg         = clients.filter(c => { const n = (c.weekly||{}).nps; return n !== null && n !== undefined && n < 0; });
-  const sinContacto    = clients.filter(c => { const lc = (c.weekly||{}).lastContact; if (!lc) return true; return Math.floor((Date.now()-new Date(lc))/86400000) > 60; });
-  const centry         = clients.filter(c => (c.weekly||{}).centry);
+  // ── Datos desde PORTFOLIO_GAP ──────────────────────────────────────────────
+  const quickWins   = PORTFOLIO_GAP.filter(x => x.gap === 1);
+  const pushStrat   = PORTFOLIO_GAP.filter(x => x.gap === 2);
+  const recovery    = PORTFOLIO_GAP.filter(x => x.gap >= 3);
+  const grupos      = GRUPO_ESTRATEGICO || [];
 
-  // Dolor 1: tickets recurrentes → stock ML (Emma + Forus tienen mismo bug)
-  const stockML = clients.filter(c => { const wr = c.weekly||{}; return (wr.tickets||0)>0 && (wr.causaRaiz||'').toLowerCase().includes('mercado libre'); });
+  // Radar de expansión: detectar productos mencionados en acciones
+  const productos = [
+    { nombre:'Repricing Automático', icon:'⚡', keywords:['repricing','precio automático'] },
+    { nombre:'AnyTools',             icon:'🧰', keywords:['anytools','anytools'] },
+    { nombre:'Predize',              icon:'🤝', keywords:['predize'] },
+    { nombre:'TikTok Shop',          icon:'🎵', keywords:['tiktok'] },
+    { nombre:'Kits',                 icon:'📦', keywords:['kits','kit'] },
+    { nombre:'Marca Seleta',         icon:'🏷️', keywords:['marca seleta','marca selecta','brand'] },
+    { nombre:'QBR / EBR',            icon:'📋', keywords:['qbr','ebr','executive review'] },
+    { nombre:'Migración AnyMarket',  icon:'🚀', keywords:['migración','centry','migrate'] }
+  ];
 
-  const card = (emoji, titulo, subtitulo, color, contenido) => `
-    <div class="card" style="border-left:4px solid ${color};margin-bottom:16px;">
-      <div class="card-title" style="font-size:15px;">${emoji} ${titulo} <span>${subtitulo}</span></div>
-      ${contenido}
-    </div>`;
+  const radarData = productos.map(function(p) {
+    const count = PORTFOLIO_GAP.filter(function(x) {
+      const ac = (x.accion || '').toLowerCase();
+      return p.keywords.some(function(k) { return ac.includes(k); });
+    }).length;
+    return { nombre: p.nombre, icon: p.icon, count: count };
+  }).filter(function(p) { return p.count > 0; }).sort(function(a,b) { return b.count - a.count; });
 
-  const pill = (txt, color) => `<span style="background:${color}22;color:${color};border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700;margin-right:4px;">${txt}</span>`;
-  const clientList = arr => arr.length ? arr.map(c=>c.nombre).join(', ') : '—';
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function kpi(valor, label, sub, color) {
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;flex:1;min-width:120px;border-top:3px solid ' + color + '">' +
+      '<div style="font-size:28px;font-weight:800;color:' + color + '">' + valor + '</div>' +
+      '<div style="font-size:12px;font-weight:700;color:var(--text);margin-top:2px">' + label + '</div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-top:2px">' + sub + '</div></div>';
+  }
 
-  const row = (icono, tipo, accion, beneficio, valor, equipo, clientes, urgencia) => `
-    <tr style="border-bottom:1px solid var(--border);">
-      <td style="padding:12px 10px;font-size:18px;text-align:center;">${icono}</td>
-      <td style="padding:12px 10px;">${pill(tipo, urgencia==='alta'?'#e74c3c':urgencia==='media'?'#f39c12':'#2ecc71')}</td>
-      <td style="padding:12px 10px;font-weight:600;font-size:13px;">${accion}</td>
-      <td style="padding:12px 10px;font-size:12px;color:var(--text2);">${beneficio}</td>
-      <td style="padding:12px 10px;font-size:12px;color:var(--accent2);">${valor}</td>
-      <td style="padding:12px 10px;font-size:12px;">${equipo}</td>
-      <td style="padding:12px 10px;font-size:11px;color:var(--text3);">${clientes}</td>
-    </tr>`;
+  function grupoCard(g) {
+    const names = g.ids.map(function(id) { return PORT.find(function(x){return x.id===id;})?.name||id; }).join(' · ');
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:18px 20px;flex:1;min-width:220px">' +
+      '<div style="font-size:20px;margin-bottom:4px">' + g.icon + '</div>' +
+      '<div style="font-weight:700;font-size:14px;margin-bottom:3px">' + g.nombre + '</div>' +
+      '<div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:8px">' + g.ids.length + ' cuentas · 1 reunión = múltiples upgrades</div>' +
+      '<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px">' + g.desc + '</div>' +
+      '<div style="font-size:10px;color:var(--text3)">' + names + '</div></div>';
+  }
 
-  const tabla = (filas) => `
-    <div style="overflow-x:auto;">
-    <table style="width:100%;">
-      <thead><tr style="background:var(--surface2);">
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Tipo</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);"></th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Acción</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Beneficio</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Entrega de Valor</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Equipo</th>
-        <th style="padding:8px 10px;font-size:10px;color:var(--text3);">Clientes afectados</th>
-      </tr></thead>
-      <tbody>${filas}</tbody>
-    </table></div>`;
+  function radarBar(p) {
+    const pct = Math.round((p.count / PORTFOLIO_GAP.length) * 100);
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">' +
+      '<span style="font-size:16px;width:22px;text-align:center">' + p.icon + '</span>' +
+      '<span style="font-size:13px;font-weight:600;flex:1">' + p.nombre + '</span>' +
+      '<div style="width:120px;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">' +
+        '<div style="height:100%;width:' + pct + '%;background:var(--accent);border-radius:4px"></div></div>' +
+      '<span style="font-size:12px;font-weight:700;color:var(--accent);min-width:28px;text-align:right">' + p.count + '</span></div>';
+  }
 
-  let html = '';
+  function actionRow(x) {
+    const port = PORT.find(function(p){return p.id===x.id;});
+    if (!port) return '';
+    const gapColor = x.gap===1?'var(--green)':x.gap===2?'var(--yellow)':'var(--orange)';
+    const gapLabel = x.gap===1?'⚡ Quick Win':x.gap===2?'🔥 30-60d':'🏗️ 60-90d';
+    return '<tr onclick="currentClient=\'' + x.id + '\';nav(\'ficha\',document.getElementById(\'nav-ficha\'))" style="cursor:pointer">' +
+      '<td style="padding:10px 12px"><strong style="font-size:13px">' + port.name + '</strong>' +
+        '<span style="font-size:10px;color:var(--text3);margin-left:6px">' + port.country + '</span></td>' +
+      '<td><span style="background:' + gapColor + '20;color:' + gapColor + ';font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px">' + gapLabel + '</span></td>' +
+      '<td style="font-size:12px;color:var(--text2);max-width:300px;line-height:1.5">' + x.accion + '</td>' +
+      '<td style="font-size:11px;color:var(--text3)">' + (x.grupo||'') + '</td></tr>';
+  }
 
-  // ── BLOQUE 1: DOLORES DETECTADOS ──────────────────────────────────────────
-  html += card('🩺','Dolores Detectados en la Cartera','Patrones recurrentes que requieren acción coordinada','#e74c3c', tabla(
-    (stockML.length >= 2 ? row('🔄','Bug compartido','Agrupar tickets de stock ML en un solo caso','Resuelve el mismo bug para múltiples clientes en paralelo','Reduce tiempo de resolución 50% — menos impacto en GMV de los clientes','Soporte + Producto',clientList(stockML),'alta') : '') +
-    (conBugs.length > 0 ? row('🐛','Micro-video','Video 3 min: "Cómo reportar un bug con toda la información"','El cliente reporta mejor → soporte resuelve más rápido','Menos tickets mal documentados, ciclos de soporte más cortos','CS + Soporte',clientList(conBugs),'media') : '') +
-    (sinUsePoints.length > 0 ? row('💤','Workshop cliente','Taller: "Cómo activar y usar Use Points"','Clientes que no usan lo que pagaron empiezan a ver valor','Reduce riesgo de churn por percepción de bajo valor. Aumenta adopción.','CS',clientList(sinUsePoints),'alta') : '') +
-    (bajoUsePoints.length > 0 ? row('📉','Check-in proactivo','Reunión de adopción: revisar uso de Use Points con el cliente','Identifica por qué no usan el plan contratado','Abre conversación de valor antes de la renovación','CS',clientList(bajoUsePoints),'media') : '') +
-    (npsNeg.length > 0 ? row('😟','Workshop interno','Taller CS: "Gestión de NPS negativo y recuperación de cliente"','El equipo CS sabe cómo actuar ante NPS crítico','Convierte un detractor en promotor con el proceso correcto','CS Team','Coboe Botiga, Forus SA','alta') : '') +
-    (sinGMV.length > 0 ? row('📦','Diagnóstico de operación','Revisar integración activa y pedidos en los últimos 30 días','Detectar si el cliente está operando o si hay un problema técnico','Prevenir churn silencioso por operación caída','CS + Soporte',clientList(sinGMV),'alta') : '')
-  ));
+  // ── Build HTML ────────────────────────────────────────────────────────────
+  const kpiRow = '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">' +
+    kpi(quickWins.length,  '⚡ Quick Wins',         'B→A esta semana',     'var(--green)') +
+    kpi(pushStrat.length,  '🔥 Push Estratégico',  'C→A en 30-60 días',   'var(--yellow)') +
+    kpi(recovery.length,   '🏗️ Recovery',           'Plan 60-90 días',     'var(--orange)') +
+    kpi(grupos.length,     '🤝 Grupos Mult.',        '1 reunión = N upgrades','var(--accent)') +
+    '</div>';
 
-  // ── BLOQUE 2: BASE DE CONOCIMIENTO ────────────────────────────────────────
-  html += card('📚','Potenciación de Base de Conocimiento','Artículos que evitan tickets repetidos y empoderan al cliente','#4f8ef7', tabla(
-    row('📄','KB Article','Guía: "Sincronización de stock AnyMarket → Mercado Libre"','Clientes resuelven dudas antes de abrir ticket','Reduce hasta 30% los tickets de stock en ML. El cliente se autogestiona.','CS + Soporte','Emma Sleep, Forus SA, Lounge','alta') +
-    row('📄','KB Article','Guía: "Publicación de SKUs con imágenes en Falabella"','Evita rechazos de publicación por falta de imágenes','Menos tickets de publicación. Cliente publica más rápido.','CS + Soporte','Forus Colombia','media') +
-    row('📄','KB Article','Guía: "Configuración de integración Shopify + RUT en Chile"','Shopify captura RUT correctamente desde el primer intento','Elimina un ticket recurrente específico de clientes chilenos con Shopify','Soporte','Fashions Park','media') +
-    row('📄','KB Article','Guía: "Qué es Use Points y cómo maximizar el plan contratado"','El cliente entiende su plan y lo usa','Aumenta percepción de valor. Reduce preguntas básicas al CSM.','CS',clientList(sinUsePoints.concat(bajoUsePoints).slice(0,3)),'media') +
-    row('📄','KB Article','Checklist: "Antes de escalar un ticket a soporte"','El cliente pre-diagnostica antes de abrir un ticket','Tickets mejor documentados → resolución más rápida','CS + Soporte','Todos','baja')
-  ));
+  const gruposSection = grupos.length ? (
+    '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🤝 Grupos Estratégicos — Una reunión, múltiples cuentas</div>' +
+    '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px">' + grupos.map(grupoCard).join('') + '</div>'
+  ) : '';
 
-  // ── BLOQUE 3: MICRO-VIDEOS ────────────────────────────────────────────────
-  html += card('🎬','Micro-Videos de Capacitación','Videos cortos (2-5 min) para empoderar al cliente y reducir fricción','#9b59b6', tabla(
-    row('▶️','Micro-video','Video 2 min: "Cómo revisar el estado de sincronización de stock"','El cliente identifica si hay un problema antes de llamar','Autogestión del cliente → menos urgencias innecesarias al CS','CS',clientList(stockML),'alta') +
-    row('▶️','Micro-video','Video 3 min: "Cómo usar Use Points paso a paso"','Adopción inmediata de la funcionalidad','El cliente ve valor en lo que pagó. Sube el NPS.','CS',clientList(sinUsePoints),'alta') +
-    row('▶️','Micro-video','Video 5 min: "Qué hacer cuando un SKU no se publica en el marketplace"','El cliente diagnostica y corrige errores de publicación solo','Menos tickets de publicación. Operación más ágil para el cliente.','CS + Soporte','Forus Colombia, Gino','media') +
-    row('▶️','Micro-video','Video 3 min: "Cómo leer el panel de pedidos en AnyMarket"','El cliente interpreta correctamente sus datos operativos','Menos consultas básicas. Conversaciones con el CS se vuelven estratégicas.','CS','Todos','baja') +
-    row('▶️','Micro-video','Video 4 min: "Proceso de migración Centry — qué esperar"','Clientes en migración saben qué va a pasar y cuándo','Reduce ansiedad y tickets de seguimiento durante la migración','CS + PM',clientList(centry),'media')
-  ));
+  const radarSection =
+    '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🎯 Radar de Expansión — Productos con mayor potencial</div>' +
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px">' +
+    radarData.map(radarBar).join('') +
+    '<div style="font-size:11px;color:var(--text3);margin-top:10px">Clientes del portfolio con oportunidad identificada por producto</div></div>';
 
-  // ── BLOQUE 4: WORKSHOPS ───────────────────────────────────────────────────
-  html += card('🏫','Workshops Continuos','Sesiones formativas periódicas con clientes y equipo interno','#00d4aa', tabla(
-    row('👥','Workshop cliente','Workshop mensual: "Novedades AnyMarket + casos de uso"','El cliente conoce features nuevas y las adopta','Aumenta uso de la plataforma → más difícil de churnar. Upsell natural.','CS','Todos — rotar por grupo de país','alta') +
-    row('👥','Workshop cliente','Workshop trimestral: "Revisión de KPIs y objetivos — EBR"','El cliente ve el valor entregado con datos concretos','Justifica la renovación. Genera confianza en la relación.','CS','Clientes con +6 meses','alta') +
-    row('👥','Workshop interno','Workshop mensual CS: "Análisis de patrones de tickets"','El equipo CS identifica problemas sistémicos antes de que exploten','Intervención proactiva. Menos escalaciones. Mejor experiencia cliente.','CS Team','Interno','alta') +
-    row('👥','Workshop cliente','Workshop onboarding: "Primeros 30 días con AnyMarket"','Clientes nuevos adoptan la plataforma más rápido','Reduce tiempo hasta primer valor (TTV). Baja tasa de churn en primeros 90 días.','CS','Whirlpool, Lacoste (nuevos)','alta') +
-    row('👥','Workshop interno','Workshop CS: "Cómo manejar stakeholders y cambios de contacto"','El equipo CS tiene un protocolo cuando cambia el contacto en el cliente','No se pierde la relación por rotación. Aplica a Tramontina y Colombiana.','CS Team','Interno — Tramontina, Colombiana','media')
-  ));
+  const actionRows = PORTFOLIO_GAP.map(actionRow).join('');
+  const tableSection =
+    '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">📋 Plan de Acción — Todos los clientes con potencial A</div>' +
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px">' +
+    '<table><thead><tr><th>Cliente</th><th style="width:120px">Prioridad</th><th>Acción CS</th><th style="width:110px">Grupo</th></tr></thead>' +
+    '<tbody>' + actionRows + '</tbody></table></div>';
 
-  // ── RESUMEN IMPACTO ───────────────────────────────────────────────────────
-  html += `<div class="card" style="border-left:4px solid var(--accent2);background:linear-gradient(135deg,var(--surface),var(--surface2));">
-    <div class="card-title">📊 Impacto Estimado si se Ejecuta el Plan</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">
-      <div><div style="font-size:28px;font-weight:700;color:var(--green);">-40%</div><div style="font-size:12px;color:var(--text2);">Tickets repetidos (KB + micro-videos)</div></div>
-      <div><div style="font-size:28px;font-weight:700;color:var(--accent);">+25%</div><div style="font-size:12px;color:var(--text2);">Adopción Use Points (workshops)</div></div>
-      <div><div style="font-size:28px;font-weight:700;color:var(--accent2);">+30 pts</div><div style="font-size:12px;color:var(--text2);">NPS promedio (rescate + EBR)</div></div>
-      <div><div style="font-size:28px;font-weight:700;color:var(--yellow);">3 clientes</div><div style="font-size:12px;color:var(--text2);">Recuperados de riesgo churn</div></div>
-    </div>
-  </div>`;
+  // Reference section (FAQ + Guía) — collapsed
+  const refSection =
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">' +
+    '<div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'" ' +
+      'style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:13px">' +
+      '<span>📚 Referencia Rápida — FAQ & Guía Operacional</span>' +
+      '<span style="font-size:11px;color:var(--text3);font-weight:400">Clic para expandir ▼</span></div>' +
+    '<div style="display:none;padding:0 20px 20px">' +
+      '<input placeholder="🔍 Buscar en FAQ…" oninput="filterFaq(this.value)" ' +
+        'style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box;margin-bottom:12px">' +
+      '<div id="faqContentEmbed"></div>' +
+    '</div></div>';
 
-  document.getElementById('capacitacionGrid').innerHTML = html;
+  pg.innerHTML = '<div style="padding:0 0 40px">' + kpiRow + gruposSection + radarSection + tableSection + refSection + '</div>';
+
+  // Render FAQ inside the embed container
+  try {
+    var faqEl = document.getElementById('faqContentEmbed');
+    if (faqEl && typeof FAQ_DATA !== 'undefined') {
+      faqEl.innerHTML = FAQ_DATA.map(function(cat, ci) {
+        return '<div style="margin-bottom:8px"><div style="font-weight:700;font-size:12px;color:var(--text3);text-transform:uppercase;padding:8px 0;letter-spacing:.5px">' + cat.cat + '</div>' +
+          cat.items.map(function(item, ii) {
+            var key = 'emb-' + ci + '-' + ii;
+            return '<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden">' +
+              '<div onclick="var b=this.nextSibling;b.style.display=b.style.display===\'none\'?\'block\':\'none\'" style="padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600">' + item.q + ' <span style="float:right;color:var(--text3)">▼</span></div>' +
+              '<div style="display:none;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6;border-top:1px solid var(--border)">' + item.a + '</div></div>';
+          }).join('') + '</div>';
+      }).join('');
+    }
+  } catch(e) {}
 }
+
 
 // ── GUIA OPERACIONAL ──────────────────────────────────────────────────────────
 function renderGuia() {
@@ -6751,246 +6776,4 @@ function renderPortfolioA() {
     const c = clients.find(x=>x.id===id);
     const sc = c?.healthScore;
     if (sc==null) return '<span style="color:var(--text3);font-size:11px">—</span>';
-    const col = sc>=70?'var(--green)':sc>=50?'var(--yellow)':sc>=30?'var(--orange)':'var(--red)';
-    return `<span style="background:${col}20;color:${col};font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px">${sc}</span>`;
-  }
-
-  const rows = PORTFOLIO_GAP.map(p => {
-    const port = PORT.find(x=>x.id===p.id);
-    if (!port) return '';
-    const grupoBadge = p.grupo
-      ? `<span style="background:rgba(79,142,247,.12);color:var(--accent);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap">${p.grupo}</span>`
-      : '';
-    return `<tr onclick="currentClient='${p.id}';nav('ficha',document.getElementById('nav-ficha'))" style="cursor:pointer">
-      <td><strong style="font-size:13px">${port.name}</strong><br><span style="font-size:10px;color:var(--text3)">${port.country}</span></td>
-      <td style="text-align:center">${tierBadge(p.current)}</td>
-      <td style="text-align:center">${tierBadge('A')}</td>
-      <td style="text-align:center">${gapDots(p.gap)}</td>
-      <td style="text-align:center">${scoreChip(p.id)}</td>
-      <td style="font-size:12px;color:var(--text2);max-width:340px;line-height:1.5">${p.accion}</td>
-      <td>${grupoBadge}</td>
-    </tr>`;
-  }).join('');
-
-  const grupoCards = GRUPO_ESTRATEGICO.map(g => {
-    const names = g.ids.map(id=>PORT.find(x=>x.id===id)?.name||id).join(' · ');
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:18px 20px;flex:1;min-width:240px">
-      <div style="font-size:20px;margin-bottom:6px">${g.icon}</div>
-      <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:3px">${g.nombre}</div>
-      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:10px">${g.ids.length} cuentas · una sola reunión = múltiples upgrades</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5">${g.desc}</div>
-      <div style="font-size:10px;color:var(--text3);font-style:italic">${names}</div>
-    </div>`;
-  }).join('');
-
-  // Update badge
-  const nb = document.getElementById('nb-portfolio-a');
-  if (nb) nb.textContent = g1.length;
-
-  pg.innerHTML = `<div style="padding:0 0 40px">
-    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px">
-      <div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
-        <div style="font-size:30px;font-weight:800;color:var(--green)">${g1.length}</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">⚡ Quick Wins</div>
-        <div style="font-size:11px;color:var(--text3)">Gap 1 · B→A esta semana</div>
-      </div>
-      <div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
-        <div style="font-size:30px;font-weight:800;color:var(--yellow)">${g2.length}</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">🔥 Push Estratégico</div>
-        <div style="font-size:11px;color:var(--text3)">Gap 2 · C→A en 30-60 días</div>
-      </div>
-      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
-        <div style="font-size:30px;font-weight:800;color:var(--red)">${g3g4.length}</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">🏗️ Recovery</div>
-        <div style="font-size:11px;color:var(--text3)">Gap 3-4 · plan 60-90 días</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 22px;flex:1;min-width:130px">
-        <div style="font-size:30px;font-weight:800;color:var(--accent)">${PORTFOLIO_GAP.length}</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text)">📊 Total</div>
-        <div style="font-size:11px;color:var(--text3)">clientes con potencial A</div>
-      </div>
-    </div>
-
-    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">⚡ Grupos Multiplicadores — Una reunión, múltiples upgrades</div>
-    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px">${grupoCards}</div>
-
-    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">📋 Plan de Acción — Ordenado por prioridad (Gap 1 = acción inmediata)</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-      <table>
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th style="text-align:center;width:72px">Actual</th>
-            <th style="text-align:center;width:72px">Meta</th>
-            <th style="text-align:center;width:80px">Gap</th>
-            <th style="text-align:center;width:72px">Health</th>
-            <th>Acción Clave CS</th>
-            <th style="width:110px">Grupo</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  </div>`;
-}
-</script>
-
-<!-- ── IMPORT MODAL ────────────────────────────────────────────────────── -->
-<div id="addActionOverlay" class="overlay" onclick="closeAddAction(event)">
-  <div class="modal wide">
-    <button class="modal-close" onclick="closeAddActionModal()">✕</button>
-    <h2 id="addActionTitle">Nueva Acción</h2>
-    <input type="hidden" id="editActionId">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Tipo</label>
-        <select id="fa-tipo" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
-          <option value="soporte">🎫 Soporte</option>
-          <option value="cs">🤝 CS</option>
-          <option value="pm">📋 PM</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Cliente</label>
-        <select id="fa-client" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none"></select>
-      </div>
-    </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Título *</label>
-      <input id="fa-title" type="text" placeholder="Título de la acción" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
-    </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Descripción</label>
-      <textarea id="fa-desc" rows="3" placeholder="Detalle de la acción..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
-    </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Causa Raíz</label>
-      <textarea id="fa-causa" rows="2" placeholder="¿Por qué es necesaria esta acción?" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Estado</label>
-        <select id="fa-status" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
-          <option value="por-hacer">📌 Por Hacer</option>
-          <option value="en-progreso">⚡ En Progreso</option>
-          <option value="bloqueado">🚧 Bloqueado</option>
-          <option value="resuelto">✅ Resuelto</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Prioridad</label>
-        <select id="fa-priority" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none">
-          <option value="critica">🔴 Crítica</option>
-          <option value="alta">🟠 Alta</option>
-          <option value="media">🟡 Media</option>
-          <option value="baja">🟢 Baja</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Fecha límite</label>
-        <input id="fa-due" type="date" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
-      </div>
-    </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:4px">Notas</label>
-      <textarea id="fa-notes" rows="2" placeholder="Notas adicionales, responsable, contexto..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <input id="fa-bottleneck" type="checkbox" style="width:16px;height:16px;accent-color:var(--accent)">
-      <label for="fa-bottleneck" style="font-size:13px;color:var(--text2);cursor:pointer">🚧 Marcar como cuello de botella</label>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="saveAction()">💾 Guardar</button>
-      <button class="btn btn-ghost" onclick="closeAddActionModal()">Cancelar</button>
-      <button id="deleteActionBtn" class="btn btn-ghost" style="margin-left:auto;color:var(--red);display:none" onclick="deleteCurrentAction()">🗑 Eliminar</button>
-    </div>
-  </div>
-</div>
-
-<div id="importOverlay" class="overlay" onclick="closeImport(event)">
-  <div class="modal wide">
-    <button class="modal-close" onclick="closeImportModal()">✕</button>
-    <h2>↑ Importar datos semanales</h2>
-    <p class="modal-sub">Pegá el contenido del archivo JSON generado esta semana y hacé clic en Importar.</p>
-    <textarea id="importTA" style="width:100%;height:240px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:monospace;font-size:12px;resize:vertical;box-sizing:border-box;" placeholder='{ "clientes": [...], "acciones": [] }'></textarea>
-    <div id="importResult" class="import-result"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="processImport()">Importar</button>
-      <button class="btn btn-ghost" onclick="closeImportModal()">Cancelar</button>
-      <button class="btn btn-ghost" style="margin-left:auto;color:var(--red)" onclick="clearAllData()">🗑 Resetear todo</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ── SUPABASE LOGIN SCREEN ──────────────────────────────────────────── -->
-
-<!-- ── SUPABASE LOGIN SCREEN ──────────────────────────────────────────── -->
-
-<!-- ── SUPABASE LOGIN SCREEN ──────────────────────────────────────────── -->
-<div id="sb-login-screen" style="display:none; position:fixed; inset:0; background:var(--bg); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
-  <div style="background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:48px 40px; max-width:440px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.5);">
-    <div style="font-size:40px; margin-bottom:12px;">🚀</div>
-    <h2 style="color:var(--text); font-size:22px; font-weight:700; margin-bottom:6px;">CS Command Center</h2>
-    <p style="color:var(--text2); font-size:13px; margin-bottom:32px;">AnyMarket LATAM · Ingresá con tu email @db1.com.br</p>
-    <input id="sb-email-input" type="email" placeholder="tu.nombre@db1.com.br"
-      style="width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:12px 16px; border-radius:10px; font-size:14px; outline:none; box-sizing:border-box; margin-bottom:12px; transition:border-color .15s;"
-      onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
-      onkeydown="if(event.key==='Enter') sendMagicLink()">
-    <button id="sb-login-btn" onclick="sendMagicLink()"
-      style="width:100%; background:var(--accent); color:#fff; border:none; padding:13px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:16px; transition:opacity .2s;"
-      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-      ✨ Ingresar con link mágico
-    </button>
-    <p id="sb-login-msg" style="font-size:13px; color:var(--text2); line-height:1.6; min-height:20px;"></p>
-    <p style="color:var(--text3); font-size:11px; margin-top:28px;">Te enviamos un enlace al email — sin contraseña necesaria.<br>Solo @db1.com.br tiene acceso.</p>
-  </div>
-</div>
-
-<!-- ── ALERT DETAIL PANEL ──────────────────────────────────────────────── -->
-<div class="alert-detail-overlay" id="adpOverlay" onclick="closeAlertDetail(event)"></div>
-<div class="alert-detail-panel" id="adpPanel" style="display:none">
-  <button class="adp-close-btn" onclick="closeAlertDetailPanel()">✕ Cerrar</button>
-  <div id="adpContent"></div>
-</div>
-
-<!-- ZENDESK SETUP MODAL -->
-<div id="zd-setup-overlay" class="overlay" onclick="closeZdSetup(event)" style="display:none">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
-    <button class="modal-close" onclick="closeZdSetup()">✕</button>
-    <h2 style="margin-bottom:6px">🎫 Zendesk Auto-Sync</h2>
-    <p style="font-size:12px;color:var(--text3);margin-bottom:18px">Configurá una vez — el dashboard sincronizará tickets automáticamente cada vez que lo abrís.</p>
-    <div style="margin-bottom:14px">
-      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Email de Zendesk</label>
-      <input id="zd-email-input" type="email" placeholder="tu@email.com"
-        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
-    </div>
-    <div style="margin-bottom:14px">
-      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px">Contraseña de Zendesk</label>
-      <input id="zd-token-input" type="password" placeholder="Tu contraseña de Zendesk"
-        style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px;box-sizing:border-box">
-    </div>
-    <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text3);margin-bottom:16px;line-height:1.6">
-      🔒 Tu contraseña se guarda solo en tu navegador (localStorage) y nunca sale de tu dispositivo. Podés borrarla cuando quieras desde el mismo botón.
-    </div>
-    <div id="zd-last-sync-label" style="font-size:11px;color:var(--text3);margin-bottom:14px"></div>
-    <div style="display:flex;gap:10px">
-      <button onclick="saveZdCredsAndSync()" class="btn btn-primary" style="flex:1">💾 Guardar y Sincronizar</button>
-      <button onclick="closeZdSetup()" class="btn btn-ghost">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<!-- PROFILE PICKER MODAL -->
-<div id="profile-picker" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
-  <div style="background:#1a1d2e; border:1px solid #2e3250; border-radius:16px; padding:40px; max-width:600px; width:90%; text-align:center;">
-    <div style="font-size:28px; margin-bottom:8px;">&#128075;</div>
-    <h2 style="color:#e8eaf6; font-size:20px; margin-bottom:4px;">CS Command Center</h2>
-    <p style="color:#8892b0; font-size:13px; margin-bottom:32px;">Selecciona tu perfil para continuar</p>
-    <div id="profile-cards" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;"></div>
-    <p style="color:#4a5578; font-size:11px; margin-top:24px;">Links compartidos ingresan en modo vista general</p>
-  </div>
-</div>
-
-</body>
-</html>
+    const col = sc>=70?'var(--green)':sc
