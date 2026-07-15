@@ -1,0 +1,6 @@
+{
+  "site_id": "3b4bd17f-0cc1-46f3-b34b-bb110923bc82",
+  "site_name": "marvelous-florentine-0615b0",
+  "url": "https://marvelous-florentine-0615b0.netlify.app",
+  "note": "Para redesplegar: necesitas el Personal Access Token de Netlify (User Settings > Applications). Luego pide a Claude que actualice el dashboard."
+}
