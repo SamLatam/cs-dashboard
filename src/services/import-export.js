@@ -24,8 +24,8 @@ import {
 import { getActions, setActions, seedActions, LS_ACTIONS } from '../services/actions-repo.js';
 import { appendHistorySnapshot } from '../services/history-repo.js';
 import { calcHS } from '../domain/health-score.js';
-import { getMRR, getRenewal } from '../domain/renewal-revenue.js';
-import { norm, today, daysSince, daysUntil, fmtG } from '../lib/format.js';
+import { getMRR } from '../domain/renewal-revenue.js';
+import { norm, today, daysSince, fmtG } from '../lib/format.js';
 import { renderKPIs } from '../ui/kpis.js';
 import { renderOverview } from '../ui/overview.js';
 
@@ -97,7 +97,8 @@ function exportarJSON() {
       ticketDetalle: w.ticketDetalle ?? null, causaRaiz: w.causaRaiz ?? null,
       prioridad: w.prioridad ?? null, tckFecha: w.tckFecha ?? null,
       gmv: w.gmv ?? null, upPlan: w.upPlan ?? null, qtUp: w.qtUp ?? null,
-      nps: w.nps ?? null, lastContact: w.lastContact ?? null, centry: c.centry
+      nps: w.nps ?? null, lastContact: w.lastContact ?? null, centry: c.centry,
+      features: w.features ?? null
     };
   });
   const exportObj = { clientes: data, acciones: actions };
@@ -137,9 +138,6 @@ function generarResumen() {
   const mrrTotal     = mrrData.reduce((s,x)=>s+x.mrr,0);
   const mrrAtRisk    = mrrData.filter(x=>x.h.cl==='orange'||x.h.cl==='yellow').reduce((s,x)=>s+x.mrr,0);
   const mrrCritico   = mrrData.filter(x=>x.h.cl==='red').reduce((s,x)=>s+x.mrr,0);
-  // Renewal alerts
-  const renewals30 = clients.filter(c=>{const r=getRenewal(c.id);return r&&daysUntil(r)<=30&&daysUntil(r)>=0;});
-  const renewals60 = clients.filter(c=>{const r=getRenewal(c.id);return r&&daysUntil(r)>30&&daysUntil(r)<=60;});
   // Cadence
   const contactadosMes = clients.filter(c=>c.weekly?.lastContact&&daysSince(c.weekly.lastContact)<=30).length;
   const pctCadencia = Math.round(contactadosMes/clients.length*100);
@@ -165,15 +163,12 @@ function generarResumen() {
     if (mrrCritico) txt += `   🔴 MRR crítico (acción urgente): $${mrrCritico.toLocaleString()} USD/mes\n`;
     txt += '\n';
   }
-  if (renewals30.length) txt += `🔴 RENOVACIONES URGENTES (<30 días): ${renewals30.map(c=>c.name).join(', ')}\n`;
-  if (renewals60.length) txt += `🟡 RENOVACIONES PRÓXIMAS (30-60 días): ${renewals60.map(c=>c.name).join(', ')}\n`;
   if (topGMV.length) {
     txt += `\n💎 TOP GMV:\n`;
     topGMV.forEach((c, i) => { txt += `   ${i+1}. ${c.name}: ${fmtG(c.weekly.gmv)}\n`; });
   }
   txt += '\n📌 Prioridades de acción:\n';
   criticos.forEach(n => { txt += `   → URGENTE: contactar ${n} (Health crítico)\n`; });
-  if (renewals30.length) renewals30.forEach(c => { txt += `   → RENOVACIÓN en <30 días: ${c.name}\n`; });
   actions.filter(a => a.status !== 'resuelto' && a.dueDate && new Date(a.dueDate) < new Date()).slice(0, 3).forEach(a => {
     const cl = PORT.find(p => p.id === a.clientId);
     txt += `   → VENCIDA: "${a.title}" — ${cl?.name || a.clientId}\n`;
@@ -215,10 +210,12 @@ Para cada cliente necesito que me des un objeto JSON con esta estructura exacta:
   "qtUp": use points usados o null,
   "nps": número NPS (-100 a 100) o null,
   "lastContact": "YYYY-MM-DD o null",
-  "centry": true|false
+  "centry": true|false,
+  "features": ["predize","koncili","winnerbox","marcaseleta"] // solo los que el cliente REALMENTE usa, o null si no lo sabés
 }
 
 IMPORTANTE: Si no tenés el dato real de algún campo, poné null. NUNCA inventar valores.
+"features" es un dato de adopción de la suite AnyTools que solo vos conocés por la relación con el cliente — no viene de ninguna fuente automatizada, así que solo completalo si estás segura.
 Los clientes CENTRY (FORUS SA, FORUS COLOMBIA, FORUS PERU, GINO, LOUNGE, MAISA) no tienen upPlan ni qtUp aún — operan en Centry, en proceso de migración a AnyMarket.
 
 Devolveme un array JSON listo para pegar en el dashboard.`;

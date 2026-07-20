@@ -311,19 +311,6 @@ textarea.ficha-note:focus { border-color: var(--accent); }
 .rar-val  { font-size: 13px; font-weight: 700; }
 .rar-cnt  { font-size: 11px; color: var(--text3); width: 48px; text-align: right; }
 
-/* ── RENEWAL CARDS ── */
-.renew-grid { display: flex; flex-direction: column; gap: 8px; }
-.renew-card { border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: opacity .15s; }
-.renew-card:hover { opacity: .85; }
-.renew-card .rc-days { font-size: 22px; font-weight: 800; width: 44px; text-align: center; flex-shrink: 0; }
-.renew-card .rc-name { font-size: 12px; font-weight: 600; flex: 1; }
-.renew-card .rc-date { font-size: 11px; color: var(--text3); }
-.renew-card .rc-mrr  { font-size: 11px; font-weight: 700; }
-.rc-urgent  { background: var(--red-bg);    border-left: 3px solid var(--red); }
-.rc-soon    { background: var(--orange-bg); border-left: 3px solid var(--orange); }
-.rc-planned { background: var(--yellow-bg); border-left: 3px solid var(--yellow); }
-.rc-ok      { background: var(--green-bg);  border-left: 3px solid var(--green); }
-
 /* ── CADENCE COVERAGE ── */
 .cad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
 .cad-card { background: var(--surface2); border-radius: 10px; padding: 14px; text-align: center; }

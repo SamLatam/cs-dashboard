@@ -46,9 +46,7 @@
 //   - lib/format.js exports: daysUntil (confirmed by reading it).
 //   - ui/overview.js exports: renderTable too (confirmed by reading its export
 //     list — this is the main portfolio table's real home, not a guess).
-import { getClients } from './clients-repo.js';
-import { getRenewal } from '../domain/renewal-revenue.js';
-import { daysUntil } from '../lib/format.js';
+import { getClients, saveData } from './clients-repo.js';
 import { renderTable } from '../ui/overview.js';
 
 // ── MOOD ───────────────────────────────────────────────────────────────────────
@@ -121,6 +119,25 @@ export function saveMktInline(id) {
   disp.innerHTML = chips || '<span style="color:var(--text3);font-size:11px">+ agregar</span>';
 }
 
+// ── ANYTOOLS FEATURES (per-client adoption of the AnyTools suite — Predize,
+//    Koncili, WinnerBox, Marca Seleta). Lives inside c.weekly.features (array
+//    of keys) so it round-trips through the normal weekly JSON import/export
+//    and cloud sync (LS_DATA/gist), unlike marketplaces/MRR/renewal which are
+//    standalone per-client localStorage keys — features is CS-curated data
+//    with no automated source, but it's still "engagement data" so it belongs
+//    alongside tickets/GMV/NPS in the weekly record, not as a UI-only field.
+export function toggleFeature(id, key) {
+  const c = getClients().find(x => x.id === id);
+  if (!c) return;
+  c.weekly = c.weekly || {};
+  const feats = new Set(c.weekly.features || []);
+  if (feats.has(key)) feats.delete(key); else feats.add(key);
+  c.weekly.features = Array.from(feats);
+  saveData(new Date().toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }));
+  renderTable();
+  if (typeof window.renderFicha === 'function') window.renderFicha();
+}
+
 // ── FICHA NOTE (per-client free-text note, distinct from the 4 global "Notas"
 //    page textareas owned by src/services/notes-repo.js) ─────────────────────
 export function saveFichaNote(id) {
@@ -128,8 +145,10 @@ export function saveFichaNote(id) {
   const t = document.getElementById('saved-ficha'); t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 2000);
 }
 
-// ── MRR / RENEWAL — setter half (getter half: getMRR/getRenewal/
-//    getRenewalAction live in src/domain/renewal-revenue.js) ─────────────────
+// ── MRR — setter half (getter half: getMRR lives in src/domain/renewal-revenue.js).
+// NOTA 2026-07-20: saveRenewalField/updateRenewalBadge removidos — los contratos
+// de AnyMarket se renuevan mensualmente, no hay ciclo de renovación anual que
+// trackear (feedback directo de Sami).
 export function saveMRRField(id) {
   const v = document.getElementById('mrr-input-' + id)?.value;
   if (v === null || v === undefined) return;
@@ -137,22 +156,6 @@ export function saveMRRField(id) {
   else localStorage.setItem('cs-mrr-' + id, parseFloat(v));
   const t = document.getElementById('saved-mrr-' + id);
   if (t) { t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 2000); }
-}
-
-export function saveRenewalField(id) {
-  const v = document.getElementById('renewal-input-' + id)?.value;
-  if (v) localStorage.setItem('cs-renewal-' + id, v);
-  else localStorage.removeItem('cs-renewal-' + id);
-  const t = document.getElementById('saved-renewal-' + id);
-  if (t) { t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 2000); }
-  // update badge
-  updateRenewalBadge();
-}
-
-export function updateRenewalBadge() {
-  const urgent = getClients().filter(c => { const r = getRenewal(c.id); return r && daysUntil(r) <= 30 && daysUntil(r) >= 0; }).length;
-  const badge = document.getElementById('nb-renovaciones');
-  if (badge) { badge.textContent = urgent; badge.style.display = urgent > 0 ? 'flex' : 'none'; }
 }
 
 // exposed for inline HTML handlers (confirmed via grep of the whole source for
@@ -172,4 +175,4 @@ window.editMktInline = editMktInline;
 window.saveMktInline = saveMktInline;
 window.saveFichaNote = saveFichaNote;
 window.saveMRRField = saveMRRField;
-window.saveRenewalField = saveRenewalField;
+window.toggleFeature = toggleFeature;

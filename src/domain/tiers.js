@@ -25,7 +25,8 @@ const PORTFOLIO_GAP = [
   // Gap 3 (D→A) — Trabajo profundo
   {id:'tramontina-cl',  current:'D', gap:3, accion:'Expansion Talk urgente: agregar Falabella, Ripley, ML, Hites. Presentar TRAMONTINA MX como caso de éxito.', grupo:'Tramontina'},
   // Gap 4 (E→A) — Recovery total
-  {id:'lacoste',        current:'E', gap:4, accion:'CRÍTICO: Diagnóstico urgente + reunión ejecutiva + Recovery Plan conjunto con Producto y Soporte.'},
+  // NOTA 2026-07-20: 'lacoste' (LACOSTE - CL) removido — cliente cancelado, decisión
+  // comercial, marca adquirida por Grupo AXO. Ver c.weekly.cancelado en clients-repo.js.
 ];
 
 const GRUPO_ESTRATEGICO = [

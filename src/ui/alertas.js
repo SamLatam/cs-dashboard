@@ -34,6 +34,7 @@ import { calcHS } from '../domain/health-score.js';
 import { getTicketPattern } from '../domain/ticket-patterns.js';
 import { getPatterns } from '../services/client-state-repo.js';
 import { fmtD, daysSince } from '../lib/format.js';
+import { getEngagementProfile } from '../domain/engagement.js';
 
 // ── ALERT DETAIL PANEL ─────────────────────────────────────────────────────────
 let _currentAlertData = null;
@@ -262,6 +263,33 @@ function renderAlerts() {
     else if (!w.lastContact && !c.centry) allAlerts.push({type:'ac-blue', client:c.name, clientId:c.id,
       title:`⏱ Sin Registro de Contacto`, body:`No hay fecha de último contacto registrada. Verificar historial en HubSpot.`,
       causa:null, fecha:null, sev:'media', extra:null
+    });
+
+    // ── ALERTAS DE ENGAGEMENT (frecuencia · intensidad · features · casos de uso) ──
+    // Complementan las alertas operativas de arriba: detectan el patrón de "churn
+    // silencioso" — cuentas que no generan tickets ni NPS negativo, pero que están
+    // subutilizando la plataforma sin que nadie lo note.
+    const mktStr = localStorage.getItem('cs-mkt-' + c.id) || '';
+    const eng = getEngagementProfile(c, mktStr);
+
+    if (eng.intensity.level === 'baja') allAlerts.push({type:'ac-orange', client:c.name, clientId:c.id,
+      title:`📉 Baja Intensidad de Uso — ${eng.intensity.label} Use Points`, body:`Consumo de Use Points bajo: ${eng.intensity.detail} El cliente paga un plan que no está exprimiendo.`,
+      causa:null, fecha:null, sev:'alta', extra:'Diagnóstico de adopción'
+    });
+
+    if (!c.centry && eng.features.count === 0 && (w.gmv > 0 || (w.upPlan != null && w.qtUp != null))) allAlerts.push({type:'ac-blue', client:c.name, clientId:c.id,
+      title:`🧩 Cero Features de la Suite AnyTools`, body:`No usa ningún producto adicional (Predize, Koncili, WinnerBox, Marca Seleta). Oportunidad de expansión y mayor "costo de salida".`,
+      causa:null, fecha:null, sev:'media', extra:'Presentar suite AnyTools'
+    });
+
+    if (eng.useCase.level === 'baja' && eng.useCase.count != null) allAlerts.push({type:'ac-blue', client:c.name, clientId:c.id,
+      title:`🎯 Un Solo Caso de Uso — ${eng.useCase.label}`, body:`Depende de un único marketplace activo. Mayor riesgo de reemplazo: cada canal adicional ata más al cliente a AnyMarket.`,
+      causa:null, fecha:null, sev:'media', extra:'Proponer nuevo marketplace'
+    });
+
+    if (eng.segment === 'casual' && eng.confidence !== 'low' && !(w.nps < 0) && !(w.tickets >= 5)) allAlerts.push({type:'ac-orange', client:c.name, clientId:c.id,
+      title:`💤 Churn Silencioso — Engagement Casual`, body:`Bajo en frecuencia/intensidad/features/casos de uso sin generar tickets ni NPS negativo. Este patrón no aparece en Zendesk ni TrackSale — solo se ve acá.`,
+      causa:eng.reasons.join(' | '), fecha:null, sev:'alta', extra:'Ver Ficha → sección Engagement'
     });
   });
 

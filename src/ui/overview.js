@@ -63,8 +63,9 @@ import { getTicketPattern } from '../domain/ticket-patterns.js';
 import { segPorteRow, tipoChamadoBadge, presenciaReunBadge, showToast } from '../lib/dom.js';
 import { getLifecycle, LC_STAGES } from '../domain/lifecycle.js';
 import { getMRR } from '../domain/renewal-revenue.js';
-import { renderRevenueAtRisk, renderRenewalMini, renderCadenceCoverage } from './renovaciones.js';
+import { renderRevenueAtRisk, renderCadenceCoverage } from './renovaciones.js';
 import { norm, fmtG, fmtD, daysSince } from '../lib/format.js';
+import { getEngagementProfile } from '../domain/engagement.js';
 
 const LS_HISTORY = 'cs-v3-history';
 
@@ -178,7 +179,6 @@ function renderOverview() {
   // New panels
   renderLifecyclePipeline();
   renderRevenueAtRisk();
-  renderRenewalMini();
   renderCadenceCoverage();
   renderOverviewRisk();
 }
@@ -311,13 +311,17 @@ function renderTable() {
     // Risk signals for this row
     const sigs = getRiskSignals(c);
     const riskIcons = sigs.length ? `<div style="display:flex;gap:3px;margin-top:3px">${sigs.map(s=>`<span title="${s.label}" style="font-size:11px">${s.icon}</span>`).join('')}</div>` : '';
+    // Engagement badge (frecuencia · intensidad · features · casos de uso)
+    const mktStr = localStorage.getItem('cs-mkt-' + c.id) || '';
+    const eng = getEngagementProfile(c, mktStr);
+    const engBadge = eng.segment !== 'sin-datos' ? `<span title="${eng.reasons.join(' · ')}" style="font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:700;${eng.segment==='power'?'background:rgba(34,197,94,.12);color:var(--green)':eng.segment==='core'?'background:rgba(79,142,247,.12);color:var(--accent)':'background:rgba(230,126,34,.12);color:var(--orange)'}">${eng.label}</span>` : '';
     // Mood badge + ticket recurrence badge
     const mood = moodBadge(c.id);
     const tixPat = getTicketPattern(c.id);
     const recBadge = tixPat?.isRecurring ? `<span title="Tickets recurrentes en ${tixPat.wksWithTix} de ${tixPat.weeks} semanas" style="font-size:9px;background:rgba(231,76,60,.12);color:#e74c3c;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:700">🔁</span>` : '';
     const canceladoBadge = w.cancelado ? ` <span class="badge b-red" title="Cancelado ${w.fechaCancelacion?fmtD(w.fechaCancelacion):''}${w.motivoCancelacion?' — '+w.motivoCancelacion:''}">❌ CANCELADO</span>` : '';
     return `<tr onclick="openFicha('${c.id}')" style="${w.cancelado?'opacity:.55':sigs.some(s=>s.type==='health'&&calcHS(c).cl==='red')?'background:rgba(231,76,60,.04)':''}">
-      <td>${hCell}</td><td><div class="client-name">${c.name}${c.centry?' <span class="tag-centry">CENTRY</span>':''}${canceladoBadge} ${mood}${recBadge}</div><div class="client-sub">${fl} ${c.country}</div>${segPorteRow(c,w)}${riskIcons}</td>
+      <td>${hCell}</td><td><div class="client-name">${c.name}${c.centry?' <span class="tag-centry">CENTRY</span>':''}${canceladoBadge} ${mood}${recBadge}${engBadge}</div><div class="client-sub">${fl} ${c.country}</div>${segPorteRow(c,w)}${riskIcons}</td>
       <td>${fl} ${c.country}</td><td>${gmvCell}</td><td>${tCell}${bugBadge}${tipoBadge}</td><td>${npsCell}</td><td>${upCell}</td><td>${contCell}${presBadge}</td><td>${actCell}</td></tr>`;
   }).join('');
   const _cancCount=document.getElementById('chip-cancelados-count');

@@ -2,11 +2,11 @@
 
 ## Contexto
 
-Este proyecto contiene el **CS Command Center** (`cs_dashboard_standalone.html`), el dashboard de salud de cartera de Sami (CSM AnyMarket LATAM).
+Este proyecto contiene el **CS Command Center**, el dashboard de salud de cartera de Sami (CSM AnyMarket LATAM).
+
+> **ACTUALIZACIÓN DE ARQUITECTURA (2026-07-20):** el dashboard ya NO es un único archivo `cs_dashboard_standalone.html`. Es una app Vite modular: `index.html` (entry point) + `src/domain/*.js` (lógica pura: health-score, cadence, engagement, risk-signals...) + `src/services/*.js` (repos de datos/localStorage/cloud sync) + `src/ui/*.js` (render). Se compila con `npm run build` → `dist/index.html`. **Regla actualizada: nunca crear archivos de dashboard nuevos — siempre editar el módulo correspondiente dentro de `src/` (o `index.html` si es markup/CSS global), nunca un HTML standalone paralelo.**
 
 El dashboard se actualiza semanalmente importando un archivo JSON con los datos operativos de cada cliente.
-
-> **REGLA PRINCIPAL:** Siempre editar `cs_dashboard_standalone.html` — nunca crear archivos de dashboard nuevos.
 
 ---
 
@@ -54,6 +54,8 @@ El dashboard se actualiza semanalmente importando un archivo JSON con los datos 
 - Están en **proceso activo de migración a AnyMarket** con acciones asignadas al Product Manager.
 - Sus tickets de `produto_centry` **no** indican riesgo de churn — son parte de la migración interna.
 - Usar `gmv: null`, `upPlan: null`, `qtUp: null` para todos estos clientes.
+
+**Cuentas canceladas**: LACOSTE - CL y LACOSTE (Chile) — canceladas el 2026-07-20, decisión comercial: la marca fue adquirida por Grupo AXO, a quien se le vendió el derecho comercial de la marca. Marcadas con `cancelado:true` en el SEED (`src/services/clients-repo.js`); no aparecen en las vistas activas del dashboard, solo en el filtro "Cancelados". Removidas de `PORTFOLIO_GAP` (tiers.js) y de `CLASS_A` en Portafolio Estratégico (portfolio-a.js).
 
 ---
 
@@ -119,7 +121,23 @@ Cada objeto de cliente tiene esta estructura:
 - `nps`: score de -100 a 100 (`null` si no hay dato reciente)
 - `lastContact`: fecha en formato YYYY-MM-DD (`null` si desconocido) — se puede omitir si no hubo contacto nuevo
 - `centry`: `true` solo para FORUS COLOMBIA, FORUS SA, FORUS PERU, GINO, LOUNGE S/A y MAISA
+- `features`: array con las claves de la suite AnyTools que el cliente REALMENTE usa — valores posibles: `"predize"`, `"koncili"`, `"winnerbox"`, `"marcaseleta"`. `null`/omitir si no se evaluó. Es un dato que solo la CSM conoce por la relación con el cliente — no viene de ninguna fuente automatizada, así que solo completarlo si hay certeza (se puede cargar también desde la Ficha del cliente en el dashboard, sección Engagement).
 - Usar `null` para campos sin dato — **nunca inventar ni estimar valores**
+
+---
+
+## Engagement Score (Frecuencia · Intensidad · Features · Casos de Uso)
+
+Desde 2026-07-20 la Ficha de cada cliente incluye una sección **🔥 Engagement** (`src/domain/engagement.js`) que clasifica al cliente como Power / Core / Casual User combinando 4 dimensiones, todas con datos reales del dashboard (nunca inventadas):
+
+| Dimensión | Fuente real | Cómo se mide |
+|---|---|---|
+| Frecuencia | `weekly.lastContact` | Cadencia de contacto CS — proxy, porque AnyMarket no expone telemetría de acceso al producto a este dashboard |
+| Intensidad | `weekly.upPlan` / `weekly.qtUp` (Power BI Use Points) | % de Use Points consumidos |
+| Features | `weekly.features` (carga manual de la CSM) | Cantidad de productos AnyTools adoptados (Predize, Koncili, WinnerBox, Marca Seleta) |
+| Casos de Uso | Campo "Marketplaces Activos" de la Ficha (`cs-mkt-<id>`) | Cantidad de canales/marketplaces activos, como proxy de diversidad de casos de uso |
+
+Si faltan 3 o 4 dimensiones, el sistema devuelve `segment:'sin-datos'` en vez de forzar una clasificación (regla del proyecto: nunca dar una evaluación con datos insuficientes). El módulo también alimenta 4 alertas nuevas en la página de Alertas: baja intensidad, cero features, un solo caso de uso, y "churn silencioso" (engagement casual sin tickets/NPS negativo — el patrón que no se ve en Zendesk ni TrackSale).
 
 ---
 

@@ -70,8 +70,8 @@ function renderPortfolioA() {
     { id:'tramontina-mx', group:'🍳 Tramontina',    groupColor:'#fb923c', reason:'Enterprise · Hogar · 5 canales MX = caso de éxito para CL' },
     { id:'tramontina-cl', group:'🍳 Tramontina',    groupColor:'#fb923c', reason:'Enterprise · Hogar · solo 2 canales activos → oportunidad masiva' },
     // MARCAS PREMIUM individuales
-    { id:'lacoste',       group:null,               groupColor:null,       reason:'Enterprise · Moda Premium · marca aspiracional · alto potencial NPS' },
-    { id:'lacoste-gen',   group:null,               groupColor:null,       reason:'Enterprise · Moda Premium · expansión de canales CL' },
+    // NOTA 2026-07-20: 'lacoste' y 'lacoste-gen' removidos de Portafolio Estratégico —
+    // ambas cuentas canceladas (decisión comercial, marca adquirida por Grupo AXO).
     { id:'whirlpool',     group:null,               groupColor:null,       reason:'Enterprise · Electrodomésticos · marca global · QBR ejecutivo pendiente' },
     { id:'kayser',        group:null,               groupColor:null,       reason:'Enterprise · Moda · alto GMV CL · adopción Repricing pendiente' },
     { id:'colombiana',    group:null,               groupColor:null,       reason:'Enterprise · Retail CO · expansión de canales Colombia' },

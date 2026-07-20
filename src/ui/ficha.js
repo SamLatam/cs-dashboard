@@ -43,11 +43,12 @@ import { getClients } from '../services/clients-repo.js';
 import { getActions } from '../services/actions-repo.js';
 import { calcHS, hpEmoji, hpLabel } from '../domain/health-score.js';
 import { LC_STAGES, getLifecycle, buildPlaybook } from '../domain/lifecycle.js';
-import { getMRR, getRenewal } from '../domain/renewal-revenue.js';
+import { getMRR } from '../domain/renewal-revenue.js';
 import { ticketSparkline } from '../domain/ticket-patterns.js';
 import { segBadge, porteBadge, tipoChamadoBadge, presenciaReunBadge, tendenciaLabel } from '../lib/dom.js';
-import { fmtG, fmtD, daysSince, daysUntil } from '../lib/format.js';
+import { fmtG, fmtD, daysSince } from '../lib/format.js';
 import { getMood, MOODS, getPatterns } from '../services/client-state-repo.js';
+import { getEngagementProfile, ANYTOOLS_FEATURES, engagementBadgeColor } from '../domain/engagement.js';
 
 function renderFicha() {
   const id = document.getElementById('fichaSelect').value;
@@ -74,6 +75,52 @@ function renderFicha() {
         <div style="font-size:11px;color:var(--text3);margin-bottom:8px;padding-left:140px">→ ${v.raw}</div>`).join('')}
     </div>`;
   }
+
+  // ── ENGAGEMENT SCORE (frecuencia · intensidad · features · casos de uso) ──
+  const eng = getEngagementProfile(c, savedMkt);
+  const engFeats = new Set((w.features) || []);
+  const engSection = `<div class="ficha-box" style="grid-column:1/-1">
+    <h4>🔥 Engagement — <span style="color:${engagementBadgeColor(eng.segment)}">${eng.label}</span>
+      ${eng.confidence ? `<span style="font-size:10px;color:var(--text3);font-weight:400;margin-left:8px">confianza: ${eng.confidence === 'high' ? 'alta' : eng.confidence === 'medium' ? 'media' : 'baja'}</span>` : ''}
+    </h4>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Frecuencia</div>
+        <div style="font-size:14px;font-weight:700">${eng.frequency.label}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${eng.frequency.detail}</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Intensidad (Use Points)</div>
+        <div style="font-size:14px;font-weight:700">${eng.intensity.label}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${eng.intensity.detail}</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Features (suite AnyTools)</div>
+        <div style="font-size:14px;font-weight:700">${eng.features.label}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${eng.features.detail}</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Casos de Uso (marketplaces)</div>
+        <div style="font-size:14px;font-weight:700">${eng.useCase.label}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${eng.useCase.detail}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:6px">Adopción suite AnyTools</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${ANYTOOLS_FEATURES.map(f => `<button class="btn ${engFeats.has(f.key) ? '' : 'btn-ghost'}" onclick="toggleFeature('${id}','${f.key}')"
+          style="font-size:11px;padding:5px 12px;${engFeats.has(f.key) ? 'background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)' : ''}"
+          title="${f.desc}">${engFeats.has(f.key) ? '✓ ' : '+ '}${f.label}</button>`).join('')}
+      </div>
+    </div>
+    ${eng.reasons.length ? `<div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:${eng.recommendations.length ? '10px' : '0'}">
+      ${eng.reasons.map(r => `→ ${r}`).join('<br>')}
+    </div>` : ''}
+    ${eng.recommendations.length ? `<div style="background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:10px 12px">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:6px">💡 Cómo generar más engagement</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.7">${eng.recommendations.map(r => `→ ${r}`).join('<br>')}</div>
+    </div>` : ''}
+  </div>`;
 
   const actSection = clientActions.length ? `
     <div class="ficha-box" style="grid-column:1/-1">
@@ -154,17 +201,6 @@ function renderFicha() {
             <span id="saved-mrr-${id}" class="saved-tag" style="opacity:0">✓</span>
           </div>
         </div>
-        <div class="ficha-row" style="align-items:center">
-          <label>Fecha de Renovación</label>
-          <div class="val" style="display:flex;align-items:center;gap:8px">
-            <input type="date" id="renewal-input-${id}" value="${getRenewal(id)||''}"
-              style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;font-size:12px;outline:none"
-              onblur="saveRenewalField('${id}')"
-              onchange="saveRenewalField('${id}')">
-            ${getRenewal(id)?`<span style="font-size:11px;color:${daysUntil(getRenewal(id))<30?'var(--red)':daysUntil(getRenewal(id))<60?'var(--orange)':'var(--green)'}">⏳ ${daysUntil(getRenewal(id))}d</span>`:''}
-            <span id="saved-renewal-${id}" class="saved-tag" style="opacity:0">✓</span>
-          </div>
-        </div>
       </div>
       <div class="ficha-box">
         <h4>🎫 Ticket Actual</h4>
@@ -186,6 +222,7 @@ function renderFicha() {
         </div>
       </div>
       ${hsSection}
+      ${engSection}
       ${actSection}
       <div class="ficha-box" style="grid-column:1/-1">
         <h4>📝 Notas de Acción</h4>

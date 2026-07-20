@@ -232,7 +232,7 @@ export const SEED_MRR = {
   'pointbreak':1477,      // POINTBREAK — $1.358.911 CLP/mes
   'dtodoymas':1284,       // DTODOYMAS — $1.181.148 CLP/mes
   'updown-juegos':1123,   // UPDOWN JUEGOS — $1.033.231 CLP/mes
-  'lacoste':1043,         // LACOSTE — $959.956 CLP/mes
+  // 'lacoste': removido 2026-07-20 — cuenta cancelada (Grupo AXO adquirió el derecho comercial de la marca)
   'forus-peru':764,       // FORUS PERU — $702.603 CLP/mes
   'kayser':622,           // KAYSER — $572.168 CLP/mes
   'tramontina-mx':494,    // TRAMONTINA MX — $454.654 CLP/mes
@@ -324,7 +324,7 @@ export const SEED = [
   {nombre:"BEL STAR S/A - BELCORP Colombia",             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:16375786500,  upPlan:null, qtUp:null, nps:0,     lastContact:"2026-06-26", centry:false},
   {nombre:"COLOMBIANA DE COMERCIO S/A",                  tickets:0, bugs:0, ticketsPendientes:0, ticketDetalle:null,                                                                                                                                          causaRaiz:null,                                                                                                       gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:null,         centry:false},
   {nombre:"EMMA SLEEP - CL",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:97742205200,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
-  {nombre:"LACOSTE - CL",                                tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:14416074900,  upPlan:36,   qtUp:10,   nps:null,   lastContact:"2026-06-24", centry:false},
+  {nombre:"LACOSTE - CL",                                tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:14416074900,  upPlan:36,   qtUp:10,   nps:null,   lastContact:"2026-06-24", centry:false, cancelado:true, fechaCancelacion:"2026-07-20", motivoCancelacion:"Decisión comercial del cliente — la marca Lacoste fue adquirida por Grupo AXO, a quien se le vendió el derecho comercial de la marca.", gmvPerdido:14416074900},
   {nombre:"PROMOTORA DE BELLEZA S/A - BELCORP Chile",    tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:7374581000,   upPlan:36,   qtUp:3,    nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"TRANSBEL S.A. DE C.V. - BELCORP Mexico",      tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:478865027,    upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"WHIRLPOOL",                                   tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-04-15", centry:false},
@@ -337,7 +337,7 @@ export const SEED = [
   {nombre:"EMMA SLEEP - CO",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:41441886400,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"FORUS PERU",                                  tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:null,         upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"KAYSER",                                      tickets:0, bugs:0, ticketsPendientes:0, ticketDetalle:null, causaRaiz:null,                                                                                                                                                                                                                               gmv:11408661300,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
-  {nombre:"LACOSTE",                                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:14416074900,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
+  {nombre:"LACOSTE",                                     tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:14416074900,  upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false, cancelado:true, fechaCancelacion:"2026-07-20", motivoCancelacion:"Decisión comercial del cliente — la marca Lacoste fue adquirida por Grupo AXO, a quien se le vendió el derecho comercial de la marca.", gmvPerdido:14416074900},
   {nombre:"TRAMONTINA - CL",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:28378500,     upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
   {nombre:"TRAMONTINA - MX",                             tickets:0, bugs:0, ticketsPendientes:0,                                                                                                                                                               gmv:64928426,     upPlan:null, qtUp:null, nps:null,   lastContact:"2026-06-26", centry:false},
 
@@ -683,6 +683,12 @@ export function load() {
 export function saveData(dt) {
   const val = JSON.stringify({clients, updatedAt: dt, seedVersion: SEED_VERSION});
   localStorage.setItem(LS_DATA, val);
+  // Marca de tiempo del último guardado local — usada por gist-sync.js/loadFromCloud()
+  // para no pisar este cambio con una copia remota vieja mientras el push (Gist,
+  // debounced 3s) todavía no llegó. Ver bug 2026-07-20: "Registrar Contacto" se
+  // revertía si la página se recargaba (o pasaba el poll de 90s) antes de que
+  // doGistSave() terminara de subir el cambio.
+  localStorage.setItem('cs-last-local-save', String(Date.now()));
   pushToSupabase(LS_DATA, val);
   scheduleGistSave();
 }

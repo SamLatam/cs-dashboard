@@ -34,12 +34,11 @@ import { renderAutomatizacion } from './automatizacion.js';
 import { renderPortfolioA } from './portfolio-a.js';
 import { renderFaq } from './faq.js';
 import { renderGuia } from './guia.js';
-import { renderRenovaciones } from './renovaciones.js';
 import { renderEquipo, renderDirector } from './director.js';
 import { renderPortfolioReview } from './portfolio-review.js';
 
 // Source line 2773
-const PAGE_TITLES = {overview:'Vista General de Cartera',portfolio:'Mis Clientes',ficha:'Ficha Cliente',acciones:'Gestión de Acciones',alertas:'Alertas & Riesgos',predicciones:'🔮 Predicciones & Sugerencias',capacitacion:'🎓 Capacitación & Entrega de Valor',automatizacion:'🤖 Automatización D/E — Clientes en Riesgo',catalogo:'Catálogo & GMV',metricas:'Métricas','portfolio-a':'🎯 Aceleración Portfolio A',faq:'💡 FAQ — CS & AnyMarket & AnyTools',notas:'Notas',guia:'Guía Operacional CS',renovaciones:'💰 Renovaciones & Revenue at Risk',equipo:'👥 Gestión de Equipo',director:'👑 Vista Director — Portfolio Global',review:'🔄 Revisión de Portafolio — 3 Rounds'};
+const PAGE_TITLES = {overview:'Vista General de Cartera',portfolio:'Mis Clientes',ficha:'Ficha Cliente',acciones:'Gestión de Acciones',alertas:'Alertas & Riesgos',predicciones:'🔮 Predicciones & Sugerencias',capacitacion:'🎓 Capacitación & Entrega de Valor',automatizacion:'🤖 Automatización D/E — Clientes en Riesgo',catalogo:'Catálogo & GMV',metricas:'Métricas','portfolio-a':'🎯 Aceleración Portfolio A',faq:'💡 FAQ — CS & AnyMarket & AnyTools',notas:'Notas',guia:'Guía Operacional CS',equipo:'👥 Gestión de Equipo',director:'👑 Vista Director — Portfolio Global',review:'🔄 Revisión de Portafolio — 3 Rounds'};
 
 // Source lines 2774-2797
 function nav(page, el) {
@@ -61,7 +60,6 @@ function nav(page, el) {
   if (page==='portfolio-a')    renderPortfolioA();
   if (page==='faq')            renderFaq();
   if (page==='guia')           renderGuia();
-  if (page==='renovaciones')   renderRenovaciones();
   if (page==='equipo')         renderEquipo();
   if (page==='director')       renderDirector();
   if (page==='review')         renderPortfolioReview();

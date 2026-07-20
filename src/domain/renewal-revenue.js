@@ -20,16 +20,9 @@
 import { SEED_MRR } from '../services/clients-repo.js';
 
 function getMRR(id){const v=localStorage.getItem('cs-mrr-'+id);return v?parseFloat(v):(SEED_MRR&&SEED_MRR[id]?SEED_MRR[id]:null);}
-function getRenewal(id){return localStorage.getItem('cs-renewal-'+id)||null;}
 
-function getRenewalAction(days, hsCl){
-  if(days===null)return'Agregar fecha de renovación';
-  if(days<0)return'⚠ Renovación vencida — gestionar urgente';
-  if(days<=30&&hsCl==='red')return'🔴 Llamada urgente + plan de retención';
-  if(days<=30)return'📞 Llamada de renovación + deck de valor';
-  if(days<=60)return'📊 Preparar deck de valor entregado';
-  if(days<=90)return'📋 Diagnóstico 360° + QBR';
-  return'✅ En seguimiento regular';
-}
+// NOTA 2026-07-20: getRenewal/getRenewalAction removidos — los contratos de
+// AnyMarket se renuevan mensualmente, no hay un ciclo de renovación anual que
+// trackear (feedback directo de Sami). Ver [[feedback]] en memoria del proyecto.
 
-export { getMRR, getRenewal, getRenewalAction };
+export { getMRR };

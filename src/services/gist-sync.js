@@ -207,6 +207,20 @@ export async function loadFromCloud() {
     const gistData = await res.json();
     const files    = gistData.files || {};
 
+    // ── GUARD contra "race condition" que revertía cambios recién hechos ──────
+    // BUG (2026-07-20): registrarContacto()/cancelClient()/toggleFeature()/etc.
+    // guardan en localStorage al instante, pero el push a Gist (doGistSave) está
+    // debounced 3s (scheduleGistSave). Si la página se recarga o el poll de 90s
+    // corre ANTES de que ese push termine, este loadFromCloud() traía de vuelta
+    // el snapshot remoto viejo y lo aplicaba con prioridad sobre el local —
+    // pisando silenciosamente el cambio recién hecho (ej. "Registrar Contacto
+    // hoy" volvía a mostrar la fecha anterior). Fix: si el último guardado local
+    // es más reciente que el `updated_at` del Gist, todavía no llegó nuestro
+    // propio push — no fusionar clientes remotos esta vez.
+    const lastLocalSave    = parseInt(localStorage.getItem('cs-last-local-save') || '0', 10);
+    const remoteUpdatedAt  = gistData.updated_at ? new Date(gistData.updated_at).getTime() : 0;
+    const localSaveIsNewer = lastLocalSave > 0 && lastLocalSave > remoteUpdatedAt;
+
     let mergedClients = [];
     let appliedOwn    = false;
 
@@ -252,7 +266,8 @@ export async function loadFromCloud() {
     }
 
     // Fusionar datos de clientes en localStorage
-    if (mergedClients.length > 0) {
+    // (se salta por completo si localSaveIsNewer — ver guard arriba)
+    if (mergedClients.length > 0 && !localSaveIsNewer) {
       try {
         const existingRaw = localStorage.getItem(LS_DATA);
         const existing    = existingRaw ? JSON.parse(existingRaw) : {};
