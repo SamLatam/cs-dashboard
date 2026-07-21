@@ -293,7 +293,7 @@ export const SEED_MRR = {
   'colque-audio':15   // $13.366 CLP
 };
 
-const SEED_VERSION = '2026-07-06b';
+export const SEED_VERSION = '2026-07-06b';
 const ISOLATION_VERSION = '2026-06-25b'; // bump to force CSM store cleanup
 (function isolationCleanup() {
   const key = 'cs-isolation-v';

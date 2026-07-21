@@ -27,7 +27,7 @@
 //   - ../ui/overview.js exports: renderOverview (confirmed — already built).
 import { getSbClient } from '../lib/supabase-client.js';
 import { getSbUser } from './auth.js';
-import { LS_DATA, load, resetLoadGuard } from './clients-repo.js';
+import { LS_DATA, load, resetLoadGuard, SEED_VERSION } from './clients-repo.js';
 import { getActiveUser } from './profiles-repo.js';
 import { getActionsKey } from './actions-repo.js';
 import { LS_NOTES } from './notes-repo.js';
@@ -277,7 +277,14 @@ export async function loadFromCloud() {
         // Clientes que solo están en local (sin datos remotos)
         const localOnly   = localList.filter(c => !remoteMap.has(c.id));
         const merged      = [...mergedClients, ...localOnly];
-        localStorage.setItem(LS_DATA, JSON.stringify({ lastUpdate: existing.lastUpdate, clients: merged }));
+        // BUG (2026-07-21): this write omitted `seedVersion`, so the next load()
+        // saw p.seedVersion===undefined → isSeedNewer===true → only USER_FIELDS
+        // (lastContact/notes/mood/marketplaces/lifecycle) were reapplied from the
+        // freshly-merged remote data, silently dropping any other custom weekly
+        // field (e.g. cancelado/fechaCancelacion/motivoCancelacion/gmvPerdido) —
+        // a just-synced cancellation would revert back to the SEED's value on
+        // the very next load(). Stamping seedVersion here fixes that.
+        localStorage.setItem(LS_DATA, JSON.stringify({ lastUpdate: existing.lastUpdate, clients: merged, seedVersion: SEED_VERSION }));
       } catch(e) {}
     }
 
